@@ -14,7 +14,7 @@ export class UsersService {
   findByEmail(email: string): Promise<UserEntity | null> {
     return this.usersRepository.findOne({
       where: {
-        email: email.trim().toLowerCase(),
+        email: this.normalizeEmail(email),
       },
     });
   }
@@ -23,5 +23,9 @@ export class UsersService {
     return this.usersRepository.findOne({
       where: { id },
     });
+  }
+
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
   }
 }

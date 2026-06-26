@@ -1,25 +1,24 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as bcrypt from 'bcrypt';
 
 import { UserEntity } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { AccessTokenService } from './services/access-token.service';
+import { verifyPassword } from './utils/password.util';
 
-jest.mock('bcrypt', () => ({
-  compare: jest.fn(),
+jest.mock('./utils/password.util', () => ({
+  verifyPassword: jest.fn(),
 }));
+
+const mockedVerifyPassword = verifyPassword as jest.MockedFunction<
+  typeof verifyPassword
+>;
 
 describe(AuthService.name, () => {
   let authService: AuthService;
   let usersService: jest.Mocked<Pick<UsersService, 'findByEmail'>>;
-  let jwtService: jest.Mocked<Pick<JwtService, 'signAsync'>>;
-  let configService: jest.Mocked<Pick<ConfigService, 'getOrThrow'>>;
-  const bcryptCompare = bcrypt.compare as unknown as jest.MockedFunction<
-    (data: string | Buffer, encrypted: string) => Promise<boolean>
-  >;
+  let accessTokenService: jest.Mocked<Pick<AccessTokenService, 'issueForUser'>>;
 
   const mockUser = {
     id: 'ad1e0902-1928-4345-b513-60c86c94fc91',
@@ -34,12 +33,8 @@ describe(AuthService.name, () => {
       findByEmail: jest.fn(),
     };
 
-    jwtService = {
-      signAsync: jest.fn(),
-    };
-
-    configService = {
-      getOrThrow: jest.fn(),
+    accessTokenService = {
+      issueForUser: jest.fn(),
     };
 
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -50,50 +45,42 @@ describe(AuthService.name, () => {
           useValue: usersService,
         },
         {
-          provide: JwtService,
-          useValue: jwtService,
-        },
-        {
-          provide: ConfigService,
-          useValue: configService,
+          provide: AccessTokenService,
+          useValue: accessTokenService,
         },
       ],
     }).compile();
 
     authService = moduleRef.get(AuthService);
-  });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('login', () => {
-    it('should return an access token and safe user profile when credentials are valid', async () => {
+    it('should return login response when credentials are valid', async () => {
       // Arrange
-      usersService.findByEmail.mockResolvedValue(mockUser);
-      jwtService.signAsync.mockResolvedValue('signed-access-token');
-      configService.getOrThrow.mockReturnValue(3600);
-      bcryptCompare.mockResolvedValue(true);
-
       const loginRequest = {
         email: 'reviewer@simpleinvoice.local',
         password: 'Password123!',
       };
+
+      usersService.findByEmail.mockResolvedValue(mockUser);
+      mockedVerifyPassword.mockResolvedValue(true);
+      accessTokenService.issueForUser.mockResolvedValue({
+        accessToken: 'signed-access-token',
+        expiresIn: 3600,
+      });
 
       // Act
       const result = await authService.login(loginRequest);
 
       // Assert
       expect(usersService.findByEmail).toHaveBeenCalledWith(loginRequest.email);
-      expect(bcrypt.compare).toHaveBeenCalledWith(
+      expect(mockedVerifyPassword).toHaveBeenCalledWith(
         loginRequest.password,
         mockUser.passwordHash,
       );
-      expect(jwtService.signAsync).toHaveBeenCalledWith({
-        sub: mockUser.id,
-        email: mockUser.email,
-      });
-      expect(configService.getOrThrow).toHaveBeenCalledWith('auth.jwtExpiresIn');
+      expect(accessTokenService.issueForUser).toHaveBeenCalledWith(mockUser);
 
       expect(result).toEqual({
         accessToken: 'signed-access-token',
@@ -108,53 +95,40 @@ describe(AuthService.name, () => {
       expect(result).not.toHaveProperty('user.passwordHash');
     });
 
-    it('should use configured auth.jwtExpiresIn', async () => {
-      // Arrange
-      usersService.findByEmail.mockResolvedValue(mockUser);
-      jwtService.signAsync.mockResolvedValue('signed-access-token');
-      configService.getOrThrow.mockReturnValue(900);
-      bcryptCompare.mockResolvedValue(true);
-
-      // Act
-      const result = await authService.login({
-        email: 'reviewer@simpleinvoice.local',
-        password: 'Password123!',
-      });
-
-      // Assert
-      expect(result.expiresIn).toBe(900);
-    });
-
     it('should throw UnauthorizedException when user does not exist', async () => {
       // Arrange
+      const loginRequest = {
+        email: 'missing@simpleinvoice.local',
+        password: 'Password123!',
+      };
+
       usersService.findByEmail.mockResolvedValue(null);
 
       // Act
-      const act = authService.login({
-        email: 'unknown@simpleinvoice.local',
-        password: 'Password123!',
-      });
+      const act = authService.login(loginRequest);
 
       // Assert
       await expect(act).rejects.toThrow(UnauthorizedException);
-      expect(jwtService.signAsync).not.toHaveBeenCalled();
+      expect(mockedVerifyPassword).not.toHaveBeenCalled();
+      expect(accessTokenService.issueForUser).not.toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException when password is invalid', async () => {
       // Arrange
-      usersService.findByEmail.mockResolvedValue(mockUser);
-      bcryptCompare.mockResolvedValue(false);
-
-      // Act
-      const act = authService.login({
+      const loginRequest = {
         email: 'reviewer@simpleinvoice.local',
         password: 'wrong-password',
-      });
+      };
+
+      usersService.findByEmail.mockResolvedValue(mockUser);
+      mockedVerifyPassword.mockResolvedValue(false);
+
+      // Act
+      const act = authService.login(loginRequest);
 
       // Assert
       await expect(act).rejects.toThrow(UnauthorizedException);
-      expect(jwtService.signAsync).not.toHaveBeenCalled();
+      expect(accessTokenService.issueForUser).not.toHaveBeenCalled();
     });
   });
-
 });

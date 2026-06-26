@@ -6,6 +6,7 @@ import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { AccessTokenService } from './services/access-token.service';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard],
+  providers: [AuthService, AccessTokenService, JwtAuthGuard],
   exports: [AuthService, JwtAuthGuard],
 })
 export class AuthModule {}

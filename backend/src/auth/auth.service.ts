@@ -1,70 +1,46 @@
-import { UnauthorizedException } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-import { UserEntity } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
-import { AuthUserResponseDto } from './dto/auth-user-response.dto';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import type { JwtPayload } from './types/jwt-payload.type';
+import { toAuthUserResponse } from './mappers/auth-user-response.mapper';
+import { AccessTokenService } from './services/access-token.service';
+import { verifyPassword } from './utils/password.util';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly accessTokenService: AccessTokenService,
   ) {}
 
   async login(loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
-    const user = await this.validateCredentials(loginRequestDto);
-
-    const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-    };
-
-    const accessToken = await this.jwtService.signAsync(payload);
-    const expiresIn =
-      this.configService.getOrThrow<number>('auth.jwtExpiresIn');
-
-    return {
-      accessToken,
-      tokenType: 'Bearer',
-      expiresIn,
-      user: this.toAuthUserResponse(user),
-    };
-  }
-
-  private toAuthUserResponse(user: UserEntity): AuthUserResponseDto {
-    return {
-      id: user.id,
-      email: user.email,
-      fullname: user.fullname,
-    };
-  }
-
-  private async validateCredentials(
-    loginRequestDto: LoginRequestDto,
-  ): Promise<UserEntity> {
     const user = await this.usersService.findByEmail(loginRequestDto.email);
 
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw this.invalidCredentialsError();
     }
 
-    const isPasswordValid = await bcrypt.compare(
+    const isPasswordValid = await verifyPassword(
       loginRequestDto.password,
       user.passwordHash,
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw this.invalidCredentialsError();
     }
 
-    return user;
+    const issuedToken = await this.accessTokenService.issueForUser(user);
+
+    return {
+      accessToken: issuedToken.accessToken,
+      tokenType: 'Bearer',
+      expiresIn: issuedToken.expiresIn,
+      user: toAuthUserResponse(user),
+    };
+  }
+
+  private invalidCredentialsError(): UnauthorizedException {
+    return new UnauthorizedException('Invalid email or password');
   }
 }
