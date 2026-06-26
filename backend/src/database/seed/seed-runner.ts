@@ -65,63 +65,56 @@ async function createInvoices(
   seedInvoices: InvoiceSeedInput[],
   reviewerUserId: string,
 ): Promise<void> {
-  for (const seedInvoice of seedInvoices) {
-    await createInvoice(manager, seedInvoice, reviewerUserId);
-  }
-}
-
-async function createInvoice(
-  manager: EntityManager,
-  seedInvoice: InvoiceSeedInput,
-  reviewerUserId: string,
-): Promise<void> {
   const invoiceRepository = manager.getRepository(InvoiceEntity);
   const invoiceItemRepository = manager.getRepository(InvoiceItemEntity);
 
-  const totals = calculateInvoiceTotals({
-    quantity: seedInvoice.item.quantity,
-    rate: seedInvoice.item.rate,
-    taxPercentage: seedInvoice.taxPercentage,
-    discount: seedInvoice.totalDiscount,
-    totalPaid: seedInvoice.totalPaid,
+  const invoices = seedInvoices.map((seedInvoice) => {
+    const totals = calculateInvoiceTotals({
+      quantity: seedInvoice.item.quantity,
+      rate: seedInvoice.item.rate,
+      taxPercentage: seedInvoice.taxPercentage,
+      discount: seedInvoice.totalDiscount,
+      totalPaid: seedInvoice.totalPaid,
+    });
+
+    return invoiceRepository.create({
+      id: seedInvoice.id,
+      invoiceNumber: seedInvoice.invoiceNumber,
+      invoiceReference: seedInvoice.invoiceReference ?? null,
+      invoiceDate: seedInvoice.invoiceDate,
+      dueDate: seedInvoice.dueDate,
+      currency: seedInvoice.currency,
+      currencySymbol: seedInvoice.currencySymbol,
+      description: seedInvoice.description ?? null,
+      status: seedInvoice.status,
+
+      customerFullname: seedInvoice.customerFullname,
+      customerEmail: seedInvoice.customerEmail,
+      customerMobileNumber: seedInvoice.customerMobileNumber ?? null,
+      customerAddress: seedInvoice.customerAddress ?? null,
+
+      invoiceSubTotal: totals.invoiceSubTotal,
+      taxPercentage: seedInvoice.taxPercentage,
+      totalTax: totals.totalTax,
+      totalDiscount: toMoney(seedInvoice.totalDiscount),
+      totalAmount: totals.totalAmount,
+      totalPaid: toMoney(seedInvoice.totalPaid),
+      balanceAmount: totals.balanceAmount,
+
+      createdById: reviewerUserId,
+    });
   });
 
-  const invoice = invoiceRepository.create({
-    id: seedInvoice.id,
-    invoiceNumber: seedInvoice.invoiceNumber,
-    invoiceReference: seedInvoice.invoiceReference ?? null,
-    invoiceDate: seedInvoice.invoiceDate,
-    dueDate: seedInvoice.dueDate,
-    currency: seedInvoice.currency,
-    currencySymbol: seedInvoice.currencySymbol,
-    description: seedInvoice.description ?? null,
-    status: seedInvoice.status,
-
-    customerFullname: seedInvoice.customerFullname,
-    customerEmail: seedInvoice.customerEmail,
-    customerMobileNumber: seedInvoice.customerMobileNumber ?? null,
-    customerAddress: seedInvoice.customerAddress ?? null,
-
-    invoiceSubTotal: totals.invoiceSubTotal,
-    taxPercentage: seedInvoice.taxPercentage,
-    totalTax: totals.totalTax,
-    totalDiscount: toMoney(seedInvoice.totalDiscount),
-    totalAmount: totals.totalAmount,
-    totalPaid: toMoney(seedInvoice.totalPaid),
-    balanceAmount: totals.balanceAmount,
-
-    createdById: reviewerUserId,
-  });
-
-  const savedInvoice = await invoiceRepository.save(invoice);
-
-  await invoiceItemRepository.save(
+  const invoiceItems = seedInvoices.map((seedInvoice) =>
     invoiceItemRepository.create({
       id: seedInvoice.item.id,
-      invoiceId: savedInvoice.id,
+      invoiceId: seedInvoice.id,
       name: seedInvoice.item.name,
       quantity: seedInvoice.item.quantity,
       rate: seedInvoice.item.rate,
     }),
   );
+
+  await invoiceRepository.save(invoices);
+  await invoiceItemRepository.save(invoiceItems);
 }

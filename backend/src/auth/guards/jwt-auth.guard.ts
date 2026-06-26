@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -13,6 +14,8 @@ import type { JwtPayload } from '../types/jwt-payload.type';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
@@ -26,27 +29,34 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Missing access token');
     }
 
+    const payload = await this.verifyToken(token);
+
+    if (!payload.sub) {
+      throw new UnauthorizedException('Invalid access token');
+    }
+
+    const user = await this.usersService.findById(payload.sub);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid access token');
+    }
+
+    request.user = {
+      id: user.id,
+      email: user.email,
+      fullname: user.fullname,
+    };
+
+    return true;
+  }
+
+  private async verifyToken(token: string): Promise<JwtPayload> {
     try {
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
-
-      if (!payload.sub) {
-        throw new UnauthorizedException('Invalid access token');
-      }
-
-      const user = await this.usersService.findById(payload.sub);
-
-      if (!user) {
-        throw new UnauthorizedException('Invalid access token');
-      }
-
-      request.user = {
-        id: user.id,
-        email: user.email,
-        fullname: user.fullname,
-      };
-
-      return true;
-    } catch {
+      return await this.jwtService.verifyAsync<JwtPayload>(token);
+    } catch (error) {
+      this.logger.debug(
+        error instanceof Error ? error.message : 'JWT verification failed',
+      );
       throw new UnauthorizedException('Invalid or expired access token');
     }
   }

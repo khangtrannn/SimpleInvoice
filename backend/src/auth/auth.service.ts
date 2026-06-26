@@ -28,7 +28,8 @@ export class AuthService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload);
-    const expiresIn = this.configService.get<number>('auth.jwtExpiresIn') ?? 3600;
+    const expiresIn =
+      this.configService.getOrThrow<number>('auth.jwtExpiresIn');
 
     return {
       accessToken,
@@ -38,7 +39,7 @@ export class AuthService {
     };
   }
 
-  toAuthUserResponse(user: UserEntity): AuthUserResponseDto {
+  private toAuthUserResponse(user: UserEntity): AuthUserResponseDto {
     return {
       id: user.id,
       email: user.email,

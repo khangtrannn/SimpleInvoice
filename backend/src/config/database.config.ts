@@ -1,3 +1,4 @@
+import { registerAs } from '@nestjs/config';
 import Joi from 'joi';
 
 export const databaseEnvValidationSchema = Joi.object({
@@ -40,3 +41,11 @@ export function getDatabaseConfig(
     password: value.POSTGRES_PASSWORD,
   };
 }
+
+export default registerAs('database', () => ({
+  host: process.env.POSTGRES_HOST,
+  port: Number(process.env.POSTGRES_PORT),
+  database: process.env.POSTGRES_DB,
+  username: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+}));

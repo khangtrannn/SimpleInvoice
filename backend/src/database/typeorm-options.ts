@@ -1,30 +1,25 @@
 import { config } from 'dotenv';
 import { DataSourceOptions } from 'typeorm';
 
-import { getDatabaseConfig } from '../config/database.config';
+import { DatabaseConfig, getDatabaseConfig } from '../config/database.config';
 import { ENV_FILE_PATHS } from '../config/env-file-paths';
 
 config({ path: ENV_FILE_PATHS });
 
 const isCompiled = __filename.endsWith('.js');
 
-export function createTypeOrmOptions(): DataSourceOptions {
-  const { host, port, database, username, password } =
-    getDatabaseConfig();
-
+export function createTypeOrmOptions(
+  databaseConfig: DatabaseConfig = getDatabaseConfig(),
+): DataSourceOptions {
   return {
     type: 'postgres',
-    host,
-    port,
-    database,
-    username,
-    password,
+    host: databaseConfig.host,
+    port: databaseConfig.port,
+    database: databaseConfig.database,
+    username: databaseConfig.username,
+    password: databaseConfig.password,
 
-    entities: [
-      isCompiled
-        ? 'dist/**/*.entity.js'
-        : 'src/**/*.entity.ts',
-    ],
+    entities: [isCompiled ? 'dist/**/*.entity.js' : 'src/**/*.entity.ts'],
 
     migrations: [
       isCompiled

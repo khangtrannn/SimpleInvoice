@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import appConfig from './config/app.config';
+import databaseConfig from './config/database.config';
 import { ENV_FILE_PATHS } from './config/env-file-paths';
 import { envValidationSchema } from './config/env.validation';
 import { HealthModule } from './health/health.module';
@@ -18,16 +19,26 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
       cache: true,
       envFilePath: ENV_FILE_PATHS,
-      load: [appConfig, authConfig],
+      load: [appConfig, authConfig, databaseConfig],
       validationSchema: envValidationSchema,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60_000,
+        limit: 60,
+      },
+    ]),
     HealthModule,
     DatabaseModule,
     UsersModule,
     InvoicesModule,
     AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
