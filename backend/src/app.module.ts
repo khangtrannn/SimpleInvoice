@@ -9,6 +9,8 @@ import { HealthModule } from './health/health.module';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { InvoicesModule } from './invoices/invoices.module';
+import authConfig from './config/auth.config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -16,13 +18,14 @@ import { InvoicesModule } from './invoices/invoices.module';
       isGlobal: true,
       cache: true,
       envFilePath: ENV_FILE_PATHS,
-      load: [appConfig],
+      load: [appConfig, authConfig],
       validationSchema: envValidationSchema,
     }),
     HealthModule,
     DatabaseModule,
     UsersModule,
     InvoicesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
