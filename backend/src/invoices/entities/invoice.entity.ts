@@ -5,12 +5,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 
 import { UserEntity } from '../../users/entities/user.entity';
 import { InvoiceStatus } from '../enums/invoice-status.enum';
+import { InvoiceItemEntity } from './invoice-item.entity';
 
 @Entity({ name: 'invoices' })
 @Unique('uq_invoices_invoice_number', ['invoiceNumber'])
@@ -198,4 +200,7 @@ export class InvoiceEntity {
     foreignKeyConstraintName: 'fk_invoices_created_by_id_users_id',
   })
   createdBy!: UserEntity;
+
+  @OneToMany(() => InvoiceItemEntity, (item) => item.invoice)
+  items!: InvoiceItemEntity[];
 }
