@@ -14,7 +14,7 @@ export class UsersService {
   findByEmail(email: string): Promise<UserEntity | null> {
     return this.usersRepository.findOne({
       where: {
-        email,
+        email: email.trim().toLowerCase(),
       },
     });
   }

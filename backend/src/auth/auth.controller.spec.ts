@@ -4,6 +4,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { AuthenticatedUser } from './types/authenticated-request.type';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 describe(AuthController.name, () => {
   let authController: AuthController;
@@ -22,7 +23,12 @@ describe(AuthController.name, () => {
           useValue: authService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     authController = moduleRef.get(AuthController);
   });
