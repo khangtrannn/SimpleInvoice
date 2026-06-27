@@ -1,6 +1,16 @@
-import { Link, Outlet } from 'react-router';
+import { Link, Outlet, useNavigate } from 'react-router';
+
+import { useAuth } from '@/features/auth/auth-context';
 
 export function AppLayout() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
@@ -15,11 +25,26 @@ export function AppLayout() {
             </Link>
 
             <Link
-              className="rounded-lg bg-slate-950 px-3 py-2 font-medium text-white hover:bg-slate-800"
+              className="hidden rounded-lg bg-slate-950 px-3 py-2 font-medium text-white hover:bg-slate-800 sm:inline-flex"
               to="/invoices/new"
             >
               Create invoice
             </Link>
+
+            <div className="hidden h-6 w-px bg-slate-200 sm:block" />
+
+            <div className="hidden text-right sm:block">
+              <p className="text-xs font-semibold text-slate-950">{user?.fullname}</p>
+              <p className="text-xs text-slate-500">{user?.email}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-950"
+            >
+              Logout
+            </button>
           </nav>
         </div>
       </header>

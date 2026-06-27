@@ -3,21 +3,17 @@ import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Navigate, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { login } from '@/api/auth.api';
-import {
-  getAccessToken,
-  setAccessToken,
-  setStoredAuthUser,
-} from '@/features/auth/auth-storage';
+import { useAuth } from '@/features/auth/auth-context';
 import { loginSchema, type LoginFormValues } from '@/features/auth/login.schema';
 import { getApiErrorMessage } from '@/utils/api-error';
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const existingToken = getAccessToken();
 
   const {
     register,
@@ -34,18 +30,13 @@ export function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      setAccessToken(data.accessToken);
-      setStoredAuthUser(data.user);
+      signIn(data);
       navigate('/invoices', { replace: true });
     },
   });
 
   function onSubmit(values: LoginFormValues) {
     loginMutation.mutate(values);
-  }
-
-  if (existingToken) {
-    return <Navigate to="/invoices" replace />;
   }
 
   const submitError = loginMutation.isError
@@ -61,19 +52,11 @@ export function LoginPage() {
           <div className="flex min-h-0 flex-1 items-center justify-center">
             <div className="w-full max-w-[520px]">
               <div className="mb-14 hidden lg:block xl:mb-20 2xl:mb-24">
-                <img
-                  src="/brand/simple-invoice-logo.png"
-                  alt="SimpleInvoice"
-                  className="h-12 w-auto xl:h-14"
-                />
+                <span className="text-3xl font-bold text-slate-950">SimpleInvoice</span>
               </div>
 
               <div className="mb-8 text-center lg:text-left xl:mb-10">
-                <img
-                  src="/brand/simple-invoice-logo.png"
-                  alt="SimpleInvoice"
-                  className="mx-auto mb-10 h-12 w-auto sm:h-14 lg:hidden"
-                />
+                <span className="mx-auto mb-10 block text-2xl font-bold text-slate-950 lg:hidden">SimpleInvoice</span>
 
                 <h1 className="text-4xl font-semibold text-slate-950 sm:text-5xl">
                   Sign In
@@ -167,7 +150,7 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={loginMutation.isPending}
-                  className="mt-6 h-14 w-full rounded-xl bg-blue-600 text-lg font-medium text-white shadow-[0_18px_35px_rgba(37,99,235,0.32)] transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:bg-blue-300 disabled:shadow-none xl:mt-8 xl:h-16"
+                  className="mt-6 h-14 w-full rounded-xl bg-slate-950 text-xl font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:bg-slate-400 disabled:shadow-none xl:mt-8 xl:h-16"
                 >
                   {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
                 </button>
