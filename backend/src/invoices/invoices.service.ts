@@ -16,13 +16,15 @@ import {
 import {
   calculateInvoiceTotals,
   InvoiceCalculationError,
+  toMoney,
 } from './domain/invoice-calculation';
 import type { InvoiceTotals } from './domain/invoice-calculation.types';
-import { InvoicesRepository } from './invoices.repository';
+import { DraftInvoiceData, InvoicesRepository } from './invoices.repository';
 import {
   toInvoiceDetailResponse,
   toInvoiceListItemResponse,
 } from './mappers/invoice-response.mapper';
+import { getCurrencySymbol } from './utils/currency-symbol.util';
 
 const INVOICE_NUMBER_UNIQUE_CONSTRAINT = 'uq_invoices_invoice_number';
 
@@ -60,14 +62,10 @@ export class InvoicesService {
     currentUser: AuthenticatedUser,
   ): Promise<InvoiceDetailResponseDto> {
     const totals = this.calculateTotals(createInvoiceDto);
+    const data = this.buildDraftInvoiceData(createInvoiceDto, currentUser.id, totals);
 
     try {
-      const savedInvoice = await this.invoicesRepository.createDraftInvoice(
-        createInvoiceDto,
-        currentUser,
-        totals,
-      );
-
+      const savedInvoice = await this.invoicesRepository.createDraftInvoice(data);
       return toInvoiceDetailResponse(savedInvoice);
     } catch (error) {
       if (isUniqueViolation(error, INVOICE_NUMBER_UNIQUE_CONSTRAINT)) {
@@ -94,5 +92,33 @@ export class InvoicesService {
 
       throw error;
     }
+  }
+
+  private buildDraftInvoiceData(
+    dto: CreateInvoiceDto,
+    createdById: string,
+    totals: InvoiceTotals,
+  ): DraftInvoiceData {
+    return {
+      invoiceNumber: dto.invoiceNumber,
+      invoiceReference: dto.invoiceReference ?? null,
+      invoiceDate: dto.invoiceDate,
+      dueDate: dto.dueDate,
+      currency: dto.currency,
+      currencySymbol: getCurrencySymbol(dto.currency),
+      description: dto.description ?? null,
+      customerFullname: dto.customerName,
+      customerEmail: dto.customerEmail,
+      customerMobileNumber: dto.customerMobile ?? null,
+      customerAddress: dto.customerAddress ?? null,
+      taxPercentage: toMoney(dto.taxPercentage),
+      ...totals,
+      createdById,
+      item: {
+        name: dto.item.name,
+        quantity: dto.item.quantity,
+        rate: toMoney(dto.item.rate),
+      },
+    };
   }
 }

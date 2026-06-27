@@ -1,6 +1,6 @@
 import { IsOptional, validate } from 'class-validator';
 
-import { isValidDateOnlyString } from './date-only.util';
+import { isValidDateOnlyString } from '../utils/date-only.util';
 import { IsDateOnly } from './is-date-only.validator';
 import { IsDateOnOrAfter } from './is-date-on-or-after.validator';
 import { IsDateRange } from './is-date-range.validator';

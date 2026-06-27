@@ -7,22 +7,11 @@ import {
   SelectQueryBuilder,
 } from 'typeorm';
 
-import type { AuthenticatedUser } from '../auth/types/authenticated-request.type';
 import { getTodayDateOnly } from '../common/utils/date.util';
-import type { InvoiceTotals } from './domain/invoice-calculation.types';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import {
-  GetInvoicesQueryDto,
-  InvoiceSortBy,
-  SortOrdering,
-} from './dto/get-invoices-query.dto';
+import { GetInvoicesQueryDto, InvoiceSortBy, SortOrdering } from './dto/get-invoices-query.dto';
 import { InvoiceItemEntity } from './entities/invoice-item.entity';
 import { InvoiceEntity } from './entities/invoice.entity';
-import {
-  InvoiceEffectiveStatus,
-  InvoiceStatus,
-} from './enums/invoice-status.enum';
-import { getCurrencySymbol } from './utils/currency-symbol.util';
+import { InvoiceEffectiveStatus, InvoiceStatus } from './enums/invoice-status.enum';
 
 const SORT_COLUMN_MAP: Record<InvoiceSortBy, string> = {
   [InvoiceSortBy.INVOICE_DATE]: 'invoice.invoice_date',
@@ -33,6 +22,33 @@ const SORT_COLUMN_MAP: Record<InvoiceSortBy, string> = {
 export type FindAllInvoicesResult = {
   invoices: InvoiceEntity[];
   total: number;
+};
+
+export type DraftInvoiceData = {
+  invoiceNumber: string;
+  invoiceReference: string | null;
+  invoiceDate: string;
+  dueDate: string;
+  currency: string;
+  currencySymbol: string;
+  description: string | null;
+  customerFullname: string;
+  customerEmail: string;
+  customerMobileNumber: string | null;
+  customerAddress: string | null;
+  invoiceSubTotal: string;
+  taxPercentage: string;
+  totalTax: string;
+  totalDiscount: string;
+  totalAmount: string;
+  totalPaid: string;
+  balanceAmount: string;
+  createdById: string;
+  item: {
+    name: string;
+    quantity: number;
+    rate: string;
+  };
 };
 
 @Injectable()
@@ -59,13 +75,9 @@ export class InvoicesRepository {
     });
   }
 
-  createDraftInvoice(
-    createInvoiceDto: CreateInvoiceDto,
-    currentUser: AuthenticatedUser,
-    totals: InvoiceTotals,
-  ): Promise<InvoiceEntity> {
+  createDraftInvoice(data: DraftInvoiceData): Promise<InvoiceEntity> {
     return this.dataSource.transaction((manager) =>
-      this.persistDraftInvoice(manager, createInvoiceDto, currentUser, totals),
+      this.persistDraftInvoice(manager, data),
     );
   }
 
@@ -159,46 +171,22 @@ export class InvoicesRepository {
 
   private async persistDraftInvoice(
     manager: EntityManager,
-    createInvoiceDto: CreateInvoiceDto,
-    currentUser: AuthenticatedUser,
-    totals: InvoiceTotals,
+    data: DraftInvoiceData,
   ): Promise<InvoiceEntity> {
+    const { item, ...invoiceData } = data;
     const invoiceRepository = manager.getRepository(InvoiceEntity);
     const invoiceItemRepository = manager.getRepository(InvoiceItemEntity);
 
     const invoice = invoiceRepository.create({
-      invoiceNumber: createInvoiceDto.invoiceNumber,
-      invoiceReference: createInvoiceDto.invoiceReference ?? null,
-      invoiceDate: createInvoiceDto.invoiceDate,
-      dueDate: createInvoiceDto.dueDate,
-      currency: createInvoiceDto.currency,
-      currencySymbol: getCurrencySymbol(createInvoiceDto.currency),
-      description: createInvoiceDto.description ?? null,
+      ...invoiceData,
       status: InvoiceStatus.DRAFT,
-
-      customerFullname: createInvoiceDto.customerName,
-      customerEmail: createInvoiceDto.customerEmail,
-      customerMobileNumber: createInvoiceDto.customerMobile ?? null,
-      customerAddress: createInvoiceDto.customerAddress ?? null,
-
-      invoiceSubTotal: totals.invoiceSubTotal,
-      taxPercentage: createInvoiceDto.taxPercentage.toFixed(2),
-      totalTax: totals.totalTax,
-      totalDiscount: totals.totalDiscount,
-      totalAmount: totals.totalAmount,
-      totalPaid: totals.totalPaid,
-      balanceAmount: totals.balanceAmount,
-
-      createdById: currentUser.id,
     });
 
     const persistedInvoice = await invoiceRepository.save(invoice);
 
     const invoiceItem = invoiceItemRepository.create({
       invoiceId: persistedInvoice.id,
-      name: createInvoiceDto.item.name,
-      quantity: createInvoiceDto.item.quantity,
-      rate: createInvoiceDto.item.rate.toFixed(2),
+      ...item,
     });
 
     const persistedItem = await invoiceItemRepository.save(invoiceItem);

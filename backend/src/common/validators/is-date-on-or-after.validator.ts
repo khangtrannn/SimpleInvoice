@@ -6,7 +6,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-import { isValidDateOnlyString } from './date-only.util';
+import { isValidDateOnlyString } from '../utils/date-only.util';
 
 @ValidatorConstraint({ name: 'isDateOnOrAfter', async: false })
 export class IsDateOnOrAfterConstraint implements ValidatorConstraintInterface {

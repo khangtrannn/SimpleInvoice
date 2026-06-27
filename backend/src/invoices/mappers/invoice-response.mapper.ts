@@ -1,3 +1,4 @@
+import { getTodayDateOnly } from '../../common/utils/date.util';
 import { InvoiceEntity } from '../entities/invoice.entity';
 import {
   InvoiceDetailResponseDto,
@@ -8,6 +9,7 @@ import { deriveInvoiceStatus } from '../domain/derive-invoice-status';
 export function toInvoiceListItemResponse(
   invoice: InvoiceEntity,
 ): InvoiceListItemResponseDto {
+  const today = getTodayDateOnly();
   return {
     id: invoice.id,
     invoiceNumber: invoice.invoiceNumber,
@@ -20,6 +22,7 @@ export function toInvoiceListItemResponse(
     status: deriveInvoiceStatus({
       persistedStatus: invoice.status,
       dueDate: invoice.dueDate,
+      today,
     }),
   };
 }
@@ -27,6 +30,7 @@ export function toInvoiceListItemResponse(
 export function toInvoiceDetailResponse(
   invoice: InvoiceEntity,
 ): InvoiceDetailResponseDto {
+  const today = getTodayDateOnly();
   return {
     id: invoice.id,
     invoiceNumber: invoice.invoiceNumber,
@@ -39,6 +43,7 @@ export function toInvoiceDetailResponse(
     status: deriveInvoiceStatus({
       persistedStatus: invoice.status,
       dueDate: invoice.dueDate,
+      today,
     }),
     customer: {
       fullname: invoice.customerFullname,

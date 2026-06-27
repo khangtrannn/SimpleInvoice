@@ -6,7 +6,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { isUniqueViolation } from '../database/postgres-errors.util';
-import { AuthenticatedUser } from '../auth/types/authenticated-request.type';
+import type { AuthenticatedUser } from '../auth/types/authenticated-request.type';
 
 jest.mock('../database/postgres-errors.util');
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -179,18 +179,32 @@ describe(InvoicesService.name, () => {
       const result = await invoicesService.create(createInvoiceDto, currentUser);
 
       // Assert
-      expect(invoicesRepository.createDraftInvoice).toHaveBeenCalledWith(
-        createInvoiceDto,
-        currentUser,
-        {
-          invoiceSubTotal: '200.00',
-          totalTax: '20.00',
-          totalDiscount: '20.00',
-          totalAmount: '200.00',
-          totalPaid: '0.00',
-          balanceAmount: '200.00',
+      expect(invoicesRepository.createDraftInvoice).toHaveBeenCalledWith({
+        invoiceNumber: createInvoiceDto.invoiceNumber,
+        invoiceReference: createInvoiceDto.invoiceReference,
+        invoiceDate: createInvoiceDto.invoiceDate,
+        dueDate: createInvoiceDto.dueDate,
+        currency: createInvoiceDto.currency,
+        currencySymbol: 'AU$',
+        description: createInvoiceDto.description,
+        customerFullname: createInvoiceDto.customerName,
+        customerEmail: createInvoiceDto.customerEmail,
+        customerMobileNumber: createInvoiceDto.customerMobile,
+        customerAddress: createInvoiceDto.customerAddress,
+        taxPercentage: '10.00',
+        invoiceSubTotal: '200.00',
+        totalTax: '20.00',
+        totalDiscount: '20.00',
+        totalAmount: '200.00',
+        totalPaid: '0.00',
+        balanceAmount: '200.00',
+        createdById: currentUser.id,
+        item: {
+          name: createInvoiceDto.item.name,
+          quantity: createInvoiceDto.item.quantity,
+          rate: '100.00',
         },
-      );
+      });
       expect(result.id).toBe(mockInvoice.id);
       expect(result.invoiceNumber).toBe(mockInvoice.invoiceNumber);
     });

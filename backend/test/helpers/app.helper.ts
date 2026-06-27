@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Client } from 'pg';
 import { AppModule } from '../../src/app.module';
-import { configureApp } from '../../src/app.config';
+import { configureApp } from '../../src/app.setup';
 
 export async function createTestApp(): Promise<{
   app: INestApplication;

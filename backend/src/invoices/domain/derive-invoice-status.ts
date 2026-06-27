@@ -1,4 +1,3 @@
-import { getTodayDateOnly } from '../../common/utils/date.util';
 import {
   InvoiceEffectiveStatus,
   InvoiceStatus,
@@ -7,10 +6,9 @@ import {
 export function deriveInvoiceStatus(input: {
   persistedStatus: InvoiceStatus;
   dueDate: string;
+  today: string;
 }): InvoiceEffectiveStatus {
-  const today = getTodayDateOnly();
-
-  if (input.persistedStatus !== InvoiceStatus.PAID && input.dueDate < today) {
+  if (input.persistedStatus !== InvoiceStatus.PAID && input.dueDate < input.today) {
     return InvoiceEffectiveStatus.OVERDUE;
   }
 
