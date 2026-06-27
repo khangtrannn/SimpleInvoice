@@ -2,13 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 
+import { trimLowercaseString } from '../../common/transforms/string.transforms';
+
 export class LoginRequestDto {
   @ApiProperty({
     example: 'reviewer@simpleinvoice.local',
   })
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : value,
-  )
+  @Transform(({ value }) => trimLowercaseString(value))
   @IsEmail()
   email!: string;
 

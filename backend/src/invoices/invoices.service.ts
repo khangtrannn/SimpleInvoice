@@ -1,0 +1,95 @@
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+
+import { AuthenticatedUser } from '../auth/types/authenticated-request.type';
+import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { GetInvoicesQueryDto } from './dto/get-invoices-query.dto';
+import {
+  InvoiceDetailResponseDto,
+  InvoiceListResponseDto,
+} from './dto/invoice-response.dto';
+import {
+  calculateInvoiceTotals,
+  InvoiceCalculationError,
+} from './domain/invoice-calculation';
+import type { InvoiceTotals } from './domain/invoice-calculation.types';
+import { InvoicesRepository } from './invoices.repository';
+import {
+  toInvoiceDetailResponse,
+  toInvoiceListItemResponse,
+} from './mappers/invoice-response.mapper';
+
+@Injectable()
+export class InvoicesService {
+  constructor(private readonly invoicesRepository: InvoicesRepository) {}
+
+  async findAll(query: GetInvoicesQueryDto): Promise<InvoiceListResponseDto> {
+    const page = query.page;
+    const pageSize = query.pageSize;
+    const { invoices, total } = await this.invoicesRepository.findAll(query);
+
+    return {
+      data: invoices.map(toInvoiceListItemResponse),
+      paging: {
+        page,
+        pageSize,
+        total,
+      },
+    };
+  }
+
+  async findOne(id: string): Promise<InvoiceDetailResponseDto> {
+    const invoice = await this.invoicesRepository.findByIdWithItems(id);
+
+    if (!invoice) {
+      throw new NotFoundException('Invoice not found');
+    }
+
+    return toInvoiceDetailResponse(invoice);
+  }
+
+  async create(
+    createInvoiceDto: CreateInvoiceDto,
+    currentUser: AuthenticatedUser,
+  ): Promise<InvoiceDetailResponseDto> {
+    const totals = this.calculateTotals(createInvoiceDto);
+
+    try {
+      const savedInvoice = await this.invoicesRepository.createDraftInvoice(
+        createInvoiceDto,
+        currentUser,
+        totals,
+      );
+
+      return toInvoiceDetailResponse(savedInvoice);
+    } catch (error) {
+      if (this.invoicesRepository.isUniqueViolation(error)) {
+        throw new ConflictException('Invoice number already exists');
+      }
+
+      throw error;
+    }
+  }
+
+  private calculateTotals(createInvoiceDto: CreateInvoiceDto): InvoiceTotals {
+    try {
+      return calculateInvoiceTotals({
+        quantity: createInvoiceDto.item.quantity,
+        rate: createInvoiceDto.item.rate,
+        taxPercentage: createInvoiceDto.taxPercentage,
+        discount: createInvoiceDto.discount,
+        totalPaid: 0,
+      });
+    } catch (error) {
+      if (error instanceof InvoiceCalculationError) {
+        throw new BadRequestException([error.message]);
+      }
+
+      throw error;
+    }
+  }
+}

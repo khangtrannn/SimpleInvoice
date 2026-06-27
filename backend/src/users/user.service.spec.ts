@@ -1,17 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 import { UserEntity } from './entities/user.entity';
+import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
-
-type MockRepository<T extends object = object> = Partial<
-  Record<keyof Repository<T>, jest.Mock>
->;
 
 describe(UsersService.name, () => {
   let usersService: UsersService;
-  let usersRepository: MockRepository<UserEntity>;
+  let usersRepository: jest.Mocked<
+    Pick<UsersRepository, 'findByEmail' | 'findById'>
+  >;
 
   const mockUser = {
     id: 'ad1e0902-1928-4345-b513-60c86c94fc91',
@@ -23,14 +20,15 @@ describe(UsersService.name, () => {
 
   beforeEach(async () => {
     usersRepository = {
-      findOne: jest.fn(),
+      findByEmail: jest.fn(),
+      findById: jest.fn(),
     };
 
     const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
         {
-          provide: getRepositoryToken(UserEntity),
+          provide: UsersRepository,
           useValue: usersRepository,
         },
       ],
@@ -42,7 +40,7 @@ describe(UsersService.name, () => {
   describe('findByEmail', () => {
     it('should normalize email and find user by email', async () => {
       // Arrange
-      usersRepository.findOne?.mockResolvedValue(mockUser);
+      usersRepository.findByEmail.mockResolvedValue(mockUser);
 
       // Act
       const result = await usersService.findByEmail(
@@ -50,17 +48,15 @@ describe(UsersService.name, () => {
       );
 
       // Assert
-      expect(usersRepository.findOne).toHaveBeenCalledWith({
-        where: {
-          email: 'reviewer@simpleinvoice.local',
-        },
-      });
+      expect(usersRepository.findByEmail).toHaveBeenCalledWith(
+        'reviewer@simpleinvoice.local',
+      );
       expect(result).toEqual(mockUser);
     });
 
     it('should return null when user is not found by email', async () => {
       // Arrange
-      usersRepository.findOne?.mockResolvedValue(null);
+      usersRepository.findByEmail.mockResolvedValue(null);
 
       // Act
       const result = await usersService.findByEmail('missing@example.com');
@@ -73,23 +69,19 @@ describe(UsersService.name, () => {
   describe('findById', () => {
     it('should find user by id', async () => {
       // Arrange
-      usersRepository.findOne?.mockResolvedValue(mockUser);
+      usersRepository.findById.mockResolvedValue(mockUser);
 
       // Act
       const result = await usersService.findById(mockUser.id);
 
       // Assert
-      expect(usersRepository.findOne).toHaveBeenCalledWith({
-        where: {
-          id: mockUser.id,
-        },
-      });
+      expect(usersRepository.findById).toHaveBeenCalledWith(mockUser.id);
       expect(result).toEqual(mockUser);
     });
 
     it('should return null when user is not found by id', async () => {
       // Arrange
-      usersRepository.findOne?.mockResolvedValue(null);
+      usersRepository.findById.mockResolvedValue(null);
 
       // Act
       const result = await usersService.findById(

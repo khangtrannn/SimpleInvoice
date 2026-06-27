@@ -23,6 +23,6 @@ import { AccessTokenService } from './services/access-token.service';
   ],
   controllers: [AuthController],
   providers: [AuthService, AccessTokenService, JwtAuthGuard],
-  exports: [AuthService, JwtAuthGuard],
+  exports: [AuthService, JwtAuthGuard, JwtModule, UsersModule],
 })
 export class AuthModule {}

@@ -59,7 +59,8 @@ function createAppendixInvoice(): InvoiceSeedInput {
 function createGeneratedInvoice(index: number): InvoiceSeedInput {
   const status = createPersistedStatus(index);
   const dueDateOffset = createDueDateOffset(index, status);
-  const invoiceDateOffset = dueDateOffset - faker.number.int({ min: 7, max: 30 });
+  const invoiceDateOffset =
+    dueDateOffset - faker.number.int({ min: 7, max: 30 });
 
   const quantity = faker.number.int({ min: 1, max: 8 });
   const rate = toMoney(

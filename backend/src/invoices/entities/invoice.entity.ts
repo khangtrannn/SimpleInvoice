@@ -16,8 +16,14 @@ import { InvoiceItemEntity } from './invoice-item.entity';
 
 @Entity({ name: 'invoices' })
 @Unique('uq_invoices_invoice_number', ['invoiceNumber'])
-@Check('chk_invoices_due_date_on_or_after_invoice_date', '"due_date" >= "invoice_date"')
-@Check('chk_invoices_invoice_sub_total_non_negative', '"invoice_sub_total" >= 0')
+@Check(
+  'chk_invoices_due_date_on_or_after_invoice_date',
+  '"due_date" >= "invoice_date"',
+)
+@Check(
+  'chk_invoices_invoice_sub_total_non_negative',
+  '"invoice_sub_total" >= 0',
+)
 @Check('chk_invoices_tax_percentage_non_negative', '"tax_percentage" >= 0')
 @Check('chk_invoices_total_tax_non_negative', '"total_tax" >= 0')
 @Check('chk_invoices_total_discount_non_negative', '"total_discount" >= 0')
