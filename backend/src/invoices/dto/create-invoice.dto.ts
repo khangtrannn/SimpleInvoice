@@ -58,6 +58,7 @@ export class CreateInvoiceDto {
   @Transform(({ value }) => trimOptionalString(value))
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   customerAddress?: string;
 
   @ApiProperty({
@@ -109,6 +110,7 @@ export class CreateInvoiceDto {
   @Transform(({ value }) => trimOptionalString(value))
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   description?: string;
 
   @ApiProperty({

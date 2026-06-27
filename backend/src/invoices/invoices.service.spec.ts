@@ -35,7 +35,7 @@ describe(InvoicesService.name, () => {
   const createInvoiceDto: CreateInvoiceDto = {
     customerName: 'Paul Smith',
     customerEmail: 'paul@example.com',
-    customerMobileNumber: '+61412345678',
+    customerMobile: '+61412345678',
     customerAddress: 'Sydney, Australia',
     invoiceNumber: 'IV1780488206995',
     invoiceReference: 'REF-001',
@@ -131,7 +131,10 @@ describe(InvoicesService.name, () => {
       const result = await invoicesService.findAll(query);
 
       // Assert
-      expect(invoicesRepository.findAll).toHaveBeenCalledWith(query);
+      expect(invoicesRepository.findAll).toHaveBeenCalledWith(
+        query,
+        expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+      );
       expect(result.paging).toEqual({
         page: 1,
         pageSize: 10,
@@ -209,7 +212,7 @@ describe(InvoicesService.name, () => {
       await expect(act).rejects.toThrow(ConflictException);
       expect(isUniqueViolation).toHaveBeenCalledWith(
         duplicateError,
-        'UQ_invoices_invoice_number',
+        'uq_invoices_invoice_number',
       );
     });
 

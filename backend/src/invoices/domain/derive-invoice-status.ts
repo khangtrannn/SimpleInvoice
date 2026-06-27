@@ -1,11 +1,8 @@
+import { getTodayDateOnly } from '../../common/utils/date.util';
 import {
   InvoiceEffectiveStatus,
   InvoiceStatus,
 } from '../enums/invoice-status.enum';
-
-export function getTodayDateOnly(): string {
-  return new Date().toISOString().slice(0, 10);
-}
 
 export function deriveInvoiceStatus(input: {
   persistedStatus: InvoiceStatus;
