@@ -86,7 +86,7 @@ export function LoginPage() {
                       autoComplete="email"
                       placeholder="Email address"
                       aria-invalid={Boolean(errors.email)}
-                      className="h-14 w-full rounded-xl border border-slate-200 bg-white pl-14 pr-5 text-base text-slate-950 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 xl:h-16"
+                      className="h-14 w-full rounded-xl border border-slate-200 bg-white pl-14 pr-5 text-base text-slate-950 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 xl:h-16"
                       {...register('email')}
                     />
                   </div>
@@ -116,7 +116,7 @@ export function LoginPage() {
                       autoComplete="current-password"
                       placeholder="Password"
                       aria-invalid={Boolean(errors.password)}
-                      className="h-14 w-full rounded-xl border border-slate-200 bg-white pl-14 pr-14 text-base text-slate-950 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 xl:h-16"
+                      className="h-14 w-full rounded-xl border border-slate-200 bg-white pl-14 pr-14 text-base text-slate-950 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 xl:h-16"
                       {...register('password')}
                     />
 
@@ -150,7 +150,7 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={loginMutation.isPending}
-                  className="mt-6 h-14 w-full rounded-xl bg-slate-950 text-xl font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:bg-slate-400 disabled:shadow-none xl:mt-8 xl:h-16"
+                  className="mt-6 h-14 w-full rounded-xl bg-[#0D1F3C] text-2xl font-semibold text-white transition hover:bg-[#1B3460] focus:outline-none focus:ring-4 focus:ring-[#0D1F3C]/20 disabled:bg-slate-400 disabled:shadow-none xl:mt-8 xl:h-16"
                 >
                   {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
                 </button>
@@ -159,7 +159,7 @@ export function LoginPage() {
           </div>
 
           <footer className="mx-auto mt-6 flex w-full max-w-[520px] flex-col items-start justify-between gap-3 text-sm text-slate-500 sm:flex-row xl:mt-8">
-            <p>© 2025 SimpleInvoice. All rights reserved.</p>
+            <p>© 2026 SimpleInvoice. All rights reserved.</p>
           </footer>
         </section>
       </div>
@@ -169,7 +169,7 @@ export function LoginPage() {
 
 function HeroPanel() {
   return (
-    <section className="relative hidden overflow-hidden bg-[#12100f] lg:block">
+    <section className="relative hidden overflow-hidden bg-[#0D1F3C] lg:block">
       <img
         src="/images/login-hero.png"
         alt="SimpleInvoice invoicing dashboard preview"
