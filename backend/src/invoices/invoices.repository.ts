@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   DataSource,
   EntityManager,
-  QueryFailedError,
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
@@ -71,16 +70,6 @@ export class InvoicesRepository {
     return this.dataSource.transaction((manager) =>
       this.persistDraftInvoice(manager, createInvoiceDto, currentUser, totals),
     );
-  }
-
-  isUniqueViolation(error: unknown): boolean {
-    if (!(error instanceof QueryFailedError)) {
-      return false;
-    }
-
-    const driverError = error.driverError as { code?: string };
-
-    return driverError.code === '23505';
   }
 
   private buildFindAllQuery(

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { isUniqueViolation } from '../database/postgres-errors.util';
 import { AuthenticatedUser } from '../auth/types/authenticated-request.type';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { GetInvoicesQueryDto } from './dto/get-invoices-query.dto';
@@ -22,6 +23,8 @@ import {
   toInvoiceDetailResponse,
   toInvoiceListItemResponse,
 } from './mappers/invoice-response.mapper';
+
+const INVOICE_NUMBER_UNIQUE_CONSTRAINT = 'UQ_invoices_invoice_number';
 
 @Injectable()
 export class InvoicesService {
@@ -67,7 +70,7 @@ export class InvoicesService {
 
       return toInvoiceDetailResponse(savedInvoice);
     } catch (error) {
-      if (this.invoicesRepository.isUniqueViolation(error)) {
+      if (isUniqueViolation(error, INVOICE_NUMBER_UNIQUE_CONSTRAINT)) {
         throw new ConflictException('Invoice number already exists');
       }
 

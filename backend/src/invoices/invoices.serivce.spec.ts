@@ -5,7 +5,10 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { isUniqueViolation } from '../database/postgres-errors.util';
 import { AuthenticatedUser } from '../auth/types/authenticated-request.type';
+
+jest.mock('../database/postgres-errors.util');
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import {
   GetInvoicesQueryDto,
@@ -20,10 +23,7 @@ import { InvoicesService } from './invoices.service';
 describe(InvoicesService.name, () => {
   let invoicesService: InvoicesService;
   let invoicesRepository: jest.Mocked<
-    Pick<
-      InvoicesRepository,
-      'findAll' | 'findByIdWithItems' | 'createDraftInvoice' | 'isUniqueViolation'
-    >
+    Pick<InvoicesRepository, 'findAll' | 'findByIdWithItems' | 'createDraftInvoice'>
   >;
 
   const currentUser: AuthenticatedUser = {
@@ -95,7 +95,6 @@ describe(InvoicesService.name, () => {
       findAll: jest.fn(),
       findByIdWithItems: jest.fn(),
       createDraftInvoice: jest.fn(),
-      isUniqueViolation: jest.fn(),
     };
 
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -201,15 +200,16 @@ describe(InvoicesService.name, () => {
       const duplicateError = new Error('duplicate invoice number');
 
       invoicesRepository.createDraftInvoice.mockRejectedValue(duplicateError);
-      invoicesRepository.isUniqueViolation.mockReturnValue(true);
+      jest.mocked(isUniqueViolation).mockReturnValue(true);
 
       // Act
       const act = invoicesService.create(createInvoiceDto, currentUser);
 
       // Assert
       await expect(act).rejects.toThrow(ConflictException);
-      expect(invoicesRepository.isUniqueViolation).toHaveBeenCalledWith(
+      expect(isUniqueViolation).toHaveBeenCalledWith(
         duplicateError,
+        'UQ_invoices_invoice_number',
       );
     });
 
@@ -218,7 +218,7 @@ describe(InvoicesService.name, () => {
       const unexpectedError = new Error('database unavailable');
 
       invoicesRepository.createDraftInvoice.mockRejectedValue(unexpectedError);
-      invoicesRepository.isUniqueViolation.mockReturnValue(false);
+      jest.mocked(isUniqueViolation).mockReturnValue(false);
 
       // Act
       const act = invoicesService.create(createInvoiceDto, currentUser);
