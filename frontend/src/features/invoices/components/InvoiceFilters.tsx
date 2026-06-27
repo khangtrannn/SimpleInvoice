@@ -1,7 +1,5 @@
 import {
   AlertCircle,
-  ArrowDown,
-  ArrowUp,
   Calendar,
   CheckCircle2,
   Clock3,
@@ -92,7 +90,7 @@ export function InvoiceFilters({ query, onChange, onReset }: InvoiceFiltersProps
           <input
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
-            placeholder="Search invoice number or customer…"
+            placeholder="Search by invoice number or customer name"
             className="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-4 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-100"
           />
         </div>
@@ -144,41 +142,25 @@ export function InvoiceFilters({ query, onChange, onReset }: InvoiceFiltersProps
 
         <div className="flex items-center gap-1.5">
           <select
+            aria-label="Sort by"
             value={query.sortBy}
             onChange={(event) => handleSortByChange(event.target.value as InvoiceSortBy)}
             className="h-7 rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 shadow-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
           >
             <option value="invoiceDate">Invoice Date</option>
             <option value="dueDate">Due Date</option>
-            <option value="totalAmount">Amount</option>
+            <option value="totalAmount">Total Amount</option>
           </select>
 
-          <div className="flex overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <button
-              type="button"
-              title="Descending"
-              onClick={() => handleOrderingChange('DESC')}
-              className={`flex h-7 w-7 items-center justify-center transition ${
-                query.ordering === 'DESC'
-                  ? 'bg-[#0D1F3C] text-white'
-                  : 'text-slate-500 hover:bg-slate-50'
-              }`}
-            >
-              <ArrowDown className="h-3 w-3" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              title="Ascending"
-              onClick={() => handleOrderingChange('ASC')}
-              className={`flex h-7 w-7 items-center justify-center border-l border-slate-200 transition ${
-                query.ordering === 'ASC'
-                  ? 'bg-[#0D1F3C] text-white'
-                  : 'text-slate-500 hover:bg-slate-50'
-              }`}
-            >
-              <ArrowUp className="h-3 w-3" aria-hidden="true" />
-            </button>
-          </div>
+          <select
+            aria-label="Ordering"
+            value={query.ordering}
+            onChange={(event) => handleOrderingChange(event.target.value as Ordering)}
+            className="h-7 rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 shadow-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+          >
+            <option value="DESC">DESC</option>
+            <option value="ASC">ASC</option>
+          </select>
 
           <button
             type="button"
@@ -186,7 +168,7 @@ export function InvoiceFilters({ query, onChange, onReset }: InvoiceFiltersProps
             className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-500 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
           >
             <RotateCcw className="h-3 w-3" aria-hidden="true" />
-            <span className="hidden sm:inline">Reset</span>
+            <span className="hidden sm:inline">Clear filters</span>
           </button>
         </div>
       </div>

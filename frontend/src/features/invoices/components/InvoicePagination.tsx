@@ -31,16 +31,15 @@ export function InvoicePagination({ paging, query, onChange }: InvoicePagination
 
   return (
     <div className="flex flex-col gap-3 rounded-b-2xl border-x border-b border-slate-200 bg-white px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-xs text-slate-500">
-        <span className="font-semibold text-slate-700">{startResult}–{endResult}</span>
-        {' '}of{' '}
-        <span className="font-semibold text-slate-700">{paging.total}</span> results
+      <p className="text-xs font-medium text-slate-700">
+        Showing {startResult} to {endResult} of {paging.total} results
       </p>
 
       <div className="flex items-center gap-3">
         <label className="flex items-center gap-2 text-xs text-slate-500">
-          <span className="hidden sm:inline">Per page</span>
+          <span id="rows-per-page-label" className="hidden sm:inline">Rows per page</span>
           <select
+            aria-labelledby="rows-per-page-label"
             value={query.pageSize}
             onChange={(event) => onChange({ pageSize: Number(event.target.value), page: 1 })}
             className="h-7 rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-700 shadow-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"

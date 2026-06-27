@@ -60,11 +60,12 @@ export function InvoiceTable({ invoices }: InvoiceTableProps) {
         </table>
       </div>
 
-      <div className="divide-y divide-slate-100 lg:hidden">
+      <div className="divide-y divide-slate-100 lg:hidden" aria-hidden="true">
         {invoices.map((invoice) => (
           <Link
             key={invoice.id}
             to={`/invoices/${invoice.id}`}
+            aria-label={`Invoice for ${invoice.customerName}`}
             className={`block border-l-2 bg-white p-5 transition hover:bg-slate-50/60 ${statusRowAccent[invoice.status]}`}
           >
             <div className="flex items-start justify-between gap-4">

@@ -1,7 +1,9 @@
 import '@testing-library/jest-dom/vitest';
 
-import { cleanup } from '@testing-library/react';
+import { configure, cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+
+configure({ defaultIgnore: 'script, style, [aria-hidden="true"], [aria-hidden="true"] *' });
 
 import { server } from '@/test/mocks/server';
 
