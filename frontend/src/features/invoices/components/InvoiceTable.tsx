@@ -49,7 +49,7 @@ export function InvoiceTable({ invoices }: InvoiceTableProps) {
                 <td className="px-5 py-4 text-slate-500">{formatDate(invoice.invoiceDate)}</td>
                 <td className="px-5 py-4 text-slate-500">{formatDate(invoice.dueDate)}</td>
                 <td className="px-5 py-4 font-mono font-semibold tabular-nums text-[#0D1F3C]">
-                  {formatMoney(invoice.totalAmount, invoice.currency)}
+                  {formatMoney(invoice.totalAmount, invoice.currency, invoice.currencySymbol)}
                 </td>
                 <td className="px-5 py-4">
                   <InvoiceStatusBadge status={invoice.status} />
@@ -88,7 +88,7 @@ export function InvoiceTable({ invoices }: InvoiceTableProps) {
               <div className="col-span-2">
                 <p className="text-xs text-slate-400 uppercase tracking-wider">Total Amount</p>
                 <p className="mt-1 font-mono font-bold tabular-nums text-[#0D1F3C]">
-                  {formatMoney(invoice.totalAmount, invoice.currency)}
+                  {formatMoney(invoice.totalAmount, invoice.currency, invoice.currencySymbol)}
                 </p>
               </div>
             </div>

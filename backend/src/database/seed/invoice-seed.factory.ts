@@ -70,7 +70,7 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
     taxPercentage,
   });
 
-  const totalPaid = createTotalPaid({
+const totalPaid = createTotalPaid({
     status,
     quantity,
     rate,
@@ -80,6 +80,7 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
 
   const customerFullname = faker.person.fullName();
   const currency = SUPPORTED_CURRENCIES[index % SUPPORTED_CURRENCIES.length];
+  const itemName = createInvoiceItemName(index);
 
   return {
     id: faker.string.uuid(),
@@ -89,7 +90,7 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
     dueDate: daysFromToday(dueDateOffset),
     currency: currency.currency,
     currencySymbol: currency.currencySymbol,
-    description: faker.commerce.productDescription(),
+    description: `Invoice for ${itemName.toLowerCase()} provided to ${customerFullname}.`,
     status,
 
     customerFullname,
@@ -102,7 +103,7 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
 
     item: {
       id: faker.string.uuid(),
-      name: faker.commerce.productName(),
+      name: itemName,
       quantity,
       rate,
     },
@@ -111,6 +112,23 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
     totalDiscount,
     totalPaid,
   };
+}
+
+function createInvoiceItemName(index: number): string {
+  const itemNames = [
+    'Website Design',
+    'Frontend Development',
+    'Backend API Development',
+    'UI/UX Consulting',
+    'Cloud Infrastructure Setup',
+    'Quality Assurance Testing',
+    'Technical Support',
+    'Application Maintenance',
+    'Database Migration',
+    'Security Review',
+  ];
+
+  return itemNames[index % itemNames.length];
 }
 
 function createTotalDiscount(input: {

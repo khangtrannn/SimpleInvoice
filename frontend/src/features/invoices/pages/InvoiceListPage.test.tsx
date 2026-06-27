@@ -1,7 +1,8 @@
 import { HttpResponse, http } from 'msw';
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Link, RouteObject } from 'react-router';
+import { Link } from 'react-router';
+import type { RouteObject } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
 import { InvoiceListPage } from '@/features/invoices/pages/InvoiceListPage';
@@ -65,7 +66,7 @@ describe('InvoiceListPage', () => {
     expect(acmeInvoiceLink).toBeInTheDocument();
     expect(screen.getByText(/acme corporation/i)).toBeInTheDocument();
     expect(screen.getByText(/bright ideas pty ltd/i)).toBeInTheDocument();
-    expect(screen.getByText(/2,450.00 aud/i)).toBeInTheDocument();
+    expect(screen.getByText(/au\$2,450.00 aud/i)).toBeInTheDocument();
     expect(screen.getByText(/showing 1 to 8 of 8 results/i)).toBeInTheDocument();
   });
 
@@ -160,7 +161,7 @@ describe('InvoiceListPage', () => {
       expect(invoiceLinks[0]).toHaveTextContent('INV-2026-008');
     });
 
-    expect(screen.getByText(/750.00 aud/i)).toBeInTheDocument();
+    expect(screen.getByText(/au\$750.00 aud/i)).toBeInTheDocument();
   });
 
   it('changes page size and updates the number of visible rows', async () => {

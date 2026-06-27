@@ -65,3 +65,39 @@ export type InvoiceListResponse = {
   data: InvoiceListItem[];
   paging: Paging;
 };
+
+export type InvoiceCustomer = {
+  fullname: string;
+  email: string;
+  mobileNumber: string | null;
+  address: string | null;
+};
+
+export type InvoiceItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  rate: string;
+};
+
+export type InvoiceDetail = {
+  id: string;
+  invoiceNumber: string;
+  invoiceReference: string | null;
+  invoiceDate: string;
+  dueDate: string;
+  currency: string;
+  currencySymbol: string;
+  description: string | null;
+  status: InvoiceStatus;
+  customer: InvoiceCustomer;
+  items: InvoiceItem[];
+  invoiceSubTotal: string;
+  taxPercentage: string;
+  totalTax: string;
+  totalDiscount: string;
+  totalAmount: string;
+  totalPaid: string;
+  balanceAmount: string;
+  createdAt: string;
+};

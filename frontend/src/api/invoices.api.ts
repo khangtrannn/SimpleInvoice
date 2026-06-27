@@ -1,5 +1,5 @@
 import { httpClient } from '@/api/http-client';
-import type { InvoiceListQuery, InvoiceListResponse } from '@/api/types';
+import type { InvoiceDetail, InvoiceListQuery, InvoiceListResponse } from '@/api/types';
 
 export async function getInvoices(query: InvoiceListQuery) {
   const response = await httpClient.get<InvoiceListResponse>('/invoices', {
@@ -14,6 +14,12 @@ export async function getInvoices(query: InvoiceListQuery) {
       toDate: query.toDate || undefined,
     },
   });
+
+  return response.data;
+}
+
+export async function getInvoiceById(id: string) {
+  const response = await httpClient.get<InvoiceDetail>(`/invoices/${id}`);
 
   return response.data;
 }
