@@ -39,10 +39,58 @@ Swagger is available at `http://localhost:4000/api/docs` by default.
 ## Test
 
 ```bash
-npm run test
-npm run test:e2e
-npm run test:cov
+npm run test          # unit tests
+npm run test:e2e      # end-to-end tests (requires .env.test and a running PostgreSQL)
+npm run test:cov      # unit tests with coverage report
 ```
+
+### Testing approach
+
+The test suite is split into two layers that complement each other: unit tests verify isolated logic quickly without I/O, and E2E tests verify the full HTTP stack against a real database.
+
+#### Unit tests (`src/**/*.spec.ts`)
+
+Unit tests use **Jest** and **`@nestjs/testing`**. Each spec creates a minimal `TestingModule` that wires only the class under test and replaces every dependency with a `jest.fn()` mock. This keeps tests fast and focused on a single unit's behaviour.
+
+**What is covered:**
+
+| Area | File | What it verifies |
+|------|------|------------------|
+| Auth service | `auth/auth.service.spec.ts` | Login flow, credential validation, token issuance |
+| Auth controller | `auth/auth.controller.spec.ts` | Delegation to service; `getMe` endpoint with mocked guard |
+| JWT guard | `auth/guards/jwt-auth.guard.spec.ts` | Valid token, missing/malformed/expired token, revoked user |
+| Access token service | `auth/services/access-token.service.spec.ts` | JWT signing and expiry config |
+| Password utility | `auth/utils/password.util.spec.ts` | `bcrypt.compare` delegation |
+| Auth response mapper | `auth/mappers/auth-user-response.mapper.spec.ts` | `passwordHash` is never exposed |
+| Invoices service | `invoices/invoices.serivce.spec.ts` | `findAll`, `findOne`, `create`; conflict on duplicate number; domain validation failure; unexpected repository errors |
+| Invoices controller | `invoices/invoices.controller.spec.ts` | Delegation to service with mocked guard |
+| Invoice calculation | `invoices/domain/invoice-calculation.spec.ts` | Subtotal, tax, discount, paid, and balance rounding (Decimal.js); over-discount and over-paid validation |
+| Users service | `users/user.service.spec.ts` | Email normalisation, lookup by ID, null handling |
+| Date validators | `common/validators/date-only.validator.spec.ts` | `IsDateOnly`, `IsDateOnOrAfter`, `IsDateRange` — format and ordering rules |
+| Postgres error util | `database/postgres-errors.util.spec.ts` | `isUniqueViolation` identifies unique constraint errors by constraint name |
+
+**Mocking strategy:** repositories, external services (`JwtService`, `ConfigService`), and third-party libraries (`bcrypt`) are replaced with typed `jest.Mocked` partial objects. Guards are swapped out via `overrideGuard` so controller tests do not depend on token verification.
+
+#### E2E tests (`test/*.e2e-spec.ts`)
+
+E2E tests use **Jest** + **supertest** and boot a real NestJS application backed by a dedicated PostgreSQL database configured in `.env.test`. TypeORM migrations run during setup so the schema is always fresh. Each suite cleans the database in `beforeAll` to guarantee isolation between test files.
+
+**Setup helpers (`test/helpers/`):**
+- `app.helper.ts` — creates the `INestApplication`, runs migrations, and provides `cleanDatabase` (truncates all tables).
+- `auth.helper.ts` — `getAuthToken` logs in and returns a JWT; `authedRequest` wraps supertest with the `Authorization` header attached.
+- `user.helper.ts` — seeds a test user with a bcrypt-hashed password directly into the database.
+
+**What is covered:**
+
+| Suite | File | Scenarios |
+|-------|------|-----------|
+| Health | `app.e2e-spec.ts` | `GET /health` returns 200 |
+| Auth | `auth.e2e-spec.ts` | Login with valid credentials → 200 + JWT; invalid password → 401; email validation → 400; `GET /auth/me` with valid/missing/malformed token |
+| Invoices — create | `invoices.e2e-spec.ts` | `POST /invoices` with full payload → 201 + computed totals; minimal required fields → 201 with nullable optionals as `null`; duplicate invoice number → 409; missing required field → 400; no token → 401 |
+| Invoices — list | `invoices.e2e-spec.ts` | `GET /invoices` default pagination; keyword filter (invoice number, customer name); date range filter; invalid date range → 400; page 2 offset; no token → 401 |
+| Invoices — detail | `invoices.e2e-spec.ts` | `GET /invoices/:id` known ID → 200 with full detail; non-existent UUID → 404; invalid UUID → 400; no token → 401 |
+
+**E2E configuration:** `test/jest-e2e.json` sets `testTimeout: 30000` (network + migration overhead) and loads `.env.test` via `setupFiles` before any test runs.
 
 ## Validation Design
 
