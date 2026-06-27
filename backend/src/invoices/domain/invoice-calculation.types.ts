@@ -3,8 +3,8 @@ import type Decimal from 'decimal.js';
 export type CalculateInvoiceTotalsInput = {
   quantity: number;
   rate: Decimal.Value;
-  taxPercentage: Decimal.Value;
-  discount: Decimal.Value;
+  taxPercentage?: Decimal.Value;
+  discount?: Decimal.Value;
   totalPaid?: Decimal.Value;
 };
 

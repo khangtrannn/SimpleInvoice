@@ -23,8 +23,8 @@ export function calculateInvoiceTotals(
 ): InvoiceTotals {
   const quantity = new Decimal(input.quantity);
   const rate = new Decimal(input.rate);
-  const taxPercentage = new Decimal(input.taxPercentage);
-  const discount = new Decimal(input.discount);
+  const taxPercentage = new Decimal(input.taxPercentage ?? 0);
+  const discount = new Decimal(input.discount ?? 0);
   const totalPaid = new Decimal(input.totalPaid ?? 0);
 
   const invoiceSubTotal = quantity.mul(rate);
