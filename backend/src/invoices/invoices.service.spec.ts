@@ -131,10 +131,7 @@ describe(InvoicesService.name, () => {
       const result = await invoicesService.findAll(query);
 
       // Assert
-      expect(invoicesRepository.findAll).toHaveBeenCalledWith(
-        query,
-        expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
-      );
+      expect(invoicesRepository.findAll).toHaveBeenCalledWith(query);
       expect(result.paging).toEqual({
         page: 1,
         pageSize: 10,

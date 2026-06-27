@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import type { AuthenticatedUser } from '../auth/types/authenticated-request.type';
-import { getTodayDateOnly } from './domain/derive-invoice-status';
+import { getTodayDateOnly } from '../common/utils/date.util';
 import type { InvoiceTotals } from './domain/invoice-calculation.types';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import {
@@ -47,10 +47,7 @@ export class InvoicesRepository {
     const queryBuilder = this.buildFindAllQuery(query);
     const [invoices, total] = await queryBuilder.getManyAndCount();
 
-    return {
-      invoices,
-      total,
-    };
+    return { invoices, total };
   }
 
   findByIdWithItems(id: string): Promise<InvoiceEntity | null> {
@@ -75,6 +72,7 @@ export class InvoicesRepository {
   private buildFindAllQuery(
     query: GetInvoicesQueryDto,
   ): SelectQueryBuilder<InvoiceEntity> {
+    const today = getTodayDateOnly();
     const queryBuilder = this.invoicesRepository
       .createQueryBuilder('invoice')
       .skip((query.page - 1) * query.pageSize)
@@ -84,7 +82,7 @@ export class InvoicesRepository {
     this.applyDateRangeFilter(queryBuilder, query);
 
     if (query.status) {
-      this.applyStatusFilter(queryBuilder, query.status, getTodayDateOnly());
+      this.applyStatusFilter(queryBuilder, query.status, today);
     }
 
     this.applySorting(queryBuilder, query);
@@ -96,16 +94,14 @@ export class InvoicesRepository {
     queryBuilder: SelectQueryBuilder<InvoiceEntity>,
     keyword?: string,
   ): void {
-    const trimmedKeyword = keyword?.trim();
-
-    if (!trimmedKeyword) {
+    if (!keyword) {
       return;
     }
 
     queryBuilder.andWhere(
       '(invoice.invoice_number ILIKE :keyword OR invoice.customer_fullname ILIKE :keyword)',
       {
-        keyword: `%${trimmedKeyword}%`,
+        keyword: `%${keyword}%`,
       },
     );
   }
@@ -205,13 +201,8 @@ export class InvoicesRepository {
       rate: createInvoiceDto.item.rate.toFixed(2),
     });
 
-    await invoiceItemRepository.save(invoiceItem);
+    const persistedItem = await invoiceItemRepository.save(invoiceItem);
 
-    return invoiceRepository.findOneOrFail({
-      where: { id: persistedInvoice.id },
-      relations: {
-        items: true,
-      },
-    });
+    return { ...persistedInvoice, items: [persistedItem] };
   }
 }
