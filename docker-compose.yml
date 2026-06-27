@@ -25,6 +25,9 @@ services:
     container_name: simple_invoice_backend
     restart: unless-stopped
     env_file: ./backend/.env
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: postgres
     ports:
       - '${APP_PORT:-4000}:4000'
     depends_on:

@@ -28,11 +28,11 @@ This is a monorepo. Detailed documentation for each layer lives alongside the co
 ```
 
 This single command:
-1. Copies `backend/.env.example` → `backend/.env` if it does not exist (then exits so you can review it)
+1. Copies `.env.example` → `.env` and `backend/.env.example` → `backend/.env` if either file does not exist
 2. Builds and starts all Docker services
 3. Waits for the backend to be healthy
-4. Runs database migrations
-5. Seeds the database with sample data
+4. Runs compiled production database migrations
+5. Seeds the database with sample data from the compiled production build
 
 Once complete, the app is available at:
 
@@ -82,7 +82,7 @@ npm run start:dev
 
 ## Environment Variables
 
-All configuration is driven by `backend/.env`. Copy `backend/.env.example` as a starting point.
+Docker Compose reads the root `.env` for container wiring and `backend/.env` for backend runtime secrets. Inside Docker, the backend overrides `POSTGRES_HOST` to `postgres`; for local Node.js development, use `localhost`.
 
 | Variable            | Description                              | Default  |
 |---------------------|------------------------------------------|----------|
@@ -104,6 +104,7 @@ All configuration is driven by `backend/.env`. Copy `backend/.env.example` as a 
 - **Migration-driven schema** — `synchronize` and `migrationsRun` are disabled in TypeORM. Schema changes are always explicit migrations, never auto-applied.
 - **Customer as embedded fields** — customer data (name, email, mobile, address) is stored as columns on the `invoices` table rather than a separate `customers` table. Invoices are self-contained records; no customer identity is shared across invoices.
 - **Overdue is derived, never stored** — the database only persists `Draft`, `Pending`, and `Paid`. The `Overdue` status is computed at read time when `status != Paid AND dueDate < today`.
+- **UTC business date** — `today` for derived `Overdue` status is based on the UTC date to keep Docker, CI, and local runs deterministic.
 - **Server-side totals** — `subTotal`, `taxAmount`, `totalAmount`, and `balanceAmount` are calculated in a pure domain function on the backend and never trusted from the client.
 
 ## Known Limitations

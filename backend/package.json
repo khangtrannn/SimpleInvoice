@@ -18,16 +18,21 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e:docker": "docker compose --env-file ../backend/.env.test -f ../docker-compose.test.yml up -d --wait postgres-test && npm run test:e2e",
     "typeorm": "node ./node_modules/typeorm/cli-ts-node-commonjs.js",
     "migration:create": "npm run typeorm -- migration:create",
     "migration:generate": "npm run typeorm -- migration:generate -d src/database/data-source.ts",
     "migration:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
+    "migration:run:prod": "node ./node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js",
     "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
     "migration:show": "npm run typeorm -- migration:show -d src/database/data-source.ts",
+    "migration:show:prod": "node ./node_modules/typeorm/cli.js migration:show -d dist/database/data-source.js",
     "seed": "tsx src/database/seed/seed.ts",
+    "seed:prod": "node dist/database/seed/seed.js",
     "swagger:generate": "tsx src/generate-swagger.ts"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.5.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
@@ -52,7 +57,6 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@faker-js/faker": "^10.5.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.1.27",
@@ -94,5 +98,9 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "overrides": {
+    "multer": "^2.1.2",
+    "js-yaml": "^4.2.0"
   }
 }

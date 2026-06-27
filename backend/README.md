@@ -14,7 +14,7 @@ NestJS REST API backed by PostgreSQL, TypeORM migrations, JWT authentication, cl
 ./start.sh
 ```
 
-This single command copies `.env.example` → `.env` on first run (then exits for you to review), builds all Docker services, waits for the backend to be healthy, runs migrations, and seeds sample data.
+This single command copies missing root/backend env files from their examples, builds all Docker services, waits for the backend to be healthy, runs compiled production migrations, and seeds sample data.
 
 ### Option B — Local (Node.js 20+ and PostgreSQL 14+ required)
 
@@ -106,7 +106,7 @@ Copy `backend/.env.example` to `backend/.env` and fill in the required values.
 
 The app validates all required variables at startup using Joi and exits immediately with a descriptive error if any are missing or malformed.
 
-E2E tests require a separate `backend/.env.test` file pointing to a dedicated test database. Use the same format as `.env.example`.
+E2E tests can either use `npm run test:e2e:docker` for a temporary Docker PostgreSQL instance or a separate `backend/.env.test` file pointing to a dedicated test database. Use `.env.test.example` as the starting point for local test DB configuration.
 
 ---
 
@@ -116,10 +116,12 @@ The schema is migration-driven. `synchronize` and `migrationsRun` are disabled i
 
 ```bash
 npm run migration:run                                                       # apply pending migrations
+npm run migration:run:prod                                                  # apply compiled dist migrations
 npm run migration:show                                                      # list applied vs pending
 npm run migration:generate -- src/database/migrations/NameOfMigration      # generate from entity diff
 npm run migration:revert                                                    # revert last migration
 npm run seed                                                                # seed reviewer user + 30 sample invoices
+npm run seed:prod                                                           # seed from compiled dist
 ```
 
 Run migrations before seeding. The seed script uses upsert for the reviewer user so it is safe to run multiple times.
@@ -131,6 +133,7 @@ Run migrations before seeding. The seed script uses upsert for the reviewer user
 ```bash
 npm run test          # unit tests
 npm run test:e2e      # end-to-end tests (requires .env.test and a running PostgreSQL)
+npm run test:e2e:docker # start test PostgreSQL in Docker, then run end-to-end tests
 npm run test:cov      # unit tests with coverage report
 ```
 
@@ -189,6 +192,8 @@ src/
 - **Services** orchestrate use cases: call domain functions, decide repository operations, translate errors into HTTP exceptions.
 - **Repository wrappers** own all TypeORM details: query builders, filters, sorting, pagination, transactions.
 - **Database constraints** are the final safety net for persisted invariants.
+
+Derived `Overdue` status uses the UTC date as the business date boundary so status derivation is deterministic across local machines, Docker, and CI.
 
 ---
 

@@ -124,8 +124,11 @@ describe('Invoices (e2e)', () => {
 
     it('should return 400 when a required field is missing', async () => {
       // Arrange
-      const { invoiceNumber: _omitted, ...payloadWithoutInvoiceNumber } =
-        BASE_INVOICE_PAYLOAD;
+      const payloadWithoutInvoiceNumber: Partial<typeof BASE_INVOICE_PAYLOAD> =
+        {
+          ...BASE_INVOICE_PAYLOAD,
+        };
+      delete payloadWithoutInvoiceNumber.invoiceNumber;
 
       // Act
       const res = await api.post('/invoices').send(payloadWithoutInvoiceNumber);
@@ -196,7 +199,9 @@ describe('Invoices (e2e)', () => {
 
     it('should return 200 with only matching results when a keyword matches invoice number', async () => {
       // Act
-      const res = await api.get('/invoices').query({ keyword: 'IV-E2E-LIST-002' });
+      const res = await api
+        .get('/invoices')
+        .query({ keyword: 'IV-E2E-LIST-002' });
 
       // Assert
       expect(res.status).toBe(200);

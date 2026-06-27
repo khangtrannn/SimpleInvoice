@@ -5,11 +5,14 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$ROOT_DIR/backend"
 
 # ── 1. Env file check ────────────────────────────────────────────────────────
+if [[ ! -f "$ROOT_DIR/.env" ]]; then
+  echo ".env not found — copying from .env.example"
+  cp "$ROOT_DIR/.env.example" "$ROOT_DIR/.env"
+fi
+
 if [[ ! -f "$BACKEND_DIR/.env" ]]; then
-  echo "backend/.env not found — copying from .env.example"
+  echo "backend/.env not found — copying from backend/.env.example"
   cp "$BACKEND_DIR/.env.example" "$BACKEND_DIR/.env"
-  echo "Please review backend/.env and fill in any missing values, then re-run this script."
-  exit 1
 fi
 
 # ── 2. Start containers ───────────────────────────────────────────────────────
@@ -31,11 +34,11 @@ done
 
 # ── 4. Run migrations ─────────────────────────────────────────────────────────
 echo "Running database migrations..."
-docker exec simple_invoice_backend npm run migration:run
+docker exec simple_invoice_backend npm run migration:run:prod
 
 # ── 5. Seed data ─────────────────────────────────────────────────────────────
 echo "Seeding database..."
-docker exec simple_invoice_backend npm run seed
+docker exec simple_invoice_backend npm run seed:prod
 
 echo ""
 echo "All done! The app is running at http://localhost:4000"

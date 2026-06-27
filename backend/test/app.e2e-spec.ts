@@ -14,10 +14,16 @@ describe('Health (e2e)', () => {
     await app.close();
   });
 
-  it('GET /health returns 200 with status ok', () => {
-    return request(app.getHttpServer())
-      .get('/health')
-      .expect(200)
-      .expect({ status: 'ok', service: 'simple-invoice-backend' });
+  it('GET /health returns 200 with status ok', async () => {
+    const res = await request(app.getHttpServer()).get('/health').expect(200);
+
+    expect(res.body).toMatchObject({
+      status: 'ok',
+      info: {
+        database: {
+          status: 'up',
+        },
+      },
+    });
   });
 });
