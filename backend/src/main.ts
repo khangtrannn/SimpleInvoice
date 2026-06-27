@@ -12,17 +12,18 @@ async function bootstrap() {
 
   configureApp(app);
 
+  const port = configService.getOrThrow<number>('app.port');
+
   const swaggerConfig = new DocumentBuilder()
     .setTitle('SimpleInvoice API')
     .setDescription('REST API for the SimpleInvoice project')
     .setVersion('1.0')
+    .addServer(`http://localhost:${port}`)
     .addBearerAuth()
     .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, swaggerDocument);
-
-  const port = configService.getOrThrow<number>('app.port');
 
   await app.listen(port);
   logger.log(`SimpleInvoice backend is running on http://localhost:${port}`);

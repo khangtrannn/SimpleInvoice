@@ -6,6 +6,7 @@ import { trimLowercaseString } from '../../common/transforms/string.transforms';
 
 export class LoginRequestDto {
   @ApiProperty({
+    type: String,
     example: 'reviewer@simpleinvoice.local',
   })
   @Transform(({ value }) => trimLowercaseString(value))
@@ -13,6 +14,7 @@ export class LoginRequestDto {
   email!: string;
 
   @ApiProperty({
+    type: String,
     example: 'Password123!',
     format: 'password',
   })

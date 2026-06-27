@@ -1,0 +1,720 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid email or password"
+          }
+        },
+        "summary": "Authenticate user and return JWT access token",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, or expired access token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Return current authenticated user profile",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/invoices": {
+      "get": {
+        "operationId": "InvoicesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, or expired access token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List invoices with search, filter, sort, and pagination",
+        "tags": [
+          "Invoices"
+        ]
+      },
+      "post": {
+        "operationId": "InvoicesController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, or expired access token"
+          },
+          "409": {
+            "description": "Invoice number already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new draft invoice",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/invoices/{id}": {
+      "get": {
+        "operationId": "InvoicesController_findOne",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, or expired access token"
+          },
+          "404": {
+            "description": "Invoice not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get invoice detail by ID",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Backend and database health status\n\nThe Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "SimpleInvoice API",
+    "description": "REST API for the SimpleInvoice project",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "http://localhost:4000"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "AuthUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "ad1e0902-1928-4345-b513-60c86c94fc91",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "example": "reviewer@simpleinvoice.local"
+          },
+          "fullname": {
+            "type": "string",
+            "example": "SimpleInvoice Reviewer"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "fullname"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "tokenType": {
+            "type": "string",
+            "example": "Bearer"
+          },
+          "expiresIn": {
+            "type": "number",
+            "example": 3600,
+            "description": "Access token lifetime in seconds"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthUserResponseDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "tokenType",
+          "expiresIn",
+          "user"
+        ]
+      },
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "example": "Bad Request",
+            "description": "Error message, or array of validation error strings"
+          },
+          "error": {
+            "type": "string",
+            "example": "Bad Request"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-06-27T10:00:00.000Z"
+          },
+          "path": {
+            "type": "string",
+            "example": "/auth/login"
+          }
+        },
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "path"
+        ]
+      },
+      "InvoiceListItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "099ca7da-a290-40fa-93b9-1c43ae7bb887"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "example": "IV1780488206995"
+          },
+          "customerName": {
+            "type": "string",
+            "example": "Paul"
+          },
+          "invoiceDate": {
+            "type": "string",
+            "example": "2026-06-03"
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2026-07-03"
+          },
+          "currency": {
+            "type": "string",
+            "example": "AUD"
+          },
+          "currencySymbol": {
+            "type": "string",
+            "example": "AU$"
+          },
+          "totalAmount": {
+            "type": "string",
+            "example": "2180.00"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Pending",
+              "Paid",
+              "Overdue"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "invoiceNumber",
+          "customerName",
+          "invoiceDate",
+          "dueDate",
+          "currency",
+          "currencySymbol",
+          "totalAmount",
+          "status"
+        ]
+      },
+      "PagingResponseDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "pageSize": {
+            "type": "number",
+            "example": 10
+          },
+          "total": {
+            "type": "number",
+            "example": 100
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "total"
+        ]
+      },
+      "InvoiceListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceListItemResponseDto"
+            }
+          },
+          "paging": {
+            "$ref": "#/components/schemas/PagingResponseDto"
+          }
+        },
+        "required": [
+          "data",
+          "paging"
+        ]
+      },
+      "InvoiceCustomerResponseDto": {
+        "type": "object",
+        "properties": {
+          "fullname": {
+            "type": "string",
+            "example": "Paul"
+          },
+          "email": {
+            "type": "string",
+            "example": "paul@101digital.io"
+          },
+          "mobileNumber": {
+            "type": "string",
+            "example": "947717364111",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "example": "Singapore",
+            "nullable": true
+          }
+        },
+        "required": [
+          "fullname",
+          "email",
+          "mobileNumber",
+          "address"
+        ]
+      },
+      "InvoiceItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "b1c2d3e4-0000-0000-0000-000000000001"
+          },
+          "name": {
+            "type": "string",
+            "example": "Honda RC150"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2
+          },
+          "rate": {
+            "type": "string",
+            "example": "1000.00"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "quantity",
+          "rate"
+        ]
+      },
+      "InvoiceDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "099ca7da-a290-40fa-93b9-1c43ae7bb887"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "example": "IV1780488206995"
+          },
+          "invoiceReference": {
+            "type": "string",
+            "example": "#5721662",
+            "nullable": true
+          },
+          "invoiceDate": {
+            "type": "string",
+            "example": "2026-06-03"
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2026-07-03"
+          },
+          "currency": {
+            "type": "string",
+            "example": "AUD"
+          },
+          "currencySymbol": {
+            "type": "string",
+            "example": "AU$"
+          },
+          "description": {
+            "type": "string",
+            "example": "Invoice is issued to Kanglee",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Pending",
+              "Paid",
+              "Overdue"
+            ]
+          },
+          "customer": {
+            "$ref": "#/components/schemas/InvoiceCustomerResponseDto"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceItemResponseDto"
+            }
+          },
+          "invoiceSubTotal": {
+            "type": "string",
+            "example": "2000.00"
+          },
+          "taxPercentage": {
+            "type": "string",
+            "example": "10.00"
+          },
+          "totalTax": {
+            "type": "string",
+            "example": "200.00"
+          },
+          "totalDiscount": {
+            "type": "string",
+            "example": "20.00"
+          },
+          "totalAmount": {
+            "type": "string",
+            "example": "2180.00"
+          },
+          "totalPaid": {
+            "type": "string",
+            "example": "1451.34"
+          },
+          "balanceAmount": {
+            "type": "string",
+            "example": "728.66"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-06-03T12:03:26.995Z"
+          }
+        },
+        "required": [
+          "id",
+          "invoiceNumber",
+          "invoiceReference",
+          "invoiceDate",
+          "dueDate",
+          "currency",
+          "currencySymbol",
+          "description",
+          "status",
+          "customer",
+          "items",
+          "invoiceSubTotal",
+          "taxPercentage",
+          "totalTax",
+          "totalDiscount",
+          "totalAmount",
+          "totalPaid",
+          "balanceAmount",
+          "createdAt"
+        ]
+      }
+    }
+  }
+}

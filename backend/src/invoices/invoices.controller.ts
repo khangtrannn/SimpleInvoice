@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -18,6 +19,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+
+import { ErrorResponseDto } from '../common/dto/error-response.dto';
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -46,6 +49,10 @@ export class InvoicesController {
   })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired access token',
+  })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+    description: 'Invalid query parameters',
   })
   findAll(
     @Query() query: GetInvoicesQueryDto,
@@ -84,6 +91,10 @@ export class InvoicesController {
   })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired access token',
+  })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+    description: 'Validation error',
   })
   create(
     @Body() createInvoiceDto: CreateInvoiceDto,

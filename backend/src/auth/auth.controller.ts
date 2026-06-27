@@ -1,11 +1,14 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+
+import { ErrorResponseDto } from '../common/dto/error-response.dto';
 import { Throttle } from '@nestjs/throttler';
 
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -31,6 +34,10 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse({
     description: 'Invalid email or password',
+  })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+    description: 'Validation error',
   })
   login(@Body() loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
     return this.authService.login(loginRequestDto);

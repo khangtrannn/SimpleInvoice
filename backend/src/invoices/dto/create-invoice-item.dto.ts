@@ -13,6 +13,7 @@ import { trimString } from '../../common/transforms/string.transforms';
 
 export class CreateInvoiceItemDto {
   @ApiProperty({
+    type: String,
     example: 'Honda RC150',
   })
   @Transform(({ value }) => trimString(value))
@@ -22,6 +23,7 @@ export class CreateInvoiceItemDto {
   name!: string;
 
   @ApiProperty({
+    type: Number,
     example: 2,
   })
   @Type(() => Number)
@@ -30,6 +32,7 @@ export class CreateInvoiceItemDto {
   quantity!: number;
 
   @ApiProperty({
+    type: Number,
     example: 1000,
   })
   @Type(() => Number)

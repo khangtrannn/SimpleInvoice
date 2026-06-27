@@ -27,6 +27,7 @@ import { SUPPORTED_CURRENCIES } from '../utils/currency-symbol.util';
 
 export class CreateInvoiceDto {
   @ApiProperty({
+    type: String,
     example: 'Paul',
   })
   @Transform(({ value }) => trimString(value))
@@ -36,6 +37,7 @@ export class CreateInvoiceDto {
   customerName!: string;
 
   @ApiProperty({
+    type: String,
     example: 'paul@101digital.io',
   })
   @Transform(({ value }) => trimLowercaseString(value))
@@ -44,6 +46,7 @@ export class CreateInvoiceDto {
   customerEmail!: string;
 
   @ApiPropertyOptional({
+    type: String,
     example: '947717364111',
   })
   @Transform(({ value }) => trimOptionalString(value))
@@ -53,6 +56,7 @@ export class CreateInvoiceDto {
   customerMobile?: string;
 
   @ApiPropertyOptional({
+    type: String,
     example: 'Singapore',
   })
   @Transform(({ value }) => trimOptionalString(value))
@@ -62,6 +66,7 @@ export class CreateInvoiceDto {
   customerAddress?: string;
 
   @ApiProperty({
+    type: String,
     example: 'IV1780488206995',
   })
   @Transform(({ value }) => trimString(value))
@@ -71,6 +76,7 @@ export class CreateInvoiceDto {
   invoiceNumber!: string;
 
   @ApiPropertyOptional({
+    type: String,
     example: '#5721662',
   })
   @Transform(({ value }) => trimOptionalString(value))
@@ -80,6 +86,7 @@ export class CreateInvoiceDto {
   invoiceReference?: string;
 
   @ApiProperty({
+    type: String,
     example: '2026-06-03',
     description: 'Date in YYYY-MM-DD format',
   })
@@ -87,6 +94,7 @@ export class CreateInvoiceDto {
   invoiceDate!: string;
 
   @ApiProperty({
+    type: String,
     example: '2026-07-03',
     description: 'Date in YYYY-MM-DD format. Must be on or after invoiceDate.',
   })
@@ -97,6 +105,7 @@ export class CreateInvoiceDto {
   dueDate!: string;
 
   @ApiProperty({
+    type: String,
     example: 'AUD',
     description: 'ISO 4217 currency code',
   })
@@ -105,6 +114,7 @@ export class CreateInvoiceDto {
   currency!: string;
 
   @ApiPropertyOptional({
+    type: String,
     example: 'Invoice is issued to Kanglee',
   })
   @Transform(({ value }) => trimOptionalString(value))
@@ -122,6 +132,7 @@ export class CreateInvoiceDto {
   item!: CreateInvoiceItemDto;
 
   @ApiPropertyOptional({
+    type: Number,
     example: 10,
     default: 10,
   })
@@ -133,6 +144,7 @@ export class CreateInvoiceDto {
   taxPercentage = 10;
 
   @ApiPropertyOptional({
+    type: Number,
     example: 20,
     default: 0,
   })

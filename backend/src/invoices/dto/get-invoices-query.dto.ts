@@ -33,6 +33,7 @@ export class GetInvoicesQueryDto {
   private readonly dateRange?: never;
 
   @ApiPropertyOptional({
+    type: Number,
     example: 1,
     default: 1,
   })
@@ -43,6 +44,7 @@ export class GetInvoicesQueryDto {
   page = 1;
 
   @ApiPropertyOptional({
+    type: Number,
     example: 10,
     default: 10,
   })
@@ -77,6 +79,7 @@ export class GetInvoicesQueryDto {
   status?: InvoiceEffectiveStatus;
 
   @ApiPropertyOptional({
+    type: String,
     example: 'Paul',
     description:
       'Partial case-insensitive search on invoice number or customer name',
@@ -88,6 +91,7 @@ export class GetInvoicesQueryDto {
   keyword?: string;
 
   @ApiPropertyOptional({
+    type: String,
     example: '2026-06-01',
     description: 'Filter invoices with invoiceDate on or after this date',
   })
@@ -97,6 +101,7 @@ export class GetInvoicesQueryDto {
   fromDate?: string;
 
   @ApiPropertyOptional({
+    type: String,
     example: '2026-06-30',
     description: 'Filter invoices with invoiceDate on or before this date',
   })
