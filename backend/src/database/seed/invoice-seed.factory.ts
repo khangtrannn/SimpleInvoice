@@ -1,10 +1,7 @@
 import Decimal from 'decimal.js';
 import { faker } from '@faker-js/faker';
 
-import {
-  calculateInvoiceTotals,
-  toMoney,
-} from '../../invoices/domain/invoice-calculation';
+import { toMoney } from '../../invoices/domain/invoice-calculation';
 import { InvoiceStatus } from '../../invoices/enums/invoice-status.enum';
 import {
   FAKER_SEED,
@@ -67,9 +64,11 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
     faker.number.float({ min: 100, max: 5000, fractionDigits: 2 }),
   );
   const taxPercentage = faker.helpers.arrayElement(TAX_PERCENTAGES);
-  const totalDiscount = toMoney(
-    faker.number.float({ min: 0, max: 150, fractionDigits: 2 }),
-  );
+  const totalDiscount = createTotalDiscount({
+    quantity,
+    rate,
+    taxPercentage,
+  });
 
   const totalPaid = createTotalPaid({
     status,
@@ -83,6 +82,7 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
   const currency = SUPPORTED_CURRENCIES[index % SUPPORTED_CURRENCIES.length];
 
   return {
+    id: faker.string.uuid(),
     invoiceNumber: `SEED-${String(index + 1).padStart(4, '0')}`,
     invoiceReference: `#${faker.string.numeric(7)}`,
     invoiceDate: daysFromToday(invoiceDateOffset),
@@ -101,6 +101,7 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
     customerAddress: faker.location.streetAddress({ useFullAddress: true }),
 
     item: {
+      id: faker.string.uuid(),
       name: faker.commerce.productName(),
       quantity,
       rate,
@@ -110,6 +111,22 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
     totalDiscount,
     totalPaid,
   };
+}
+
+function createTotalDiscount(input: {
+  quantity: number;
+  rate: string;
+  taxPercentage: string;
+}): string {
+  const invoiceSubTotal = new Decimal(input.quantity).mul(input.rate);
+  const totalTax = invoiceSubTotal.mul(input.taxPercentage).div(100);
+  const preDiscountTotal = invoiceSubTotal.plus(totalTax);
+
+  return toMoney(
+    preDiscountTotal.mul(
+      faker.number.float({ min: 0, max: 0.08, fractionDigits: 2 }),
+    ),
+  );
 }
 
 function createPersistedStatus(index: number): InvoiceStatus {
@@ -139,18 +156,12 @@ function createTotalPaid(input: {
   taxPercentage: string;
   totalDiscount: string;
 }): string {
-  const totals = calculateInvoiceTotals({
-    quantity: input.quantity,
-    rate: input.rate,
-    taxPercentage: input.taxPercentage,
-    discount: input.totalDiscount,
-    totalPaid: '0.00',
-  });
-
-  const totalAmount = new Decimal(totals.totalAmount);
+  const invoiceSubTotal = new Decimal(input.quantity).mul(input.rate);
+  const totalTax = invoiceSubTotal.mul(input.taxPercentage).div(100);
+  const totalAmount = invoiceSubTotal.plus(totalTax).minus(input.totalDiscount);
 
   if (input.status === InvoiceStatus.PAID) {
-    return toMoney(totalAmount);
+    return totalAmount.toDecimalPlaces(2, Decimal.ROUND_DOWN).toFixed(2);
   }
 
   if (input.status === InvoiceStatus.PENDING) {

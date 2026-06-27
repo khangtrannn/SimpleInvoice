@@ -8,10 +8,16 @@ import {
 } from 'typeorm';
 
 import { getTodayDateOnly } from '../common/utils/date.util';
-import { GetInvoicesQueryDto, InvoiceSortBy, SortOrdering } from './dto/get-invoices-query.dto';
+import {
+  GetInvoicesQueryDto,
+  InvoiceSortBy,
+} from './dto/get-invoices-query.dto';
 import { InvoiceItemEntity } from './entities/invoice-item.entity';
 import { InvoiceEntity } from './entities/invoice.entity';
-import { InvoiceEffectiveStatus, InvoiceStatus } from './enums/invoice-status.enum';
+import {
+  InvoiceEffectiveStatus,
+  InvoiceStatus,
+} from './enums/invoice-status.enum';
 
 const SORT_COLUMN_MAP: Record<InvoiceSortBy, string> = {
   [InvoiceSortBy.INVOICE_DATE]: 'invoice.invoice_date',
@@ -163,10 +169,7 @@ export class InvoicesRepository {
     queryBuilder: SelectQueryBuilder<InvoiceEntity>,
     query: GetInvoicesQueryDto,
   ): void {
-    queryBuilder.orderBy(
-      SORT_COLUMN_MAP[query.sortBy],
-      query.ordering as SortOrdering,
-    );
+    queryBuilder.orderBy(SORT_COLUMN_MAP[query.sortBy], query.ordering);
   }
 
   private async persistDraftInvoice(

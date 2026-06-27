@@ -62,10 +62,15 @@ export class InvoicesService {
     currentUser: AuthenticatedUser,
   ): Promise<InvoiceDetailResponseDto> {
     const totals = this.calculateTotals(createInvoiceDto);
-    const data = this.buildDraftInvoiceData(createInvoiceDto, currentUser.id, totals);
+    const data = this.buildDraftInvoiceData(
+      createInvoiceDto,
+      currentUser.id,
+      totals,
+    );
 
     try {
-      const savedInvoice = await this.invoicesRepository.createDraftInvoice(data);
+      const savedInvoice =
+        await this.invoicesRepository.createDraftInvoice(data);
       return toInvoiceDetailResponse(savedInvoice);
     } catch (error) {
       if (isUniqueViolation(error, INVOICE_NUMBER_UNIQUE_CONSTRAINT)) {

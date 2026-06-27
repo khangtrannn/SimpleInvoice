@@ -23,7 +23,10 @@ import { InvoicesService } from './invoices.service';
 describe(InvoicesService.name, () => {
   let invoicesService: InvoicesService;
   let invoicesRepository: jest.Mocked<
-    Pick<InvoicesRepository, 'findAll' | 'findByIdWithItems' | 'createDraftInvoice'>
+    Pick<
+      InvoicesRepository,
+      'findAll' | 'findByIdWithItems' | 'createDraftInvoice'
+    >
   >;
 
   const currentUser: AuthenticatedUser = {
@@ -50,7 +53,7 @@ describe(InvoicesService.name, () => {
     },
     taxPercentage: 10,
     discount: 20,
-  } as CreateInvoiceDto;
+  };
 
   const mockInvoice = {
     id: 'ad1e0902-1928-4345-b513-60c86c94fc91',
@@ -176,7 +179,10 @@ describe(InvoicesService.name, () => {
       invoicesRepository.createDraftInvoice.mockResolvedValue(mockInvoice);
 
       // Act
-      const result = await invoicesService.create(createInvoiceDto, currentUser);
+      const result = await invoicesService.create(
+        createInvoiceDto,
+        currentUser,
+      );
 
       // Assert
       expect(invoicesRepository.createDraftInvoice).toHaveBeenCalledWith({
@@ -243,10 +249,10 @@ describe(InvoicesService.name, () => {
 
     it('should throw BadRequestException when calculated totals are invalid', async () => {
       // Arrange
-      const invalidDto = {
+      const invalidDto: CreateInvoiceDto = {
         ...createInvoiceDto,
         discount: 221,
-      } as CreateInvoiceDto;
+      };
 
       // Act
       const act = invoicesService.create(invalidDto, currentUser);

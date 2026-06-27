@@ -10,13 +10,13 @@ describe(AccessTokenService.name, () => {
   let jwtService: jest.Mocked<Pick<JwtService, 'signAsync'>>;
   let configService: jest.Mocked<Pick<ConfigService, 'getOrThrow'>>;
 
-  const mockUser = {
+  const mockUser: UserEntity = {
     id: 'ad1e0902-1928-4345-b513-60c86c94fc91',
     email: 'reviewer@simpleinvoice.local',
     passwordHash: '$2b$12$hashed-password',
     fullname: 'SimpleInvoice Reviewer',
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
-  } as UserEntity;
+  };
 
   beforeEach(async () => {
     jwtService = {
@@ -58,7 +58,9 @@ describe(AccessTokenService.name, () => {
         sub: mockUser.id,
         email: mockUser.email,
       });
-      expect(configService.getOrThrow).toHaveBeenCalledWith('auth.jwtExpiresIn');
+      expect(configService.getOrThrow).toHaveBeenCalledWith(
+        'auth.jwtExpiresIn',
+      );
       expect(result).toEqual({
         accessToken: 'signed-access-token',
         expiresIn: 3600,

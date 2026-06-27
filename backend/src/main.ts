@@ -29,4 +29,4 @@ async function bootstrap() {
   logger.log(`SimpleInvoice backend is running on http://localhost:${port}`);
   logger.log(`Swagger docs available at http://localhost:${port}/api/docs`);
 }
-bootstrap();
+void bootstrap();

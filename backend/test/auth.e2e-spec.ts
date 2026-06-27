@@ -63,9 +63,10 @@ describe('Auth (e2e)', () => {
 
     it('should return 401 when the email is not registered', async () => {
       // Act
-      const res = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({ email: 'nobody@example.com', password: REVIEWER_USER.password });
+      const res = await request(app.getHttpServer()).post('/auth/login').send({
+        email: 'nobody@example.com',
+        password: REVIEWER_USER.password,
+      });
 
       // Assert
       expect(res.status).toBe(401);

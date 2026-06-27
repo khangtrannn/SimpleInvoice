@@ -28,7 +28,10 @@ export class InvoiceCustomerResponseDto {
 }
 
 export class InvoiceItemResponseDto {
-  @ApiProperty({ type: String, example: 'b1c2d3e4-0000-0000-0000-000000000001' })
+  @ApiProperty({
+    type: String,
+    example: 'b1c2d3e4-0000-0000-0000-000000000001',
+  })
   id!: string;
 
   @ApiProperty({ type: String, example: 'Honda RC150' })
@@ -42,7 +45,10 @@ export class InvoiceItemResponseDto {
 }
 
 export class InvoiceListItemResponseDto {
-  @ApiProperty({ type: String, example: '099ca7da-a290-40fa-93b9-1c43ae7bb887' })
+  @ApiProperty({
+    type: String,
+    example: '099ca7da-a290-40fa-93b9-1c43ae7bb887',
+  })
   id!: string;
 
   @ApiProperty({ type: String, example: 'IV1780488206995' })
@@ -79,7 +85,10 @@ export class InvoiceListResponseDto {
 }
 
 export class InvoiceDetailResponseDto {
-  @ApiProperty({ type: String, example: '099ca7da-a290-40fa-93b9-1c43ae7bb887' })
+  @ApiProperty({
+    type: String,
+    example: '099ca7da-a290-40fa-93b9-1c43ae7bb887',
+  })
   id!: string;
 
   @ApiProperty({ type: String, example: 'IV1780488206995' })
@@ -100,7 +109,11 @@ export class InvoiceDetailResponseDto {
   @ApiProperty({ type: String, example: 'AU$' })
   currencySymbol!: string;
 
-  @ApiProperty({ type: String, example: 'Invoice is issued to Kanglee', nullable: true })
+  @ApiProperty({
+    type: String,
+    example: 'Invoice is issued to Kanglee',
+    nullable: true,
+  })
   description!: string | null;
 
   @ApiProperty({ enum: InvoiceEffectiveStatus })

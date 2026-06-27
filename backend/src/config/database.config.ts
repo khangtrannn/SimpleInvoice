@@ -1,18 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import Joi from 'joi';
 
-export const databaseEnvValidationSchema = Joi.object({
-  POSTGRES_HOST: Joi.string().hostname().required(),
-
-  POSTGRES_PORT: Joi.number().port().required(),
-
-  POSTGRES_DB: Joi.string().required(),
-
-  POSTGRES_USER: Joi.string().required(),
-
-  POSTGRES_PASSWORD: Joi.string().required(),
-});
-
 export interface DatabaseConfig {
   host: string;
   port: number;
@@ -21,24 +9,47 @@ export interface DatabaseConfig {
   password: string;
 }
 
+interface DatabaseEnvironment {
+  POSTGRES_HOST: string;
+  POSTGRES_PORT: number;
+  POSTGRES_DB: string;
+  POSTGRES_USER: string;
+  POSTGRES_PASSWORD: string;
+}
+
+export const databaseEnvValidationSchema: Joi.ObjectSchema<DatabaseEnvironment> =
+  Joi.object({
+    POSTGRES_HOST: Joi.string().hostname().required(),
+
+    POSTGRES_PORT: Joi.number().port().required(),
+
+    POSTGRES_DB: Joi.string().required(),
+
+    POSTGRES_USER: Joi.string().required(),
+
+    POSTGRES_PASSWORD: Joi.string().required(),
+  });
+
 export function getDatabaseConfig(
   environment: NodeJS.ProcessEnv = process.env,
 ): DatabaseConfig {
-  const { error, value } = databaseEnvValidationSchema.validate(environment, {
+  const validation = databaseEnvValidationSchema.validate(environment, {
     abortEarly: false,
     allowUnknown: true,
   });
 
-  if (error) {
-    throw new Error(`Invalid PostgreSQL configuration: ${error.message}`);
+  if (validation.error) {
+    throw new Error(
+      `Invalid PostgreSQL configuration: ${validation.error.message}`,
+    );
   }
 
   return {
-    host: value.POSTGRES_HOST,
-    port: value.POSTGRES_PORT,
-    database: value.POSTGRES_DB,
-    username: value.POSTGRES_USER,
-    password: value.POSTGRES_PASSWORD,
+    host: validation.value.POSTGRES_HOST,
+    port: validation.value.POSTGRES_PORT,
+    database: validation.value.POSTGRES_DB,
+    username: validation.value.POSTGRES_USER,
+    password: validation.value.POSTGRES_PASSWORD,
   };
 }
 

@@ -8,7 +8,10 @@ export function deriveInvoiceStatus(input: {
   dueDate: string;
   today: string;
 }): InvoiceEffectiveStatus {
-  if (input.persistedStatus !== InvoiceStatus.PAID && input.dueDate < input.today) {
+  if (
+    input.persistedStatus !== InvoiceStatus.PAID &&
+    input.dueDate < input.today
+  ) {
     return InvoiceEffectiveStatus.OVERDUE;
   }
 

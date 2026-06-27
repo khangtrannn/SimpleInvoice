@@ -10,13 +10,13 @@ describe(UsersService.name, () => {
     Pick<UsersRepository, 'findByEmail' | 'findById'>
   >;
 
-  const mockUser = {
+  const mockUser: UserEntity = {
     id: 'ad1e0902-1928-4345-b513-60c86c94fc91',
     email: 'reviewer@simpleinvoice.local',
     passwordHash: '$2b$12$hashed-password',
     fullname: 'SimpleInvoice Reviewer',
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
-  } as UserEntity;
+  };
 
   beforeEach(async () => {
     usersRepository = {
