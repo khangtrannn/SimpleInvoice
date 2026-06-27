@@ -39,4 +39,4 @@ docker exec simple_invoice_backend npm run seed
 
 echo ""
 echo "All done! The app is running at http://localhost:4000"
-echo "API docs available at http://localhost:4000/api"
+echo "API docs available at http://localhost:4000/api/docs"
