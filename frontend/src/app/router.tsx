@@ -8,27 +8,26 @@ import { InvoiceListPage } from '@/features/invoices/pages/InvoiceListPage';
 
 export const router = createBrowserRouter([
   {
+    path: '/',
+    element: <Navigate to="/invoices" replace />,
+  },
+  {
     path: '/login',
     element: <LoginPage />,
   },
   {
-    path: '/',
     element: <AppLayout />,
     children: [
       {
-        index: true,
-        element: <Navigate replace to="/invoices" />,
-      },
-      {
-        path: 'invoices',
+        path: '/invoices',
         element: <InvoiceListPage />,
       },
       {
-        path: 'invoices/new',
+        path: '/invoices/new',
         element: <CreateInvoicePage />,
       },
       {
-        path: 'invoices/:invoiceId',
+        path: '/invoices/:invoiceId',
         element: <InvoiceDetailPage />,
       },
     ],
