@@ -25,6 +25,12 @@ export async function createTestApp(): Promise<{
   return { app, dataSource };
 }
 
+export async function cleanDatabase(dataSource: DataSource): Promise<void> {
+  await dataSource.query(
+    'TRUNCATE TABLE invoice_items, invoices, users RESTART IDENTITY CASCADE',
+  );
+}
+
 async function ensureTestDatabase(): Promise<void> {
   const dbName = process.env.POSTGRES_DB!;
   const client = new Client({

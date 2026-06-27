@@ -14,3 +14,17 @@ export async function getAuthToken(
 
   return res.body.accessToken as string;
 }
+
+export function authedRequest(app: INestApplication<App>, token: string) {
+  const server = app.getHttpServer();
+  const auth = `Bearer ${token}`;
+  return {
+    get: (url: string) => request(server).get(url).set('Authorization', auth),
+    post: (url: string) => request(server).post(url).set('Authorization', auth),
+    put: (url: string) => request(server).put(url).set('Authorization', auth),
+    patch: (url: string) =>
+      request(server).patch(url).set('Authorization', auth),
+    delete: (url: string) =>
+      request(server).delete(url).set('Authorization', auth),
+  };
+}

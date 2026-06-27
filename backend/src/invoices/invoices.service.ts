@@ -24,7 +24,7 @@ import {
   toInvoiceListItemResponse,
 } from './mappers/invoice-response.mapper';
 
-const INVOICE_NUMBER_UNIQUE_CONSTRAINT = 'UQ_invoices_invoice_number';
+const INVOICE_NUMBER_UNIQUE_CONSTRAINT = 'uq_invoices_invoice_number';
 
 @Injectable()
 export class InvoicesService {
