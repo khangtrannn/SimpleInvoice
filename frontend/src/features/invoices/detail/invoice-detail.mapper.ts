@@ -1,4 +1,5 @@
 import type { InvoiceDetail } from '@/api/types';
+import { getCurrencyLabel } from '@/shared/lib/currency';
 import {
   formatDate,
   formatDateTime,
@@ -83,16 +84,6 @@ export function getFormattedInvoiceItemRate(
 
 function hasContent(value: string | null | undefined) {
   return Boolean(value?.trim());
-}
-
-function getCurrencyLabel(currency: string) {
-  const currencyNames: Record<string, string> = {
-    AUD: 'AUD - Australian Dollar',
-    USD: 'USD - US Dollar',
-    GBP: 'GBP - British Pound',
-  };
-
-  return currencyNames[currency] ?? currency;
 }
 
 function getPrintStatusValue(invoice: InvoiceDetail) {

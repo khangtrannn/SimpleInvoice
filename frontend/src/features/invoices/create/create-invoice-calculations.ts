@@ -1,10 +1,6 @@
 import type { CurrencyCode } from '@/api/types';
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
-
-import {
-  getCurrencyOption,
-  type CurrencyOption,
-} from './create-invoice.constants';
+import { getCurrencyOption, type CurrencyOption } from '@/shared/lib/currency';
 
 type InvoicePreviewSource = Partial<
   Pick<

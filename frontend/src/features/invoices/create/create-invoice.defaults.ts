@@ -1,6 +1,5 @@
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
-
-import { DEFAULT_CURRENCY } from './create-invoice.constants';
+import { DEFAULT_CURRENCY } from '@/shared/lib/currency';
 
 export function getCreateInvoiceDefaultValues(): CreateInvoiceFormInput {
   return {

@@ -3,8 +3,8 @@ import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 
 import { SelectInput, TextareaInput, TextInput } from '@/shared/ui/form';
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
+import { CURRENCY_OPTIONS } from '@/shared/lib/currency';
 
-import { CURRENCY_OPTIONS } from './create-invoice.constants';
 import { CreateInvoiceSectionCard } from './CreateInvoiceSectionCard';
 
 type InvoiceInformationFieldsProps = {

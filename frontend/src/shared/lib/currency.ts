@@ -32,3 +32,9 @@ export function getCurrencyOption(currencyCode: CurrencyCode): CurrencyOption {
     CURRENCY_OPTIONS[0]
   );
 }
+
+export function getCurrencyLabel(currencyCode: string): string {
+  const option = CURRENCY_OPTIONS.find((currency) => currency.code === currencyCode);
+
+  return option?.label ?? currencyCode;
+}

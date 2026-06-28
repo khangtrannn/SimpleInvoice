@@ -109,6 +109,7 @@ frontend/src/
 │   │   └── layout/          # App shell (AppLayout, AppHeader, AppUserMenu)
 │   ├── lib/                 # Cross-feature utilities
 │   │   ├── format/          # Currency, date formatting
+│   │   ├── currency.ts      # Currency options/labels (single source of truth)
 │   │   ├── api-error.ts     # API error message formatting
 │   │   └── ...
 │   └── config/              # App configuration (env vars)
