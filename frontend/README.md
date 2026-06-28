@@ -474,33 +474,6 @@ See backend README (`backend/README.md`) for endpoint details, query params, and
 
 ---
 
-## Getting Started
-
-See root `README.md` for setup instructions (Docker or local).
-
-**Quick start:**
-
-```bash
-# Install dependencies
-npm install
-
-# Start dev server
-npm run dev
-
-# In another terminal, start backend (see backend README)
-cd ../backend
-npm install
-npm run migration:run
-npm run seed
-npm run start
-
-# Frontend is now at http://localhost:5173
-# Backend is at http://localhost:4000
-# Swagger UI at http://localhost:4000/api/docs
-```
-
----
-
 ## Code Quality
 
 - **TypeScript strict mode** - All code is typed; no `any`.

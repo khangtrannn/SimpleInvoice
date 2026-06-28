@@ -187,7 +187,7 @@ flowchart TD
 - **Backend → Railway** - `railway up` is run **from the repo root**, not `backend/`, because the Railway service is already configured with `Root Directory=/backend`; uploading the full repo lets Railway apply that configured root itself. Railway's own pre-deploy step (`npm run migration:run:prod`) handles production migrations - CI's `migration:run` is only there to validate migrations apply cleanly, not to apply them to production.
 - **Frontend → Cloudflare Pages** - built with `VITE_API_BASE_URL` pointed at production, then pushed with **Direct Upload** (`npx wrangler pages deploy dist --project-name simple-invoice --branch main`). This deliberately does **not** use Cloudflare's Git integration or `wrangler deploy` (that command targets Workers, not Pages).
 
-Required GitHub repository secrets: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `RAILWAY_TOKEN`, `RAILWAY_PROJECT_ID`, `RAILWAY_SERVICE_ID`. If any of these are missing or empty, `deploy.yml` fails before starting the deploy and prints the missing secret name.
+Required GitHub repository secrets: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `RAILWAY_API_TOKEN`, `RAILWAY_PROJECT_ID`, `RAILWAY_SERVICE_ID`. If any of these are missing or empty, `deploy.yml` fails before starting the deploy and prints the missing secret name.
 
 The Railway deploy pins `@railway/cli@5.2.0` so production deploys are not affected by unexpected CLI changes from the latest release.
 
