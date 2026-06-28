@@ -2,6 +2,14 @@
 
 A full-stack invoice management application built with NestJS (backend) and React + TypeScript (frontend), backed by PostgreSQL.
 
+## Live Demo
+
+| Service     | URL                                          |
+|-------------|-----------------------------------------------|
+| Frontend    | https://simpleinvoice.khangtran.dev            |
+| Backend API | https://api.simpleinvoice.khangtran.dev        |
+| Swagger UI  | https://api.simpleinvoice.khangtran.dev/api/docs |
+
 ## Project Structure
 
 ```
@@ -122,6 +130,36 @@ Docker Compose reads the root `.env` for container wiring and `backend/.env` for
 - **UTC business date** — `today` for derived `Overdue` status is based on the UTC date to keep Docker, CI, and local runs deterministic.
 - **Server-side totals** — `subTotal`, `taxAmount`, `totalAmount`, and `balanceAmount` are calculated in a pure domain function on the backend and never trusted from the client.
 - **Aggregate tiles without currency symbol** — the summary tiles on the invoice list (Total Revenue, Paid, Pending, Overdue, Draft) display plain numbers because the list supports multi-currency invoices and the tiles respond to the active status filter. Showing a currency symbol on a potentially mixed-currency sum would be misleading.
+
+## CI/CD
+
+Two workflows in [.github/workflows/](./.github/workflows/) drive everything from PR checks to production deploys: [ci.yml](./.github/workflows/ci.yml) and [deploy.yml](./.github/workflows/deploy.yml).
+
+```mermaid
+flowchart TD
+    A[Pull request / push to main] --> B{CI workflow ci.yml}
+    B --> C[frontend job: npm ci → lint → test → build]
+    B --> D["backend job: npm ci → lint:check → build → migration:run → test → test:e2e\n(against a postgres:18-alpine service container)"]
+    C --> E{CI conclusion}
+    D --> E
+    E -. "failure — stop here" .-> F[No deploy triggered]
+    E -- "success, on main" --> G[workflow_run event]
+    G --> H{Deploy workflow deploy.yml}
+    H --> I[deploy-backend: railway up from repo root]
+    H --> J[deploy-frontend: npm run build → wrangler pages deploy]
+    I --> K[(Railway)]
+    J --> L[(Cloudflare Pages)]
+```
+
+**CI** (`ci.yml`) runs on every pull request and every push to `main`:
+- **Frontend job** — installs with `npm ci`, then runs `lint`, `test` (Vitest), and `build` (with `VITE_API_BASE_URL` pointed at the production API so the build step mirrors what ships).
+- **Backend job** — spins up a `postgres:18-alpine` service container, then runs `lint:check` (the CI-safe, non-mutating ESLint check — `--max-warnings=0`, no `--fix`), `build`, `migration:run`, `test` (unit), and `test:e2e` against that database.
+
+**Deploy** (`deploy.yml`) only runs after a CI run on `main` finishes, via a `workflow_run` trigger (`workflows: ["CI"]`), and every job is gated on `github.event.workflow_run.conclusion == 'success'` — a failing CI run never triggers a deploy.
+- **Backend → Railway** — `railway up` is run **from the repo root**, not `backend/`, because the Railway service is already configured with `Root Directory=/backend`; uploading the full repo lets Railway apply that configured root itself. Railway's own pre-deploy step (`npm run migration:run:prod`) handles production migrations — CI's `migration:run` is only there to validate migrations apply cleanly, not to apply them to production.
+- **Frontend → Cloudflare Pages** — built with `VITE_API_BASE_URL` pointed at production, then pushed with **Direct Upload** (`npx wrangler pages deploy dist --project-name simple-invoice --branch main`). This deliberately does **not** use Cloudflare's Git integration or `wrangler deploy` (that command targets Workers, not Pages).
+
+Required GitHub repository secrets: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `RAILWAY_TOKEN`, `RAILWAY_PROJECT_ID`, `RAILWAY_SERVICE_ID`.
 
 ## Known Limitations
 
