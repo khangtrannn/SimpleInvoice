@@ -137,7 +137,7 @@ describe('InvoiceListPage', () => {
     expect(filteredNames.length).toBeGreaterThan(0);
 
     // Act
-    await user.click(screen.getByRole('button', { name: /clear filters/i }));
+    await user.click(screen.getByRole('button', { name: /reset filters/i }));
 
     // Assert
     const brightNames = await screen.findAllByText(/bright ideas pty ltd/i);
