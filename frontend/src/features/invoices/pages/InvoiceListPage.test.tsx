@@ -57,13 +57,13 @@ describe('InvoiceListPage', () => {
     // Arrange
     renderInvoiceList();
 
-    // Act
-    const acmeInvoiceLink = await screen.findByRole('link', {
+    // Act - Wait for invoice number to appear in desktop table (first link matching the pattern)
+    const links = await screen.findAllByRole('link', {
       name: /inv-2026-001/i,
     });
 
     // Assert
-    expect(acmeInvoiceLink).toBeInTheDocument();
+    expect(links[0]).toBeInTheDocument();
     expect(screen.getByText(/acme corporation/i)).toBeInTheDocument();
     expect(screen.getByText(/bright ideas pty ltd/i)).toBeInTheDocument();
     expect(screen.getByText(/au\$2,450.00 aud/i)).toBeInTheDocument();
@@ -75,9 +75,10 @@ describe('InvoiceListPage', () => {
     const user = userEvent.setup();
     renderInvoiceList();
 
-    await screen.findByRole('link', {
+    const links = await screen.findAllByRole('link', {
       name: /inv-2026-001/i,
     });
+    expect(links[0]).toBeInTheDocument();
 
     // Act
     await user.type(
@@ -86,11 +87,10 @@ describe('InvoiceListPage', () => {
     );
 
     // Assert
-    expect(
-      await screen.findByRole('link', {
-        name: /inv-2026-003/i,
-      }),
-    ).toBeInTheDocument();
+    const results = await screen.findAllByRole('link', {
+      name: /inv-2026-003/i,
+    });
+    expect(results[0]).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.queryByText(/acme corporation/i)).not.toBeInTheDocument();
@@ -105,14 +105,17 @@ describe('InvoiceListPage', () => {
     const user = userEvent.setup();
     renderInvoiceList();
 
-    await screen.findByText(/acme corporation/i);
+    const names = await screen.findAllByText(/acme corporation/i);
+    expect(names[0]).toBeInTheDocument();
 
     // Act
     await user.click(screen.getByRole('button', { name: /paid/i }));
 
     // Assert
-    expect(await screen.findByText(/acme corporation/i)).toBeInTheDocument();
-    expect(screen.getByText(/echo enterprises/i)).toBeInTheDocument();
+    const paidNames = await screen.findAllByText(/acme corporation/i);
+    expect(paidNames[0]).toBeInTheDocument();
+    const enterpriseNames = screen.getAllByText(/echo enterprises/i);
+    expect(enterpriseNames[0]).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.queryByText(/bright ideas pty ltd/i)).not.toBeInTheDocument();
@@ -127,17 +130,21 @@ describe('InvoiceListPage', () => {
     const user = userEvent.setup();
     renderInvoiceList();
 
-    await screen.findByText(/acme corporation/i);
+    const names = await screen.findAllByText(/acme corporation/i);
+    expect(names[0]).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /paid/i }));
 
-    expect(await screen.findByText(/echo enterprises/i)).toBeInTheDocument();
+    const filteredNames = await screen.findAllByText(/echo enterprises/i);
+    expect(filteredNames[0]).toBeInTheDocument();
 
     // Act
     await user.click(screen.getByRole('button', { name: /clear filters/i }));
 
     // Assert
-    expect(await screen.findByText(/bright ideas pty ltd/i)).toBeInTheDocument();
-    expect(screen.getByText(/creative studio/i)).toBeInTheDocument();
+    const brightNames = await screen.findAllByText(/bright ideas pty ltd/i);
+    expect(brightNames[0]).toBeInTheDocument();
+    const creativeNames = screen.getAllByText(/creative studio/i);
+    expect(creativeNames[0]).toBeInTheDocument();
     expect(screen.getByText(/showing 1 to 8 of 8 results/i)).toBeInTheDocument();
   });
 
@@ -146,11 +153,11 @@ describe('InvoiceListPage', () => {
     const user = userEvent.setup();
     renderInvoiceList();
 
-    await screen.findByText(/acme corporation/i);
+    const names = await screen.findAllByText(/acme corporation/i);
+    expect(names[0]).toBeInTheDocument();
 
     // Act
-    await user.selectOptions(screen.getByRole('combobox', { name: /sort by/i }), 'totalAmount');
-    await user.selectOptions(screen.getByRole('combobox', { name: /ordering/i }), 'ASC');
+    await user.selectOptions(screen.getByRole('combobox', { name: /sort by/i }), 'Amount: Low to High');
 
     // Assert
     await waitFor(() => {
@@ -169,9 +176,10 @@ describe('InvoiceListPage', () => {
     const user = userEvent.setup();
     renderInvoiceList();
 
-    await screen.findByRole('link', {
+    const links = await screen.findAllByRole('link', {
       name: /inv-2026-001/i,
     });
+    expect(links[0]).toBeInTheDocument();
 
     // Act
     await user.selectOptions(screen.getByDisplayValue('10'), '20');
@@ -186,9 +194,10 @@ describe('InvoiceListPage', () => {
     const user = userEvent.setup();
     renderInvoiceList();
 
-    const invoiceLink = await screen.findByRole('link', {
+    const invoiceLinks = await screen.findAllByRole('link', {
       name: /inv-2026-001/i,
     });
+    const invoiceLink = invoiceLinks[0];
 
     // Act
     await user.click(invoiceLink);
@@ -217,7 +226,8 @@ describe('InvoiceListPage', () => {
     const user = userEvent.setup();
     renderInvoiceList();
 
-    await screen.findByText(/acme corporation/i);
+    const names = await screen.findAllByText(/acme corporation/i);
+    expect(names[0]).toBeInTheDocument();
 
     // Act
     await user.click(screen.getByRole('link', { name: /create invoice/i }));
@@ -231,7 +241,8 @@ describe('InvoiceListPage', () => {
     const user = userEvent.setup();
     renderInvoiceList();
 
-    await screen.findByText(/acme corporation/i);
+    const names = await screen.findAllByText(/acme corporation/i);
+    expect(names[0]).toBeInTheDocument();
 
     // Act
     await user.type(

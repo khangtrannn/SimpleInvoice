@@ -89,7 +89,7 @@ export function InvoiceFilters({ query, onChange, onReset }: InvoiceFiltersProps
           <input
             value={keyword}
             onChange={handleKeywordChange}
-            placeholder="Search invoices..."
+            placeholder="Search by invoice number or customer name..."
             className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
           />
         </div>

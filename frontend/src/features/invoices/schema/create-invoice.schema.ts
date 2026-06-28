@@ -35,7 +35,7 @@ export const createInvoiceSchema = z
 
     if (dueDate < invoiceDate) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['dueDate'],
         message: 'Due date must be on or after invoice date.',
       });
