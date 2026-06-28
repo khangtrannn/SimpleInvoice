@@ -1,28 +1,4 @@
-export type AuthUser = {
-  id: string;
-  email: string;
-  fullname: string;
-};
-
-export type LoginRequest = {
-  email: string;
-  password: string;
-};
-
-export type LoginResponse = {
-  accessToken: string;
-  tokenType: string;
-  expiresIn: number;
-  user: AuthUser;
-};
-
-export type ApiErrorResponse = {
-  statusCode: number;
-  message: string | string[];
-  error?: string;
-  timestamp?: string;
-  path?: string;
-};
+import type { Paging } from './common.types';
 
 export type InvoiceStatus = 'Draft' | 'Pending' | 'Paid' | 'Overdue';
 
@@ -30,7 +6,11 @@ export type InvoiceStatusFilter = InvoiceStatus | 'All';
 
 export type CurrencyCode = 'AUD' | 'USD' | 'GBP';
 
-export type InvoiceSortBy = 'createdAt' | 'invoiceDate' | 'dueDate' | 'totalAmount';
+export type InvoiceSortBy =
+  | 'createdAt'
+  | 'invoiceDate'
+  | 'dueDate'
+  | 'totalAmount';
 
 export type Ordering = 'ASC' | 'DESC';
 
@@ -43,12 +23,6 @@ export type InvoiceListQuery = {
   ordering?: Ordering;
   fromDate?: string;
   toDate?: string;
-};
-
-export type Paging = {
-  page: number;
-  pageSize: number;
-  total: number;
 };
 
 export type InvoiceListItem = {
