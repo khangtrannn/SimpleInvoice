@@ -1,9 +1,9 @@
 import { User } from 'lucide-react';
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 
+import { TextInput } from '@/shared/ui/form';
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
 
-import { TextInput } from './CreateInvoiceFormControls';
 import { CreateInvoiceSectionCard } from './CreateInvoiceSectionCard';
 
 type CustomerInformationFieldsProps = {

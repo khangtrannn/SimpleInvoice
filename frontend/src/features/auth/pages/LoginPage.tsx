@@ -1,10 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 
+import { PasswordInput, TextInput } from '@/shared/ui/form';
 import { login } from '@/api/auth.api';
 import { useAuth } from '@/features/auth/auth-context';
 import { loginSchema, type LoginFormValues } from '@/features/auth/login.schema';
@@ -13,7 +12,6 @@ import { getApiErrorMessage } from '@/utils/api-error';
 export function LoginPage() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -72,78 +70,22 @@ export function LoginPage() {
               </div>
 
               <form className="space-y-4 xl:space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
-                <div>
-                  <label htmlFor="email" className="sr-only">
-                    Email address
-                  </label>
+                <TextInput
+                  label="Email address"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  error={errors.email?.message}
+                  {...register('email')}
+                />
 
-                  <div className="relative">
-                    <Mail
-                      aria-hidden="true"
-                      className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-slate-400"
-                      strokeWidth={2}
-                    />
-
-                    <input
-                      id="email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="Email address"
-                      aria-invalid={Boolean(errors.email)}
-                      className="h-14 w-full rounded-xl border border-slate-200 bg-white pl-14 pr-5 text-base text-slate-950 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 xl:h-16"
-                      {...register('email')}
-                    />
-                  </div>
-
-                  {errors.email ? (
-                    <p className="mt-2 text-sm font-medium text-red-600">
-                      {errors.email.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="sr-only">
-                    Password
-                  </label>
-
-                  <div className="relative">
-                    <LockKeyhole
-                      aria-hidden="true"
-                      className="pointer-events-none absolute left-5 top-1/2 size-5 -translate-y-1/2 text-slate-400"
-                      strokeWidth={2}
-                    />
-
-                    <input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      placeholder="Password"
-                      aria-invalid={Boolean(errors.password)}
-                      className="h-14 w-full rounded-xl border border-slate-200 bg-white pl-14 pr-14 text-base text-slate-950 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 xl:h-16"
-                      {...register('password')}
-                    />
-
-                    <button
-                      type="button"
-                      className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
-                      onClick={() => setShowPassword((current) => !current)}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? (
-                        <EyeOff aria-hidden="true" className="size-5" strokeWidth={2} />
-                      ) : (
-                        <Eye aria-hidden="true" className="size-5" strokeWidth={2} />
-                      )}
-                    </button>
-                  </div>
-
-                  {errors.password ? (
-                    <p className="mt-2 text-sm font-medium text-red-600">
-                      {errors.password.message}
-                    </p>
-                  ) : null}
-                </div>
+                <PasswordInput
+                  label="Password"
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
+                  error={errors.password?.message}
+                  {...register('password')}
+                />
 
                 {submitError ? (
                   <div className="whitespace-pre-line rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">

@@ -1,14 +1,10 @@
 import { FileText } from 'lucide-react';
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 
+import { SelectInput, TextareaInput, TextInput } from '@/shared/ui/form';
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
 
 import { CURRENCY_OPTIONS } from './create-invoice.constants';
-import {
-  SelectInput,
-  TextareaInput,
-  TextInput,
-} from './CreateInvoiceFormControls';
 import { CreateInvoiceSectionCard } from './CreateInvoiceSectionCard';
 
 type InvoiceInformationFieldsProps = {
