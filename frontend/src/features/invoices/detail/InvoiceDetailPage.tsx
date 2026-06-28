@@ -8,7 +8,7 @@ import {
   InvoicePrintDocument,
   InvoiceSummaryCard,
   InvoiceTotalsCard,
-} from '@/features/invoices/components/InvoiceDetailCards';
+} from '@/features/invoices/detail/components';
 import { useInvoiceDetail } from '@/features/invoices/hooks/use-invoice-detail';
 import { getApiErrorMessage } from '@/utils/api-error';
 
@@ -58,7 +58,7 @@ export function InvoiceDetailPage() {
   return (
     <>
       <div className="invoice-detail-screen">
-        <InvoiceDetailHeader status={invoice.status} />
+        <InvoiceDetailHeader invoice={invoice} />
 
         <div className="mt-6 space-y-6">
           <InvoiceSummaryCard invoice={invoice} />
