@@ -2,7 +2,7 @@ import { Calendar, ChevronDown } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import type { InvoiceListQuery } from '@/api/types';
-import { formatDate } from '@/utils/format';
+import { formatDate } from '@/shared/lib/format';
 
 type InvoiceDateRangeFilterProps = {
   fromDate?: string;

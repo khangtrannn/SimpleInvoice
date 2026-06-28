@@ -4,7 +4,7 @@ import {
   getInvoiceDetailViewModel,
   getInvoiceItemLineTotal,
 } from '@/features/invoices/detail/invoice-detail.mapper';
-import { formatLineAmount } from '@/utils/format';
+import { formatLineAmount } from '@/shared/lib/format';
 
 type InvoicePrintDocumentProps = {
   invoice: InvoiceDetail;

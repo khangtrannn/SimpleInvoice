@@ -5,7 +5,7 @@ import {
   formatLineAmount,
   formatMoney,
   getDaysOverdue,
-} from '@/utils/format';
+} from '@/shared/lib/format';
 
 export type InvoiceDetailViewModel = {
   invoiceNumber: string;

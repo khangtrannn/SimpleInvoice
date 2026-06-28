@@ -1,5 +1,5 @@
 import type { InvoiceListItem } from '@/api/types';
-import { formatDate, formatLineAmount } from '@/utils/format';
+import { formatDate, formatLineAmount } from '@/shared/lib/format';
 
 const CUSTOMER_AVATAR_COLORS = [
   'bg-slate-200 text-slate-700',

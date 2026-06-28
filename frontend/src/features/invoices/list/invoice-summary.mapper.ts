@@ -1,5 +1,5 @@
 import type { InvoiceSummary } from '@/api/types';
-import { formatLineAmount } from '@/utils/format';
+import { formatLineAmount } from '@/shared/lib/format';
 
 export type TileSummary = {
   total: string;
