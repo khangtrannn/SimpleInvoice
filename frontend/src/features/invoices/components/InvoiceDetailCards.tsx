@@ -364,7 +364,7 @@ export function InvoicePrintDocument({ invoice }: InvoiceDetailProps) {
   return (
     <section className="invoice-print-root" aria-label="Printable invoice">
       <div className="invoice-print-card">
-        <header className="flex items-start justify-between gap-8 border-b border-slate-200 pb-8">
+        <header className="invoice-print-header flex items-start justify-between gap-8 border-b border-slate-200 pb-8">
           <img
             src="/brand/simple-invoice-logo.png"
             alt="SimpleInvoice"
@@ -379,7 +379,7 @@ export function InvoicePrintDocument({ invoice }: InvoiceDetailProps) {
           </div>
         </header>
 
-        <div className="grid grid-cols-2 gap-12 border-b border-slate-200 py-8 text-xl">
+        <div className="invoice-print-parties grid grid-cols-2 gap-12 border-b border-slate-200 py-8 text-xl">
           <div>
             <p className="font-bold text-slate-500">Billed By:</p>
             <p className="mt-6 font-bold text-slate-950">SimpleInvoice</p>
@@ -403,7 +403,7 @@ export function InvoicePrintDocument({ invoice }: InvoiceDetailProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-x-10 gap-y-8 border-b border-slate-200 py-8 text-xl">
+        <div className="invoice-print-meta-grid grid grid-cols-3 gap-x-10 gap-y-8 border-b border-slate-200 py-8 text-xl">
           <PrintMeta label="Invoice Date" value={formatDate(invoice.invoiceDate)} />
           <PrintMeta label="Due Date" value={formatDate(invoice.dueDate)} />
           <PrintMeta label="Currency" value={getCurrencyLabel(invoice.currency)} />
@@ -411,7 +411,7 @@ export function InvoicePrintDocument({ invoice }: InvoiceDetailProps) {
           <PrintMeta label="Description" value={invoice.description || '-'} />
         </div>
 
-        <div className="invoice-print-avoid-break mt-10 overflow-hidden rounded-2xl border border-slate-200">
+        <div className="invoice-print-items invoice-print-avoid-break mt-10 overflow-hidden rounded-2xl border border-slate-200">
           <table className="w-full border-collapse text-left text-xl">
             <thead className="bg-slate-50 text-slate-500">
               <tr>
@@ -445,7 +445,7 @@ export function InvoicePrintDocument({ invoice }: InvoiceDetailProps) {
           </table>
         </div>
 
-        <div className="invoice-print-avoid-break ml-auto mt-10 max-w-xl space-y-6 text-xl">
+        <div className="invoice-print-totals invoice-print-avoid-break ml-auto mt-10 max-w-xl space-y-6 text-xl">
           <PrintTotalLine
             label="Subtotal"
             value={formatLineAmount(invoice.invoiceSubTotal, invoice.currencySymbol)}
@@ -464,6 +464,8 @@ export function InvoicePrintDocument({ invoice }: InvoiceDetailProps) {
             strong
           />
         </div>
+
+        <PrintStatusPanel invoice={invoice} />
       </div>
     </section>
   );
@@ -520,7 +522,7 @@ function PrintTotalLine({
   strong?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-10">
+    <div className="invoice-print-total-line flex items-center justify-between gap-10">
       <span className={strong ? 'text-2xl font-bold text-slate-950' : 'font-medium text-slate-700'}>
         {label}
       </span>
@@ -529,6 +531,74 @@ function PrintTotalLine({
       </span>
     </div>
   );
+}
+
+function PrintStatusPanel({ invoice }: InvoiceDetailProps) {
+  const statusClassName = invoice.status.toLowerCase();
+
+  return (
+    <div className="invoice-print-status invoice-print-avoid-break mt-8 rounded-2xl border border-slate-200">
+      <p className="invoice-print-status-heading font-bold text-slate-700">Payment Status</p>
+
+      <div className="invoice-print-status-grid mt-5 grid grid-cols-3 gap-6">
+        <div className="invoice-print-status-metric">
+          <p className="invoice-print-status-label text-slate-500">Status</p>
+          <span className={`invoice-print-status-pill invoice-print-status-pill--${statusClassName}`}>
+            <span className="invoice-print-status-symbol" aria-hidden="true" />
+            {invoice.status}
+          </span>
+        </div>
+
+        <PrintStatusMetric label="Due Date" value={formatDate(invoice.dueDate)} />
+        <PrintStatusMetric
+          label={invoice.status === 'Paid' ? 'Payment' : 'Balance'}
+          value={getPrintStatusValue(invoice)}
+          emphasize={invoice.status !== 'Paid' && Number(invoice.balanceAmount) > 0}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PrintStatusMetric({
+  label,
+  value,
+  emphasize = false,
+}: {
+  label: string;
+  value: string;
+  emphasize?: boolean;
+}) {
+  return (
+    <div className="invoice-print-status-metric">
+      <p className="invoice-print-status-label text-slate-500">{label}</p>
+      <p
+        className={
+          emphasize
+            ? 'invoice-print-status-value invoice-print-status-value--emphasis'
+            : 'invoice-print-status-value text-slate-800'
+        }
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function getPrintStatusValue(invoice: InvoiceDetail) {
+  if (invoice.status === 'Paid') {
+    return 'Paid in full';
+  }
+
+  if (invoice.status === 'Overdue') {
+    return formatLineAmount(invoice.balanceAmount, invoice.currencySymbol);
+  }
+
+  if (invoice.status === 'Pending') {
+    return formatLineAmount(invoice.balanceAmount, invoice.currencySymbol);
+  }
+
+  return 'Not issued';
 }
 
 function DetailLabel({ children }: { children: ReactNode }) {

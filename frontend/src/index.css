@@ -18,6 +18,13 @@
 
 html {
   min-height: 100%;
+  font-size: 90%;
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 100%;
+  }
 }
 
 body {
@@ -70,6 +77,10 @@ input[type="password"]::-webkit-contacts-auto-fill-button {
     background: #eaf0fa !important;
   }
 
+  html {
+    font-size: 100%;
+  }
+
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -91,14 +102,190 @@ input[type="password"]::-webkit-contacts-auto-fill-button {
     min-height: 100vh;
     background: #eaf0fa !important;
     color: #0f172a;
-    padding: 10mm;
+    padding: 6mm;
   }
 
   .invoice-print-card {
-    min-height: calc(100vh - 20mm);
-    border-radius: 7mm;
+    min-height: auto;
+    border-radius: 5mm;
     background: #ffffff !important;
-    padding: 10mm;
+    padding: 8mm;
+    font-size: 10.5pt;
+    line-height: 1.35;
+  }
+
+  .invoice-print-card .text-xl {
+    font-size: 10.5pt !important;
+    line-height: 1.35 !important;
+  }
+
+  .invoice-print-card .text-2xl {
+    font-size: 13pt !important;
+    line-height: 1.25 !important;
+  }
+
+  .invoice-print-card .text-4xl {
+    font-size: 18.5pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .invoice-print-header {
+    gap: 8mm !important;
+    padding-bottom: 7mm !important;
+  }
+
+  .invoice-print-header img {
+    height: 12mm !important;
+  }
+
+  .invoice-print-parties {
+    gap: 12mm !important;
+    padding-top: 7mm !important;
+    padding-bottom: 7mm !important;
+  }
+
+  .invoice-print-parties .mt-2,
+  .invoice-print-parties .mt-3 {
+    margin-top: 2mm !important;
+  }
+
+  .invoice-print-parties .mt-6 {
+    margin-top: 4mm !important;
+  }
+
+  .invoice-print-meta-grid {
+    gap: 5mm 10mm !important;
+    padding-top: 7mm !important;
+    padding-bottom: 7mm !important;
+  }
+
+  .invoice-print-meta-grid .mt-5 {
+    margin-top: 2.5mm !important;
+  }
+
+  .invoice-print-items {
+    margin-top: 7mm !important;
+    border-radius: 4mm !important;
+  }
+
+  .invoice-print-items th {
+    padding: 3.5mm 5mm !important;
+  }
+
+  .invoice-print-items td {
+    padding: 4.5mm 5mm !important;
+  }
+
+  .invoice-print-totals {
+    width: 104mm !important;
+    max-width: 104mm !important;
+    margin-top: 6mm !important;
+  }
+
+  .invoice-print-totals > * + * {
+    margin-top: 3.5mm !important;
+  }
+
+  .invoice-print-total-line {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: center !important;
+    column-gap: 10mm !important;
+  }
+
+  .invoice-print-total-line > span:first-child {
+    white-space: nowrap;
+  }
+
+  .invoice-print-status {
+    margin-top: 6mm !important;
+    padding: 5.5mm 6mm !important;
+    border-radius: 4mm !important;
+    background: #f8fafc !important;
+  }
+
+  .invoice-print-status-heading {
+    letter-spacing: 0 !important;
+  }
+
+  .invoice-print-status-grid {
+    grid-template-columns: 1.15fr 0.9fr 1fr !important;
+    gap: 0 !important;
+  }
+
+  .invoice-print-status-metric {
+    min-width: 0 !important;
+  }
+
+  .invoice-print-status-metric + .invoice-print-status-metric {
+    border-left: 1px solid #dbe3ef !important;
+    padding-left: 7mm !important;
+  }
+
+  .invoice-print-status-label {
+    margin-bottom: 2.5mm !important;
+    font-size: 8pt !important;
+    font-weight: 700 !important;
+  }
+
+  .invoice-print-status-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2.5mm !important;
+    border-radius: 999px !important;
+    padding: 2.2mm 4.5mm !important;
+    font-weight: 700 !important;
+  }
+
+  .invoice-print-status-symbol {
+    width: 2.5mm !important;
+    height: 2.5mm !important;
+    border-radius: 999px !important;
+  }
+
+  .invoice-print-status-pill--paid {
+    background: #dcfce7 !important;
+    color: #047857 !important;
+  }
+
+  .invoice-print-status-pill--paid .invoice-print-status-symbol {
+    background: #10b981 !important;
+  }
+
+  .invoice-print-status-pill--pending {
+    background: #fef3c7 !important;
+    color: #b45309 !important;
+  }
+
+  .invoice-print-status-pill--pending .invoice-print-status-symbol {
+    background: #f59e0b !important;
+  }
+
+  .invoice-print-status-pill--overdue {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+  }
+
+  .invoice-print-status-pill--overdue .invoice-print-status-symbol {
+    background: #ef4444 !important;
+  }
+
+  .invoice-print-status-pill--draft {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+  }
+
+  .invoice-print-status-pill--draft .invoice-print-status-symbol {
+    background: #64748b !important;
+  }
+
+  .invoice-print-status-value {
+    font-weight: 800 !important;
+    color: #1e293b !important;
+  }
+
+  .invoice-print-status-value--emphasis {
+    color: #0f172a !important;
   }
 
   .invoice-print-avoid-break {
