@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft, Receipt } from 'lucide-react';
-import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -13,7 +12,6 @@ import {
 } from '@/features/invoices/schema/create-invoice.schema';
 import { getApiErrorMessage } from '@/utils/api-error';
 
-import { calculateInvoicePreview } from './create-invoice-calculations';
 import { getCreateInvoiceDefaultValues } from './create-invoice.defaults';
 import { mapCreateInvoiceFormToPayload } from './create-invoice.mapper';
 import { CustomerInformationFields } from './CustomerInformationFields';
@@ -28,26 +26,13 @@ export function CreateInvoiceForm() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setError,
     formState: { errors },
   } = useForm<CreateInvoiceFormInput, unknown, CreateInvoiceFormValues>({
     resolver: zodResolver(createInvoiceSchema),
     defaultValues: getCreateInvoiceDefaultValues(),
   });
-
-  const watchedValues = watch();
-
-  const preview = useMemo(
-    () => calculateInvoicePreview(watchedValues),
-    [
-      watchedValues.currency,
-      watchedValues.discount,
-      watchedValues.itemQuantity,
-      watchedValues.itemRate,
-      watchedValues.taxPercentage,
-    ],
-  );
 
   function onSubmit(values: CreateInvoiceFormValues) {
     const payload = mapCreateInvoiceFormToPayload(values);
@@ -127,12 +112,12 @@ export function CreateInvoiceForm() {
             <InvoiceItemFields
               register={register}
               errors={errors}
-              currency={watchedValues.currency}
+              control={control}
             />
           </div>
 
           <div>
-            <InvoicePreview values={watchedValues} preview={preview} />
+            <InvoicePreview control={control} />
           </div>
         </div>
       </form>

@@ -1,8 +1,8 @@
 import { Box } from 'lucide-react';
-import type { FieldErrors, UseFormRegister } from 'react-hook-form';
+import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 
 import { TextInput } from '@/shared/ui/form';
-import type { CurrencyCode } from '@/api/types';
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
 
 import { CreateInvoiceSectionCard } from './CreateInvoiceSectionCard';
@@ -10,14 +10,16 @@ import { CreateInvoiceSectionCard } from './CreateInvoiceSectionCard';
 type InvoiceItemFieldsProps = {
   register: UseFormRegister<CreateInvoiceFormInput>;
   errors: FieldErrors<CreateInvoiceFormInput>;
-  currency: CurrencyCode;
+  control: Control<CreateInvoiceFormInput>;
 };
 
 export function InvoiceItemFields({
   register,
   errors,
-  currency,
+  control,
 }: InvoiceItemFieldsProps) {
+  const currency = useWatch({ control, name: 'currency' });
+
   return (
     <CreateInvoiceSectionCard
       icon={<Box className="h-5 w-5" />}

@@ -6,9 +6,11 @@ import {
   type CurrencyOption,
 } from './create-invoice.constants';
 
-type InvoicePreviewSource = Pick<
-  CreateInvoiceFormInput,
-  'currency' | 'itemQuantity' | 'itemRate' | 'taxPercentage' | 'discount'
+type InvoicePreviewSource = Partial<
+  Pick<
+    CreateInvoiceFormInput,
+    'currency' | 'itemQuantity' | 'itemRate' | 'taxPercentage' | 'discount'
+  >
 >;
 
 export type InvoicePreviewTotals = {

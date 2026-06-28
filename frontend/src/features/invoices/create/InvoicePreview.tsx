@@ -1,30 +1,23 @@
-import type { CurrencyCode } from '@/api/types';
+import type { Control } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
+
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
 
+import { calculateInvoicePreview } from './create-invoice-calculations';
 import { getDateInputValue } from './create-invoice.defaults';
 import {
   formatPreviewDate,
   formatPreviewMoney,
 } from './create-invoice-formatters';
 
-type InvoicePreviewModel = {
-  subtotal: number;
-  taxAmount: number;
-  discount: number;
-  totalAmount: number;
-  currency: {
-    code: CurrencyCode;
-    label: string;
-    symbol: string;
-  };
-};
-
 type InvoicePreviewProps = {
-  values: CreateInvoiceFormInput;
-  preview: InvoicePreviewModel;
+  control: Control<CreateInvoiceFormInput>;
 };
 
-export function InvoicePreview({ values, preview }: InvoicePreviewProps) {
+export function InvoicePreview({ control }: InvoicePreviewProps) {
+  const values = useWatch({ control });
+  const preview = calculateInvoicePreview(values);
+
   const customerName = values.customerName || 'Customer Name';
   const customerEmail = values.customerEmail || 'customer@example.com';
   const customerMobile = values.customerMobile || '+61 400 123 456';
