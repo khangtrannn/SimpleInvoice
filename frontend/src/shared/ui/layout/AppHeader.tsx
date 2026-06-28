@@ -19,7 +19,7 @@ export function AppHeader({ user, scrolled, onLogout }: AppHeaderProps) {
           : 'bg-white border-b border-black/[0.06]',
       ].join(' ')}
     >
-      <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between px-4 sm:h-20 sm:px-6 lg:px-8">
         <AppLogo />
 
         <AppUserMenu user={user} onLogout={onLogout} />

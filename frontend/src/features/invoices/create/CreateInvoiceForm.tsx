@@ -80,7 +80,7 @@ export function CreateInvoiceForm() {
           />
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[1.05fr_0.9fr]">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.05fr_0.9fr]">
           <div className="space-y-5">
             <CustomerInformationFields register={register} errors={errors} />
 

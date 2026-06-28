@@ -82,9 +82,9 @@ function TotalLine({
   valueClassName?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-6">
+    <div className="flex items-start justify-between gap-6">
       <span className={`${strong ? 'font-bold' : 'font-medium'} ${labelClassName}`}>{label}</span>
-      <span className={`${strong ? 'text-lg font-bold' : 'font-semibold'} ${valueClassName}`}>
+      <span className={`text-right ${strong ? 'text-lg font-bold' : 'font-semibold'} ${valueClassName}`}>
         {value}
       </span>
     </div>

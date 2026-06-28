@@ -31,25 +31,23 @@ export function InvoicePreview({ control }: InvoicePreviewProps) {
   const lineAmount = quantity * rate;
 
   return (
-    <div className="h-fit rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-6">
-        <div className="flex w-full items-center justify-between">
-          <img
-            src="/brand/simple-invoice-logo.png"
-            alt="SimpleInvoice"
-            className="h-10 w-auto"
-          />
+    <div className="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+      <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between sm:pb-6">
+        <img
+          src="/brand/simple-invoice-logo.png"
+          alt="SimpleInvoice"
+          className="h-8 w-auto self-start sm:h-10"
+        />
 
-          <p className="flex flex-col items-end text-sm text-slate-500">
-            <span className="px-2 py-1">Invoice Number</span>
-            <span className="rounded-full bg-slate-100 px-2 py-1 font-semibold text-slate-700">
-              {invoiceNumber}
-            </span>
-          </p>
-        </div>
+        <p className="flex items-center gap-2 text-sm text-slate-500 sm:flex-col sm:items-end sm:gap-0">
+          <span className="px-2 py-1">Invoice Number</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700 whitespace-nowrap">
+            {invoiceNumber}
+          </span>
+        </p>
       </div>
 
-      <div className="grid gap-6 border-b border-slate-200 py-6 text-sm md:grid-cols-2">
+      <div className="grid gap-6 border-b border-slate-200 py-4 text-sm sm:py-6 md:grid-cols-2">
         <div>
           <p className="font-semibold text-slate-500">Billed By:</p>
           <p className="mt-3 font-bold text-slate-950">101 Digital PTE LTD</p>
@@ -69,7 +67,7 @@ export function InvoicePreview({ control }: InvoicePreviewProps) {
         </div>
       </div>
 
-      <div className="grid gap-4 border-b border-slate-200 py-6 text-sm md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 border-b border-slate-200 py-4 text-sm sm:py-6 md:grid-cols-3">
         <PreviewMeta
           label="Invoice Date"
           value={formatPreviewDate(invoiceDate)}
@@ -80,7 +78,22 @@ export function InvoicePreview({ control }: InvoicePreviewProps) {
         <PreviewMeta label="Description" value={values.description || '-'} />
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200">
+      {/* Mobile: card layout */}
+      <div className="mt-4 rounded-xl border border-slate-200 sm:hidden">
+        <div className="bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Items
+        </div>
+        <div className="border-t border-slate-200 px-4 py-4 text-sm">
+          <p className="font-semibold text-slate-800">{itemName}</p>
+          <div className="mt-2 flex justify-between text-slate-600">
+            <span>{quantity} × {formatPreviewMoney(rate, preview.currency.symbol)}</span>
+            <span className="font-semibold text-slate-800">{formatPreviewMoney(lineAmount, preview.currency.symbol)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop: table layout */}
+      <div className="mt-4 hidden overflow-x-auto rounded-xl border border-slate-200 sm:mt-6 sm:block">
         <table className="w-full min-w-[520px] border-collapse text-left text-sm">
           <thead className="bg-slate-50 text-slate-500">
             <tr>
@@ -110,7 +123,7 @@ export function InvoicePreview({ control }: InvoicePreviewProps) {
         </table>
       </div>
 
-      <div className="ml-auto mt-6 max-w-sm space-y-3 text-sm">
+      <div className="ml-auto mt-4 max-w-sm space-y-3 text-sm sm:mt-6">
         <SummaryLine
           label="Subtotal"
           value={formatPreviewMoney(preview.subtotal, preview.currency.symbol)}

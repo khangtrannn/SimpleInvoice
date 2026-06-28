@@ -6,7 +6,7 @@ export function AppLogo() {
       <img
         src="/brand/simple-invoice-logo.png"
         alt="SimpleInvoice"
-        className="h-12 w-auto"
+        className="h-8 w-auto sm:h-12"
       />
     </Link>
   );

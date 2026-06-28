@@ -19,7 +19,11 @@ export function LoginPage() {
               </div>
 
               <div className="mb-8 text-center lg:text-left xl:mb-10">
-                <span className="mx-auto mb-10 block text-2xl font-bold text-slate-950 lg:hidden">SimpleInvoice</span>
+                <img
+                  src="/brand/simple-invoice-logo.png"
+                  alt="SimpleInvoice"
+                  className="mx-auto mb-10 block h-12 w-auto lg:hidden"
+                />
 
                 <h1 className="text-4xl font-semibold text-slate-950 sm:text-5xl">
                   Sign In

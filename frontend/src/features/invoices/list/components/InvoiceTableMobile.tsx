@@ -10,12 +10,12 @@ type InvoiceTableMobileProps = {
 
 export function InvoiceTableMobile({ rows }: InvoiceTableMobileProps) {
   return (
-    <div className="divide-y divide-slate-100 lg:hidden">
+    <div className="flex flex-col gap-3 p-4 lg:hidden">
       {rows.map((row) => (
         <Link
           key={row.id}
           to={row.detailPath}
-          className="block bg-white p-4 transition hover:bg-slate-50/80 active:bg-slate-50"
+          className="block bg-white rounded-xl border border-slate-200 p-4 shadow-sm transition hover:shadow-md hover:border-slate-300 active:scale-[0.99]"
         >
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
