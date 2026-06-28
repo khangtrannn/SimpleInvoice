@@ -10,7 +10,7 @@ import {
   type CreateInvoiceFormInput,
   type CreateInvoiceFormValues,
 } from '@/features/invoices/schema/create-invoice.schema';
-import { getApiErrorMessage } from '@/utils/api-error';
+import { getApiErrorMessage } from '@/shared/lib/api-error';
 
 import { getCreateInvoiceDefaultValues } from './create-invoice.defaults';
 import { mapCreateInvoiceFormToPayload } from './create-invoice.mapper';

@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 
-import { AppLayout } from '@/components/layout/AppLayout';
+import { AppLayout } from '@/shared/ui/layout/AppLayout';
 import { ScrollToTop } from '@/app/ScrollToTop';
 import { AUTH_ROUTES } from '@/features/auth/auth-route.constants';
 import { LoginPage } from '@/features/auth/login/LoginPage';

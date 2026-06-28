@@ -1,6 +1,6 @@
 import { useInvoiceListQuery } from '@/features/invoices/hooks/use-invoice-list-query';
 import { useInvoices } from '@/features/invoices/hooks/use-invoices';
-import { getApiErrorMessage } from '@/utils/api-error';
+import { getApiErrorMessage } from '@/shared/lib/api-error';
 
 import { InvoiceListContent } from './InvoiceListContent';
 import { InvoiceListHeader } from './InvoiceListHeader';

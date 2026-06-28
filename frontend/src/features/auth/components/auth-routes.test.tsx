@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
-import { AppLayout } from '@/components/layout/AppLayout';
+import { AppLayout } from '@/shared/ui/layout/AppLayout';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { PublicOnlyRoute } from '@/features/auth/components/PublicOnlyRoute';
 import { setAccessToken, setStoredAuthUser } from '@/features/auth/auth-storage';

@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { loginSchema, type LoginFormValues } from '@/features/auth/login.schema';
-import { getApiErrorMessage } from '@/utils/api-error';
+import { getApiErrorMessage } from '@/shared/lib/api-error';
 import { PasswordInput, TextInput } from '@/shared/ui/form';
 
 import { useLogin } from './use-login';

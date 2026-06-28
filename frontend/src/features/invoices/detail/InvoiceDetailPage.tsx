@@ -10,7 +10,7 @@ import {
   InvoiceTotalsCard,
 } from '@/features/invoices/detail/components';
 import { useInvoiceDetail } from '@/features/invoices/hooks/use-invoice-detail';
-import { getApiErrorMessage } from '@/utils/api-error';
+import { getApiErrorMessage } from '@/shared/lib/api-error';
 
 import { InvoiceDetailError } from './InvoiceDetailError';
 import { InvoiceDetailSkeleton } from './InvoiceDetailSkeleton';

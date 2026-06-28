@@ -103,21 +103,15 @@ frontend/src/
 │           └── InvoicePreview.tsx
 │
 ├── shared/                  # Shared across features
-│   ├── ui/                  # Reusable form & layout components
+│   ├── ui/                  # Reusable UI building blocks
 │   │   ├── form/            # Form controls (TextInput, SelectInput, etc)
 │   │   │   └── form-controls.test.tsx
-│   │   └── layout/          # App layout, header, user menu
-│   ├── lib/                 # Utilities
+│   │   └── layout/          # App shell (AppLayout, AppHeader, AppUserMenu)
+│   ├── lib/                 # Cross-feature utilities
 │   │   ├── format/          # Currency, date formatting
+│   │   ├── api-error.ts     # API error message formatting
 │   │   └── ...
 │   └── config/              # App configuration (env vars)
-│
-├── components/              # Deprecated; prefer feature-local components
-│   └── layout/              # AppLayout, AppHeader, AppUserMenu
-│
-├── utils/                   # Deprecated; prefer feature-local logic
-│   ├── api-error.ts         # Error message formatting
-│   └── ...
 │
 ├── test/                    # Test setup and mocks
 │   ├── setup.ts             # Vitest config: MSW server, localStorage mock
