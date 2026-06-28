@@ -55,7 +55,6 @@ export type InvoiceSummary = {
 export type InvoiceListResponse = {
   data: InvoiceListItem[];
   paging: Paging;
-  summary: InvoiceSummary;
 };
 
 export type InvoiceCustomer = {

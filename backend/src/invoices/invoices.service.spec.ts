@@ -117,7 +117,7 @@ describe(InvoicesService.name, () => {
   });
 
   describe('findAll', () => {
-    it('should return mapped invoices with paging and summary', async () => {
+    it('should return mapped invoices with paging', async () => {
       // Arrange
       const query = {
         page: 1,
@@ -130,6 +130,29 @@ describe(InvoicesService.name, () => {
         invoices: [mockInvoice],
         total: 1,
       });
+
+      // Act
+      const result = await invoicesService.findAll(query);
+
+      // Assert
+      expect(invoicesRepository.findAll).toHaveBeenCalledWith(query);
+      expect(invoicesRepository.findSummary).not.toHaveBeenCalled();
+      expect(result.paging).toEqual({ page: 1, pageSize: 10, total: 1 });
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].invoiceNumber).toBe(mockInvoice.invoiceNumber);
+      expect(result).not.toHaveProperty('summary');
+    });
+  });
+
+  describe('findSummary', () => {
+    it('should return the aggregated summary for the matching filters', async () => {
+      // Arrange
+      const query = {
+        page: 1,
+        pageSize: 10,
+        sortBy: InvoiceSortBy.INVOICE_DATE,
+        ordering: SortOrdering.DESC,
+      } as GetInvoicesQueryDto;
 
       invoicesRepository.findSummary.mockResolvedValue({
         totalRevenue: '200.00',
@@ -147,15 +170,12 @@ describe(InvoicesService.name, () => {
       });
 
       // Act
-      const result = await invoicesService.findAll(query);
+      const result = await invoicesService.findSummary(query);
 
       // Assert
-      expect(invoicesRepository.findAll).toHaveBeenCalledWith(query);
       expect(invoicesRepository.findSummary).toHaveBeenCalledWith(query);
-      expect(result.paging).toEqual({ page: 1, pageSize: 10, total: 1 });
-      expect(result.data).toHaveLength(1);
-      expect(result.data[0].invoiceNumber).toBe(mockInvoice.invoiceNumber);
-      expect(result.summary).toEqual({
+      expect(invoicesRepository.findAll).not.toHaveBeenCalled();
+      expect(result).toEqual({
         totalRevenue: '200.00',
         totalPaid: '0.00',
         totalPending: '0.00',

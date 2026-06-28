@@ -1,5 +1,8 @@
 import { useInvoiceListQuery } from '@/features/invoices/hooks/use-invoice-list-query';
-import { useInvoices } from '@/features/invoices/hooks/use-invoices';
+import {
+  useInvoiceSummary,
+  useInvoices,
+} from '@/features/invoices/hooks/use-invoices';
 import { getApiErrorMessage } from '@/shared/lib/api-error';
 
 import { InvoiceListContent } from './InvoiceListContent';
@@ -11,9 +14,10 @@ export function InvoiceListPage() {
   const { query, updateQuery, resetQuery } = useInvoiceListQuery();
 
   const invoicesQuery = useInvoices(query);
+  const summaryQuery = useInvoiceSummary(query);
   const invoices = invoicesQuery.data?.data ?? [];
   const paging = invoicesQuery.data?.paging;
-  const summary = buildTileSummary(invoicesQuery.data?.summary ?? null);
+  const summary = buildTileSummary(summaryQuery.data ?? null);
 
   const errorMessage = invoicesQuery.isError
     ? getApiErrorMessage(invoicesQuery.error, 'Failed to load invoices.')

@@ -65,7 +65,6 @@ export const invoiceListResponseSchema: z.ZodType<InvoiceListResponse> =
   z.object({
     data: z.array(invoiceListItemSchema),
     paging: pagingSchema,
-    summary: invoiceSummarySchema,
   });
 
 const invoiceCustomerSchema: z.ZodType<InvoiceCustomer> = z.object({
@@ -106,6 +105,14 @@ export const invoiceDetailSchema: z.ZodType<InvoiceDetail> = z.object({
 
 export function parseInvoiceListResponse(data: unknown): InvoiceListResponse {
   return parseApiResponse(invoiceListResponseSchema, data, 'GET /invoices');
+}
+
+export function parseInvoiceSummaryResponse(data: unknown): InvoiceSummary {
+  return parseApiResponse(
+    invoiceSummarySchema,
+    data,
+    'GET /invoices/summary',
+  );
 }
 
 export function parseInvoiceDetailResponse(

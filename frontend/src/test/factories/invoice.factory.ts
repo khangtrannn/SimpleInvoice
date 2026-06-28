@@ -140,7 +140,6 @@ export function createMockInvoiceListResponse(
   return {
     data: [createMockInvoiceListItem()],
     paging: createMockPaging(),
-    summary: createMockInvoiceSummary(),
     ...overrides,
   };
 }

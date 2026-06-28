@@ -7,10 +7,19 @@ import {
 } from '@/test/mocks/invoice-fixtures';
 import {
   buildInvoiceListResponse,
+  buildInvoiceSummary,
+  filterInvoices,
   parseInvoiceRequestUrl,
 } from '@/test/mocks/invoice-query';
 
 export const invoiceHandlers = [
+  http.get(`${API_BASE_URL}/invoices/summary`, ({ request }) => {
+    const query = parseInvoiceRequestUrl(new URL(request.url));
+    const filtered = filterInvoices(mockInvoices, query);
+
+    return HttpResponse.json(buildInvoiceSummary(filtered), { status: 200 });
+  }),
+
   http.get(`${API_BASE_URL}/invoices/:invoiceId`, ({ params }) => {
     const invoiceId = String(params.invoiceId);
     const invoice = mockInvoiceDetails[invoiceId];

@@ -30,6 +30,7 @@ import { GetInvoicesQueryDto } from './dto/get-invoices-query.dto';
 import {
   InvoiceDetailResponseDto,
   InvoiceListResponseDto,
+  InvoiceSummaryResponseDto,
 } from './dto/invoice-response.dto';
 import { InvoicesService } from './invoices.service';
 
@@ -58,6 +59,27 @@ export class InvoicesController {
     @Query() query: GetInvoicesQueryDto,
   ): Promise<InvoiceListResponseDto> {
     return this.invoicesService.findAll(query);
+  }
+
+  @Get('summary')
+  @ApiOperation({
+    summary:
+      'Aggregated invoice totals and counts by status. Respects the same filters as GET /invoices.',
+  })
+  @ApiOkResponse({
+    type: InvoiceSummaryResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired access token',
+  })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+    description: 'Invalid query parameters',
+  })
+  findSummary(
+    @Query() query: GetInvoicesQueryDto,
+  ): Promise<InvoiceSummaryResponseDto> {
+    return this.invoicesService.findSummary(query);
   }
 
   @Get(':id')

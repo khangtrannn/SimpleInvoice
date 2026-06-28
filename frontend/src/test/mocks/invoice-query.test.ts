@@ -4,6 +4,7 @@ import { createMockInvoiceListItem } from '@/test/factories/invoice.factory';
 
 import {
   buildInvoiceListResponse,
+  buildInvoiceSummary,
   filterInvoices,
   paginateInvoices,
   parseInvoiceRequestUrl,
@@ -130,7 +131,7 @@ describe('paginateInvoices', () => {
 });
 
 describe('buildInvoiceListResponse', () => {
-  it('builds paginated response with summary', () => {
+  it('builds paginated response without summary (summary lives on its own endpoint)', () => {
     const invoices = [
       createMockInvoiceListItem({
         id: 'invoice-1',
@@ -153,8 +154,29 @@ describe('buildInvoiceListResponse', () => {
 
     expect(result.data).toHaveLength(2);
     expect(result.paging.total).toBe(2);
-    expect(result.summary.totalRevenue).toBe('300.00');
-    expect(result.summary.paidCount).toBe(1);
-    expect(result.summary.draftCount).toBe(1);
+    expect(result).not.toHaveProperty('summary');
+  });
+});
+
+describe('buildInvoiceSummary', () => {
+  it('aggregates totals and counts across the matching invoices', () => {
+    const invoices = [
+      createMockInvoiceListItem({
+        id: 'invoice-1',
+        totalAmount: '100.00',
+        status: 'Paid',
+      }),
+      createMockInvoiceListItem({
+        id: 'invoice-2',
+        totalAmount: '200.00',
+        status: 'Draft',
+      }),
+    ];
+
+    const summary = buildInvoiceSummary(invoices);
+
+    expect(summary.totalRevenue).toBe('300.00');
+    expect(summary.paidCount).toBe(1);
+    expect(summary.draftCount).toBe(1);
   });
 });

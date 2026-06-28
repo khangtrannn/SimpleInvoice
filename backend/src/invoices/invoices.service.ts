@@ -38,10 +38,7 @@ export class InvoicesService {
   constructor(private readonly invoicesRepository: InvoicesRepository) {}
 
   async findAll(query: GetInvoicesQueryDto): Promise<InvoiceListResponseDto> {
-    const [{ invoices, total }, summaryRaw] = await Promise.all([
-      this.invoicesRepository.findAll(query),
-      this.invoicesRepository.findSummary(query),
-    ]);
+    const { invoices, total } = await this.invoicesRepository.findAll(query);
 
     return {
       data: invoices.map(toInvoiceListItemResponse),
@@ -50,8 +47,14 @@ export class InvoicesService {
         pageSize: query.pageSize,
         total,
       },
-      summary: this.toSummaryDto(summaryRaw),
     };
+  }
+
+  async findSummary(
+    query: GetInvoicesQueryDto,
+  ): Promise<InvoiceSummaryResponseDto> {
+    const summaryRaw = await this.invoicesRepository.findSummary(query);
+    return this.toSummaryDto(summaryRaw);
   }
 
   private toSummaryDto(raw: InvoiceSummaryRaw): InvoiceSummaryResponseDto {

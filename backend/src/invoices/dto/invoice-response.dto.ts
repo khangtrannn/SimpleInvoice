@@ -120,9 +120,6 @@ export class InvoiceListResponseDto {
 
   @ApiProperty({ type: PagingResponseDto })
   paging!: PagingResponseDto;
-
-  @ApiProperty({ type: InvoiceSummaryResponseDto })
-  summary!: InvoiceSummaryResponseDto;
 }
 
 export class InvoiceDetailResponseDto {

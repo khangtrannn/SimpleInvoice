@@ -283,6 +283,54 @@ describe('Invoices (e2e)', () => {
     });
   });
 
+  describe('GET /invoices/summary', () => {
+    it('should return 200 with aggregated totals and counts', async () => {
+      // Act
+      const res = await api.get('/invoices/summary');
+
+      // Assert
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        totalRevenue: expect.any(String),
+        totalPaid: expect.any(String),
+        totalPending: expect.any(String),
+        totalOverdue: expect.any(String),
+        totalDraft: expect.any(String),
+        paidCount: expect.any(Number),
+        pendingCount: expect.any(Number),
+        overdueCount: expect.any(Number),
+        draftCount: expect.any(Number),
+        currencyCount: expect.any(Number),
+      });
+      // Drafts exist from the list tests, so the draft count is at least 1
+      expect(res.body.draftCount).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should respect the same filters as GET /invoices', async () => {
+      // Act
+      const filtered = await api
+        .get('/invoices/summary')
+        .query({ keyword: 'IV-E2E-LIST-002' });
+      const unfiltered = await api.get('/invoices/summary');
+
+      // Assert
+      expect(filtered.status).toBe(200);
+      expect(unfiltered.status).toBe(200);
+      const filteredDraftCount = Number(filtered.body.draftCount);
+      const unfilteredDraftCount = Number(unfiltered.body.draftCount);
+      expect(filteredDraftCount).toBeLessThanOrEqual(unfilteredDraftCount);
+      expect(filteredDraftCount).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should return 401 when no token is provided', async () => {
+      // Act
+      const res = await request(app.getHttpServer()).get('/invoices/summary');
+
+      // Assert
+      expect(res.status).toBe(401);
+    });
+  });
+
   describe('GET /invoices/:id', () => {
     let createdInvoiceId: string;
 

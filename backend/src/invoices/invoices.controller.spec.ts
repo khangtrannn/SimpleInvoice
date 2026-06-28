@@ -7,6 +7,7 @@ import { GetInvoicesQueryDto } from './dto/get-invoices-query.dto';
 import {
   InvoiceDetailResponseDto,
   InvoiceListResponseDto,
+  InvoiceSummaryResponseDto,
 } from './dto/invoice-response.dto';
 import { InvoicesController } from './invoices.controller';
 import { InvoicesService } from './invoices.service';
@@ -14,12 +15,13 @@ import { InvoicesService } from './invoices.service';
 describe(InvoicesController.name, () => {
   let invoicesController: InvoicesController;
   let invoicesService: jest.Mocked<
-    Pick<InvoicesService, 'findAll' | 'findOne' | 'create'>
+    Pick<InvoicesService, 'findAll' | 'findSummary' | 'findOne' | 'create'>
   >;
 
   beforeEach(async () => {
     invoicesService = {
       findAll: jest.fn(),
+      findSummary: jest.fn(),
       findOne: jest.fn(),
       create: jest.fn(),
     };
@@ -55,20 +57,6 @@ describe(InvoicesController.name, () => {
       const response = {
         data: [],
         paging: { page: 1, pageSize: 10, total: 0 },
-        summary: {
-          totalRevenue: '0.00',
-          totalPaid: '0.00',
-          totalPending: '0.00',
-          totalOverdue: '0.00',
-          totalDraft: '0.00',
-          paidCount: 0,
-          pendingCount: 0,
-          overdueCount: 0,
-          draftCount: 0,
-          currency: null,
-          currencySymbol: null,
-          currencyCount: 0,
-        },
       } as InvoiceListResponseDto;
 
       invoicesService.findAll.mockResolvedValue(response);
@@ -78,6 +66,41 @@ describe(InvoicesController.name, () => {
 
       // Assert
       expect(invoicesService.findAll).toHaveBeenCalledWith(query);
+      expect(result).toBe(response);
+    });
+  });
+
+  describe('findSummary', () => {
+    it('should delegate to invoicesService.findSummary', async () => {
+      // Arrange
+      const query = {
+        page: 1,
+        pageSize: 10,
+        status: undefined,
+      } as GetInvoicesQueryDto;
+
+      const response = {
+        totalRevenue: '0.00',
+        totalPaid: '0.00',
+        totalPending: '0.00',
+        totalOverdue: '0.00',
+        totalDraft: '0.00',
+        paidCount: 0,
+        pendingCount: 0,
+        overdueCount: 0,
+        draftCount: 0,
+        currency: null,
+        currencySymbol: null,
+        currencyCount: 0,
+      } as InvoiceSummaryResponseDto;
+
+      invoicesService.findSummary.mockResolvedValue(response);
+
+      // Act
+      const result = await invoicesController.findSummary(query);
+
+      // Assert
+      expect(invoicesService.findSummary).toHaveBeenCalledWith(query);
       expect(result).toBe(response);
     });
   });

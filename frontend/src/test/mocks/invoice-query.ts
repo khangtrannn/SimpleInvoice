@@ -54,7 +54,6 @@ export function buildInvoiceListResponse(
       pageSize: query.pageSize,
       total: filteredInvoices.length,
     },
-    summary: buildInvoiceSummary(filteredInvoices),
   };
 }
 

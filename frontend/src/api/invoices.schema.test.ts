@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
 import { ApiResponseValidationError } from '@/api/parse-api-response';
-import type { InvoiceDetail, InvoiceListResponse } from '@/api/types';
+import type {
+  InvoiceDetail,
+  InvoiceListResponse,
+  InvoiceSummary,
+} from '@/api/types';
 
 import {
   parseCreateInvoiceResponse,
   parseInvoiceDetailResponse,
   parseInvoiceListResponse,
+  parseInvoiceSummaryResponse,
 } from './invoices.schema';
 
 describe('parseInvoiceListResponse', () => {
@@ -26,7 +31,7 @@ describe('parseInvoiceListResponse', () => {
       status: 'Paid',
     });
     expect(result.paging.total).toBe(1);
-    expect(result.summary.totalRevenue).toBe('270.00');
+    expect(result).not.toHaveProperty('summary');
   });
 
   it('rejects an invalid invoice status', () => {
@@ -68,11 +73,39 @@ describe('parseInvoiceListResponse', () => {
     // Arrange
     const response = {
       data: createInvoiceListResponse().data,
-      summary: createInvoiceListResponse().summary,
     };
 
     // Act + Assert
     expect(() => parseInvoiceListResponse(response)).toThrow(
+      ApiResponseValidationError,
+    );
+  });
+});
+
+describe('parseInvoiceSummaryResponse', () => {
+  it('parses a valid summary response', () => {
+    // Arrange
+    const response = createInvoiceSummaryResponse();
+
+    // Act
+    const result = parseInvoiceSummaryResponse(response);
+
+    // Assert
+    expect(result).toMatchObject({
+      totalRevenue: '270.00',
+      paidCount: 1,
+      currency: 'AUD',
+    });
+  });
+
+  it('rejects a summary with an invalid numeric string', () => {
+    // Arrange
+    const response = createInvoiceSummaryResponse({
+      totalRevenue: 'not-a-number',
+    });
+
+    // Act + Assert
+    expect(() => parseInvoiceSummaryResponse(response)).toThrow(
       ApiResponseValidationError,
     );
   });
@@ -168,20 +201,26 @@ function createInvoiceListResponse(
       pageSize: 10,
       total: 1,
     },
-    summary: {
-      totalRevenue: '270.00',
-      totalPaid: '270.00',
-      totalPending: '0.00',
-      totalOverdue: '0.00',
-      totalDraft: '0.00',
-      paidCount: 1,
-      pendingCount: 0,
-      overdueCount: 0,
-      draftCount: 0,
-      currency: 'AUD',
-      currencySymbol: 'AU$',
-      currencyCount: 1,
-    },
+    ...overrides,
+  };
+}
+
+function createInvoiceSummaryResponse(
+  overrides: Partial<InvoiceSummary> = {},
+): InvoiceSummary {
+  return {
+    totalRevenue: '270.00',
+    totalPaid: '270.00',
+    totalPending: '0.00',
+    totalOverdue: '0.00',
+    totalDraft: '0.00',
+    paidCount: 1,
+    pendingCount: 0,
+    overdueCount: 0,
+    draftCount: 0,
+    currency: 'AUD',
+    currencySymbol: 'AU$',
+    currencyCount: 1,
     ...overrides,
   };
 }
