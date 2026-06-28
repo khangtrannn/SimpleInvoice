@@ -21,6 +21,11 @@ export function parseApiResponse<T>(
   const result = schema.safeParse(data);
 
   if (!result.success) {
+    console.error(
+      `Invalid API response from ${endpoint}:`,
+      result.error.issues,
+    );
+
     throw new ApiResponseValidationError(endpoint, result.error.issues);
   }
 
