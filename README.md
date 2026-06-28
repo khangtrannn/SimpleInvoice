@@ -41,7 +41,7 @@ These are intentional extras beyond the assessment requirements:
 
 - **Live demo** at custom domains (Cloudflare Pages + Railway).
 - **CI → gated deploy pipeline** - production deploy only fires after CI succeeds on `main` via a `workflow_run` trigger.
-- **A4 print-to-PDF** without a PDF library - pure CSS `@media print` swap. See [`frontend/src/features/invoices/detail/InvoicePrintDocument.tsx`](./frontend/src/features/invoices/detail/InvoicePrintDocument.tsx).
+- **A4 print-to-PDF** without a PDF library - pure CSS `@media print` swap. See [`frontend/src/features/invoices/detail/components/InvoicePrintDocument.tsx`](./frontend/src/features/invoices/detail/components/InvoicePrintDocument.tsx).
 - **Runtime Zod validation** at the frontend API boundary - every response is parsed; schema drift fails loudly. See [`frontend/src/api/invoices.schema.ts`](./frontend/src/api/invoices.schema.ts).
 - **Summary dashboard endpoint** - `GET /invoices/summary` returns aggregated totals/counts respecting the same filters as `GET /invoices`. Powers the invoice list tiles.
 - **`Decimal.js` precision arithmetic** - money math never touches IEEE-754 floats. See [`backend/src/invoices/domain/invoice-calculation.ts`](./backend/src/invoices/domain/invoice-calculation.ts).
@@ -146,6 +146,7 @@ Docker Compose reads the root `.env` for container wiring and `backend/.env` for
 | `JWT_SECRET`        | Secret for signing JWT tokens (min 32 chars) | -             |
 | `JWT_EXPIRES_IN`    | Token expiry in seconds                      | `3600`        |
 | `CORS_ORIGIN`       | Comma-separated allowlist of permitted origins | `http://localhost:3000,https://simpleinvoice.khangtran.dev` |
+| `VITE_API_URL`      | Base URL for frontend API calls (backend API) | `http://localhost:4000` |
 
 ---
 

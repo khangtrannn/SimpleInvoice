@@ -8,11 +8,11 @@ React 19 + TypeScript + Vite frontend for the SimpleInvoice assessment applicati
 
 **What to look for:**
 
-- **Protected Routes & Authentication** - Login redirects to invoice list on success; all invoice routes require valid JWT; logout clears session. See `auth-context.tsx`, `ProtectedRoute.tsx`.
-- **Invoice List** - Paginated, searchable, filterable by status (Draft/Pending/Paid/Overdue), sortable by date/amount. List state lives in URL query params. See `InvoiceListPage.tsx`, `use-invoice-list-query.ts`.
-- **Invoice Detail** - Full invoice information, line items, totals, payment status. Includes a **print-to-PDF** feature that produces an A4 document without external dependencies. See `InvoiceDetailPage.tsx`, `InvoicePrintDocument.tsx`.
-- **Create Invoice** - Multi-field form with real-time validation and a live preview panel. Backend validates totals; frontend shows preview. One line item per assessment spec. See `CreateInvoiceForm.tsx`, `createInvoiceSchema.ts`.
-- **Runtime Response Validation** - Zod schemas validate all API responses at unsafe boundaries (login, invoice list/detail, create). Parsing errors are caught and logged. See `invoices.schema.ts`, `auth.schema.ts`, `parse-api-response.ts`.
+- **Protected Routes & Authentication** - Login redirects to invoice list on success; all invoice routes require valid JWT; logout clears session. See [`src/features/auth/auth-context.tsx`](./src/features/auth/auth-context.tsx), [`src/features/auth/components/ProtectedRoute.tsx`](./src/features/auth/components/ProtectedRoute.tsx).
+- **Invoice List** - Paginated, searchable, filterable by status (Draft/Pending/Paid/Overdue), sortable by date/amount. List state lives in URL query params. See [`src/features/invoices/list/InvoiceListPage.tsx`](./src/features/invoices/list/InvoiceListPage.tsx), [`src/features/invoices/list/invoice-list-query.schema.ts`](./src/features/invoices/list/invoice-list-query.schema.ts).
+- **Invoice Detail** - Full invoice information, line items, totals, payment status. Includes a **print-to-PDF** feature that produces an A4 document without external dependencies. See [`src/features/invoices/detail/InvoiceDetailPage.tsx`](./src/features/invoices/detail/InvoiceDetailPage.tsx), [`src/features/invoices/detail/components/InvoicePrintDocument.tsx`](./src/features/invoices/detail/components/InvoicePrintDocument.tsx).
+- **Create Invoice** - Multi-field form with real-time validation and a live preview panel. Backend validates totals; frontend shows preview. One line item per assessment spec. See [`src/features/invoices/create/CreateInvoiceForm.tsx`](./src/features/invoices/create/CreateInvoiceForm.tsx), [`src/features/invoices/schema/create-invoice.schema.ts`](./src/features/invoices/schema/create-invoice.schema.ts).
+- **Runtime Response Validation** - Zod schemas validate all API responses at unsafe boundaries (login, invoice list/detail, create). Parsing errors are caught and logged. See [`src/api/invoices.schema.ts`](./src/api/invoices.schema.ts), [`src/api/auth.schema.ts`](./src/api/auth.schema.ts), [`src/api/parse-api-response.ts`](./src/api/parse-api-response.ts).
 - **Comprehensive Tests** - tests cover form validation, hooks, utilities, component behavior, and runtime schema validation. MSW mocks backend; factories generate test data. Run `npm run test` for the full suite. See `frontend/src/**/*.test.ts`, `test/mocks/`.
 - **Feature-First Architecture** - Code organized by feature (`auth`, `invoices`) with feature-local domain logic, not by layer. Shared utilities live in `shared/`. See folder structure below.
 
@@ -329,8 +329,8 @@ const user = authFactory.build({ email: 'test@example.com' });
 - **A4-ready** - CSS handles page size, margins, breaks.
 
 **Implementation:**
-- `InvoicePrintDocument.tsx` - A4-sized hidden layout.
-- `index.css` - `@media print` rule hides app shell, shows print document.
+- [`src/features/invoices/detail/components/InvoicePrintDocument.tsx`](./src/features/invoices/detail/components/InvoicePrintDocument.tsx) - A4-sized hidden layout.
+- [`src/index.css`](./src/index.css) - `@media print` rule hides app shell, shows print document.
 - `page-break-inside: avoid` prevents table/totals from splitting across pages.
 
 ---

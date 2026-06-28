@@ -145,19 +145,6 @@ Database constraints protect invariants at the storage boundary even if a future
 
 ---
 
-## Reviewer Quick Start
-
-See the [root README](../README.md) for full setup instructions (Docker or local). This section highlights backend-specific endpoints and credentials.
-
-### Default Credentials
-
-Seeded automatically by `npm run seed`:
-
-```
-Email:    reviewer@simpleinvoice.local
-Password: Password123!
-```
-
 ### Backend Endpoints
 
 | Resource    | URL                              |
@@ -445,5 +432,4 @@ erDiagram
 - **Overdue is derived, not persisted.** The database stores only `Draft`, `Pending`, and `Paid`. `Overdue` is computed at read time when `status != Paid AND dueDate < today`. No background job is needed.
 - **No refresh tokens.** The access token is the only credential. Token refresh is out of scope for this assessment.
 - **No role-based authorization.** All authenticated users have the same permissions. RBAC is out of scope.
-- **No email delivery or payment integration.** Invoice creation and status transitions are data-only operations.
 - **Customer is embedded on the invoice.** Customer data (name, email, mobile, address) is stored as columns on `invoices` rather than a separate `customers` table. Invoices are self-contained records; there is no shared customer identity across invoices.
