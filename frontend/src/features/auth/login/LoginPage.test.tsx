@@ -1,12 +1,14 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { PublicOnlyRoute } from '@/features/auth/components/PublicOnlyRoute';
 import { LoginPage } from '@/features/auth/login/LoginPage';
-import { TEST_ACCESS_TOKEN } from '@/test/mocks/constants';
+import { API_BASE_URL, TEST_ACCESS_TOKEN } from '@/test/mocks/constants';
 import { reviewerCredentials } from '@/test/mocks/auth-fixtures';
+import { server } from '@/test/mocks/server';
 import { renderWithRouter } from '@/test/test-utils';
 
 function renderLoginFlow(initialEntries = ['/login']) {
@@ -92,5 +94,35 @@ describe('LoginPage', () => {
     // Assert
     expect(await screen.findByText(/invalid email or password/i)).toBeInTheDocument();
     expect(screen.queryByText(/invoices page/i)).not.toBeInTheDocument();
+  });
+
+  it('shows a server error when login fails with an internal server error', async () => {
+    // Arrange
+    server.use(
+      http.post(`${API_BASE_URL}/auth/login`, () => {
+        return HttpResponse.json(
+          {
+            statusCode: 500,
+            message: 'Internal server error',
+            error: 'Internal Server Error',
+            timestamp: '2026-06-28T10:00:00.000Z',
+            path: '/auth/login',
+          },
+          { status: 500 },
+        );
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderLoginFlow();
+
+    // Act
+    await user.type(screen.getByLabelText(/email address/i), reviewerCredentials.email);
+    await user.type(screen.getByLabelText(/^password$/i), reviewerCredentials.password);
+    await user.click(screen.getByRole('button', { name: /sign in/i }));
+
+    // Assert
+    expect(await screen.findByText(/server is having trouble/i)).toBeInTheDocument();
+    expect(screen.queryByText(/invalid email or password/i)).not.toBeInTheDocument();
   });
 });

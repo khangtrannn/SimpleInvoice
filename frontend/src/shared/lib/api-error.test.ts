@@ -60,12 +60,44 @@ describe('getApiErrorMessage', () => {
     // Assert
     expect(result).toBe('Failed to create invoice.');
   });
+
+  it('returns a network message when the axios error has no response', () => {
+    // Arrange
+    const error = createAxiosError({
+      message: undefined,
+      hasResponse: false,
+    });
+
+    // Act
+    const result = getApiErrorMessage(error, 'Invalid email or password.');
+
+    // Assert
+    expect(result).toMatch(/unable to reach the server/i);
+  });
+
+  it('returns a server message for internal server errors', () => {
+    // Arrange
+    const error = createAxiosError({
+      message: 'Internal server error',
+      status: 500,
+    });
+
+    // Act
+    const result = getApiErrorMessage(error, 'Invalid email or password.');
+
+    // Assert
+    expect(result).toMatch(/server is having trouble/i);
+  });
 });
 
 function createAxiosError({
   message,
+  status = 400,
+  hasResponse = true,
 }: {
   message: string | string[] | undefined;
+  status?: number;
+  hasResponse?: boolean;
 }): AxiosError {
   return {
     isAxiosError: true,
@@ -75,16 +107,18 @@ function createAxiosError({
       url: '/invoices',
       headers: {},
     },
-    response: {
-      status: 400,
-      statusText: 'Bad Request',
-      headers: {},
-      config: {
-        url: '/invoices',
-        headers: {},
-      },
-      data: { message },
-    },
+    response: hasResponse
+      ? {
+          status,
+          statusText: String(status),
+          headers: {},
+          config: {
+            url: '/invoices',
+            headers: {},
+          },
+          data: { message },
+        }
+      : undefined,
     toJSON: () => ({}),
   } as AxiosError;
 }
