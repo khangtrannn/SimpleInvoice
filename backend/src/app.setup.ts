@@ -5,7 +5,11 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 export function configureApp(app: INestApplication): void {
   const configService = app.get(ConfigService);
 
-  app.enableCors();
+  const corsOrigin = configService.get<string[]>('app.corsOrigin') ?? [];
+  app.enableCors({
+    origin: corsOrigin,
+    credentials: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
