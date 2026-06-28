@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router';
 
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ScrollToTop } from '@/app/ScrollToTop';
-import { LoginPage } from '@/features/auth/pages/LoginPage';
+import { LoginPage } from '@/features/auth/login/LoginPage';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { PublicOnlyRoute } from '@/features/auth/components/PublicOnlyRoute';
 import { CreateInvoicePage } from '@/features/invoices/create/CreateInvoicePage';

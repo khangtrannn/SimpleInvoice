@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { PublicOnlyRoute } from '@/features/auth/components/PublicOnlyRoute';
-import { LoginPage } from '@/features/auth/pages/LoginPage';
+import { LoginPage } from '@/features/auth/login/LoginPage';
 import { reviewerCredentials, TEST_ACCESS_TOKEN } from '@/test/mocks/auth-handlers';
 import { renderWithRouter } from '@/test/test-utils';
 

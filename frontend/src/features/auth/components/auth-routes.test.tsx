@@ -6,7 +6,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { PublicOnlyRoute } from '@/features/auth/components/PublicOnlyRoute';
 import { setAccessToken, setStoredAuthUser } from '@/features/auth/auth-storage';
-import { LoginPage } from '@/features/auth/pages/LoginPage';
+import { LoginPage } from '@/features/auth/login/LoginPage';
 import { reviewerUser, TEST_ACCESS_TOKEN } from '@/test/mocks/auth-handlers';
 import { renderWithRouter } from '@/test/test-utils';
 

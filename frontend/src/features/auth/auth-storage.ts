@@ -1,3 +1,4 @@
+import { authUserSchema } from '@/api/auth.schema';
 import type { AuthUser } from '@/api/types';
 
 const ACCESS_TOKEN_KEY = 'simple_invoice_access_token';
@@ -23,9 +24,17 @@ export function getStoredAuthUser(): AuthUser | null {
   }
 
   try {
-    return JSON.parse(rawUser) as AuthUser;
+    const parsedUser = JSON.parse(rawUser);
+    const result = authUserSchema.safeParse(parsedUser);
+
+    if (!result.success) {
+      clearStoredAuthUser();
+      return null;
+    }
+
+    return result.data;
   } catch {
-    window.localStorage.removeItem(AUTH_USER_KEY);
+    clearStoredAuthUser();
     return null;
   }
 }
