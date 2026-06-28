@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router';
 
 import { AUTH_ROUTES } from '@/features/auth/auth-route.constants';
-import { useAuth } from '@/features/auth/auth-context';
+import { useAuth } from '@/features/auth/use-auth';
 
 import { AppHeader } from './AppHeader';
 

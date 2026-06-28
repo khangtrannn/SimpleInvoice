@@ -70,7 +70,7 @@ function createGeneratedInvoice(index: number): InvoiceSeedInput {
     taxPercentage,
   });
 
-const totalPaid = createTotalPaid({
+  const totalPaid = createTotalPaid({
     status,
     quantity,
     rate,

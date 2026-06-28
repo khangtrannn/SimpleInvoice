@@ -13,10 +13,12 @@ export function InvoiceFilterSearch({
   onChange,
 }: InvoiceFilterSearchProps) {
   const [keyword, setKeyword] = useState(currentKeyword ?? '');
+  const [syncedKeyword, setSyncedKeyword] = useState(currentKeyword);
 
-  useEffect(() => {
+  if (currentKeyword !== syncedKeyword) {
+    setSyncedKeyword(currentKeyword);
     setKeyword(currentKeyword ?? '');
-  }, [currentKeyword]);
+  }
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {

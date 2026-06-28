@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import { login } from '@/api/auth.api';
 import type { LoginRequest } from '@/api/types';
 import { AUTH_ROUTES } from '@/features/auth/auth-route.constants';
-import { useAuth } from '@/features/auth/auth-context';
+import { useAuth } from '@/features/auth/use-auth';
 
 export function useLogin() {
   const navigate = useNavigate();
