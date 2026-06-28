@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router';
 
+import { AUTH_ROUTES } from '@/features/auth/auth-route.constants';
 import { useAuth } from '@/features/auth/auth-context';
 
 import { AppHeader } from './AppHeader';
@@ -18,7 +19,7 @@ export function AppLayout() {
 
   function handleLogout() {
     logout();
-    navigate('/login', { replace: true });
+    navigate(AUTH_ROUTES.login, { replace: true });
   }
 
   return (

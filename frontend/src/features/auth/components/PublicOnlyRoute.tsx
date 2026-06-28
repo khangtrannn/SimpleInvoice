@@ -1,22 +1,19 @@
 import { Navigate, Outlet } from 'react-router';
 
+import { AUTH_ROUTES } from '@/features/auth/auth-route.constants';
 import { useAuth } from '@/features/auth/auth-context';
+
+import { AuthRouteLoading } from './AuthRouteLoading';
 
 export function PublicOnlyRoute() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-white px-4">
-        <div className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-600">Checking your session...</p>
-        </div>
-      </main>
-    );
+    return <AuthRouteLoading />;
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/invoices" replace />;
+    return <Navigate to={AUTH_ROUTES.authenticatedHome} replace />;
   }
 
   return <Outlet />;

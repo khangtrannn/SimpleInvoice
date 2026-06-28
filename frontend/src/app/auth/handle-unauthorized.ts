@@ -1,16 +1,10 @@
+import { AUTH_ROUTES } from '@/features/auth/auth-route.constants';
 import { clearAuthSession } from '@/features/auth/auth-storage';
-
-const LOGIN_PATH = '/login';
 
 export function handleUnauthorized() {
   clearAuthSession();
-  redirectToLogin();
-}
 
-function redirectToLogin() {
-  if (window.location.pathname === LOGIN_PATH) {
-    return;
+  if (window.location.pathname !== AUTH_ROUTES.login) {
+    window.location.assign(AUTH_ROUTES.login);
   }
-
-  window.location.assign(LOGIN_PATH);
 }
