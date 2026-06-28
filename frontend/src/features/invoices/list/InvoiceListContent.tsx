@@ -1,7 +1,7 @@
 import type { InvoiceListItem, InvoiceListQuery, Paging } from '@/api/types';
 import { InvoiceFilters } from '@/features/invoices/components/InvoiceFilters';
 import { InvoicePagination } from '@/features/invoices/components/InvoicePagination';
-import { InvoiceTable } from '@/features/invoices/components/InvoiceTable';
+import { InvoiceTable } from '@/features/invoices/list/components';
 
 import { InvoiceListEmptyState } from './InvoiceListEmptyState';
 import { InvoiceListSkeleton } from './InvoiceListSkeleton';

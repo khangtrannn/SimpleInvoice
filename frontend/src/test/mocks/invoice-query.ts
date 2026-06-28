@@ -1,6 +1,5 @@
 import type {
   InvoiceListItem,
-  InvoiceListQuery,
   InvoiceListResponse,
   InvoiceSortBy,
   InvoiceStatus,
@@ -146,12 +145,20 @@ export function buildInvoiceSummary(
   };
 }
 
-function getSortValue(invoice: InvoiceListItem, sortBy: InvoiceSortBy) {
+function getSortValue(invoice: InvoiceListItem, sortBy: InvoiceSortBy): string | number {
   if (sortBy === 'totalAmount') {
     return Number(invoice.totalAmount);
   }
 
-  return invoice[sortBy];
+  if (sortBy === 'invoiceDate') {
+    return invoice.invoiceDate;
+  }
+
+  if (sortBy === 'dueDate') {
+    return invoice.dueDate || '';
+  }
+
+  return invoice.invoiceDate;
 }
 
 function sumInvoiceAmounts(invoices: InvoiceListItem[]): string {
@@ -183,7 +190,7 @@ function parseSortBy(value: string | null): InvoiceSortBy {
     return value;
   }
 
-  return 'createdAt';
+  return 'invoiceDate';
 }
 
 function parseOrdering(value: string | null): Ordering {
