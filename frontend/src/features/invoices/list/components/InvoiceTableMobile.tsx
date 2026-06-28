@@ -15,69 +15,59 @@ export function InvoiceTableMobile({ rows }: InvoiceTableMobileProps) {
         <Link
           key={row.id}
           to={row.detailPath}
-          className="block bg-white p-5 transition hover:bg-slate-50/60"
+          className="block bg-white p-4 transition hover:bg-slate-50/80 active:bg-slate-50"
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
               <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${row.customerAvatarClassName}`}
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${row.customerAvatarClassName}`}
               >
                 {row.customerInitials}
               </div>
 
-              <div>
-                <p className="font-mono text-sm font-bold text-slate-950">
+              <div className="min-w-0">
+                <p className="font-mono text-xs font-bold text-slate-950 truncate">
                   {row.invoiceNumber}
                 </p>
 
-                <p className="mt-0.5 text-sm text-slate-600">
+                <p className="text-xs text-slate-500 truncate">
                   {row.customerName}
                 </p>
               </div>
             </div>
 
-            <InvoiceStatusBadge status={row.status} />
+            <div className="shrink-0">
+              <InvoiceStatusBadge status={row.status} />
+            </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <p className="text-xs tracking-wide text-slate-400 uppercase">
-                Issue Date
-              </p>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-slate-400 font-medium">Issued</p>
+                <p className="text-slate-900 font-medium">{row.invoiceDate}</p>
+              </div>
 
-              <p className="mt-1 font-medium text-slate-700">
-                {row.invoiceDate}
-              </p>
+              <div className="text-right">
+                <p className="text-slate-400 font-medium">Due</p>
+                {row.dueDate ? (
+                  <div>
+                    <p className="text-slate-900 font-medium">{row.dueDate}</p>
+                    {row.dueDateMeta ? (
+                      <p className={`text-xs font-medium ${row.dueDateMeta.colorClassName}`}>
+                        {row.dueDateMeta.text}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="text-slate-400">–</p>
+                )}
+              </div>
             </div>
 
-            <div>
-              <p className="text-xs tracking-wide text-slate-400 uppercase">
-                Due Date
-              </p>
-
-              {row.dueDate ? (
-                <>
-                  <p className="mt-1 font-medium text-slate-700">
-                    {row.dueDate}
-                  </p>
-
-                  {row.dueDateMeta ? (
-                    <p className={`text-xs ${row.dueDateMeta.colorClassName}`}>
-                      {row.dueDateMeta.text}
-                    </p>
-                  ) : null}
-                </>
-              ) : (
-                <p className="mt-1 text-slate-400">–</p>
-              )}
-            </div>
-
-            <div className="col-span-2">
-              <p className="text-xs tracking-wide text-slate-400 uppercase">
-                Total
-              </p>
-
-              <p className="mt-1 font-mono font-bold tabular-nums text-slate-950">
+            <div className="border-t border-slate-100 pt-2 flex justify-between items-center">
+              <p className="text-slate-400 font-medium">Total</p>
+              <p className="font-mono font-bold tabular-nums text-slate-950">
                 {row.totalAmount}
               </p>
             </div>
