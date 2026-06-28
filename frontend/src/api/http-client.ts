@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { handleUnauthorized } from '@/app/auth/handle-unauthorized';
+import { isAuthLoginRequest, isUnauthorizedError } from '@/api/http-error';
 import { getAccessToken } from '@/features/auth/auth-storage';
 import { env } from '@/shared/config/env';
 
@@ -24,13 +25,8 @@ httpClient.interceptors.request.use((config) => {
 httpClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      const requestUrl = error.config?.url ?? '';
-      const isLoginRequest = requestUrl.includes('/auth/login');
-
-      if (!isLoginRequest) {
-        handleUnauthorized();
-      }
+    if (isUnauthorizedError(error) && !isAuthLoginRequest(error)) {
+      handleUnauthorized();
     }
 
     return Promise.reject(error);
