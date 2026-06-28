@@ -52,15 +52,14 @@ export function InvoiceItemsCard({ invoice }: InvoiceItemsCardProps) {
       <div className="divide-y divide-slate-100 md:hidden">
         {invoice.items.map((item, index) => (
           <div key={item.id} className="p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm text-slate-500">Item #{index + 1}</p>
-                <p className="mt-1 font-semibold text-slate-950">{item.name}</p>
+            <div>
+              <p className="text-sm text-slate-500">Item #{index + 1}</p>
+              <div className="mt-1 flex items-start justify-between gap-4">
+                <p className="font-semibold text-slate-950">{item.name}</p>
+                <p className="font-bold text-slate-950 shrink-0">
+                  {getInvoiceItemLineTotal(invoice, item)}
+                </p>
               </div>
-
-              <p className="font-bold text-slate-950">
-                {getInvoiceItemLineTotal(invoice, item)}
-              </p>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
