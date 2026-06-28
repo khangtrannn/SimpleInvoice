@@ -52,3 +52,57 @@ input[type="password"]::-webkit-contacts-auto-fill-button {
   display: none !important;
   pointer-events: none;
 }
+
+.invoice-print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 0;
+    size: A4;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    background: #eaf0fa !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .app-shell-header,
+  .invoice-detail-screen {
+    display: none !important;
+  }
+
+  main {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .invoice-print-root {
+    display: block !important;
+    min-height: 100vh;
+    background: #eaf0fa !important;
+    color: #0f172a;
+    padding: 10mm;
+  }
+
+  .invoice-print-card {
+    min-height: calc(100vh - 20mm);
+    border-radius: 7mm;
+    background: #ffffff !important;
+    padding: 10mm;
+  }
+
+  .invoice-print-avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

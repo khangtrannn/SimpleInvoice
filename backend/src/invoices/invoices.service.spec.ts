@@ -25,7 +25,7 @@ describe(InvoicesService.name, () => {
   let invoicesRepository: jest.Mocked<
     Pick<
       InvoicesRepository,
-      'findAll' | 'findByIdWithItems' | 'createDraftInvoice'
+      'findAll' | 'findSummary' | 'findByIdWithItems' | 'createDraftInvoice'
     >
   >;
 
@@ -96,6 +96,7 @@ describe(InvoicesService.name, () => {
   beforeEach(async () => {
     invoicesRepository = {
       findAll: jest.fn(),
+      findSummary: jest.fn(),
       findByIdWithItems: jest.fn(),
       createDraftInvoice: jest.fn(),
     };
@@ -116,7 +117,7 @@ describe(InvoicesService.name, () => {
   });
 
   describe('findAll', () => {
-    it('should return mapped invoices with paging info', async () => {
+    it('should return mapped invoices with paging and summary', async () => {
       // Arrange
       const query = {
         page: 1,
@@ -130,18 +131,44 @@ describe(InvoicesService.name, () => {
         total: 1,
       });
 
+      invoicesRepository.findSummary.mockResolvedValue({
+        totalRevenue: '200.00',
+        totalPaid: '0.00',
+        totalPending: '0.00',
+        totalOverdue: '0.00',
+        totalDraft: '200.00',
+        paidCount: '0',
+        pendingCount: '0',
+        overdueCount: '0',
+        draftCount: '1',
+        currency: 'AUD',
+        currencySymbol: '$',
+        currencyCount: '1',
+      });
+
       // Act
       const result = await invoicesService.findAll(query);
 
       // Assert
       expect(invoicesRepository.findAll).toHaveBeenCalledWith(query);
-      expect(result.paging).toEqual({
-        page: 1,
-        pageSize: 10,
-        total: 1,
-      });
+      expect(invoicesRepository.findSummary).toHaveBeenCalledWith(query);
+      expect(result.paging).toEqual({ page: 1, pageSize: 10, total: 1 });
       expect(result.data).toHaveLength(1);
       expect(result.data[0].invoiceNumber).toBe(mockInvoice.invoiceNumber);
+      expect(result.summary).toEqual({
+        totalRevenue: '200.00',
+        totalPaid: '0.00',
+        totalPending: '0.00',
+        totalOverdue: '0.00',
+        totalDraft: '200.00',
+        paidCount: 0,
+        pendingCount: 0,
+        overdueCount: 0,
+        draftCount: 1,
+        currency: 'AUD',
+        currencySymbol: '$',
+        currencyCount: 1,
+      });
     });
   });
 

@@ -1,5 +1,5 @@
 import { HttpResponse, http } from 'msw';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Link } from 'react-router';
 import type { RouteObject } from 'react-router';
@@ -192,6 +192,21 @@ describe('InvoiceListPage', () => {
 
     // Act
     await user.click(invoiceLink);
+
+    // Assert
+    expect(await screen.findByText(/invoice detail page/i)).toBeInTheDocument();
+  });
+
+  it('navigates to invoice detail when the invoice row is clicked', async () => {
+    // Arrange
+    const user = userEvent.setup();
+    renderInvoiceList();
+
+    await screen.findByRole('table');
+    const customerCell = within(screen.getByRole('table')).getByText(/acme corporation/i);
+
+    // Act
+    await user.click(customerCell);
 
     // Assert
     expect(await screen.findByText(/invoice detail page/i)).toBeInTheDocument();

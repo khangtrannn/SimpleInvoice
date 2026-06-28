@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ScrollToTop } from '@/app/ScrollToTop';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { PublicOnlyRoute } from '@/features/auth/components/PublicOnlyRoute';
@@ -10,35 +11,40 @@ import { InvoiceListPage } from '@/features/invoices/pages/InvoiceListPage';
 
 export const router = createBrowserRouter([
   {
-    path: '/',
-    element: <Navigate to="/invoices" replace />,
-  },
-  {
-    element: <PublicOnlyRoute />,
+    element: <ScrollToTop />,
     children: [
       {
-        path: '/login',
-        element: <LoginPage />,
+        path: '/',
+        element: <Navigate to="/invoices" replace />,
       },
-    ],
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
       {
-        element: <AppLayout />,
+        element: <PublicOnlyRoute />,
         children: [
           {
-            path: '/invoices',
-            element: <InvoiceListPage />,
+            path: '/login',
+            element: <LoginPage />,
           },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
           {
-            path: '/invoices/new',
-            element: <CreateInvoicePage />,
-          },
-          {
-            path: '/invoices/:invoiceId',
-            element: <InvoiceDetailPage />,
+            element: <AppLayout />,
+            children: [
+              {
+                path: '/invoices',
+                element: <InvoiceListPage />,
+              },
+              {
+                path: '/invoices/new',
+                element: <CreateInvoicePage />,
+              },
+              {
+                path: '/invoices/:invoiceId',
+                element: <InvoiceDetailPage />,
+              },
+            ],
           },
         ],
       },

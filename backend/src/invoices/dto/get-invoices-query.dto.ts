@@ -16,6 +16,7 @@ import { IsDateRange } from '../../common/validators/is-date-range.validator';
 import { InvoiceEffectiveStatus } from '../enums/invoice-status.enum';
 
 export enum InvoiceSortBy {
+  CREATED_AT = 'createdAt',
   INVOICE_DATE = 'invoiceDate',
   DUE_DATE = 'dueDate',
   TOTAL_AMOUNT = 'totalAmount',
@@ -57,11 +58,11 @@ export class GetInvoicesQueryDto {
 
   @ApiPropertyOptional({
     enum: InvoiceSortBy,
-    default: InvoiceSortBy.INVOICE_DATE,
+    default: InvoiceSortBy.CREATED_AT,
   })
   @IsOptional()
   @IsEnum(InvoiceSortBy)
-  sortBy = InvoiceSortBy.INVOICE_DATE;
+  sortBy = InvoiceSortBy.CREATED_AT;
 
   @ApiPropertyOptional({
     enum: SortOrdering,

@@ -179,7 +179,7 @@ function createTotalPaid(input: {
   const totalAmount = invoiceSubTotal.plus(totalTax).minus(input.totalDiscount);
 
   if (input.status === InvoiceStatus.PAID) {
-    return totalAmount.toDecimalPlaces(2, Decimal.ROUND_DOWN).toFixed(2);
+    return toMoney(totalAmount);
   }
 
   if (input.status === InvoiceStatus.PENDING) {

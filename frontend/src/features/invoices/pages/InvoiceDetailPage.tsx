@@ -5,6 +5,7 @@ import {
   InvoiceDetailHeader,
   InvoiceInformationCard,
   InvoiceItemsCard,
+  InvoicePrintDocument,
   InvoiceSummaryCard,
   InvoiceTotalsCard,
 } from '@/features/invoices/components/InvoiceDetailCards';
@@ -44,23 +45,24 @@ export function InvoiceDetailPage() {
   }
 
   return (
-    <div>
-      <InvoiceDetailHeader />
-      <InvoiceSummaryCard invoice={invoice} />
+    <>
+      <div className="invoice-detail-screen">
+        <InvoiceDetailHeader status={invoice.status} />
+        <InvoiceSummaryCard invoice={invoice} />
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <CustomerInformationCard invoice={invoice} />
-        <InvoiceInformationCard invoice={invoice} />
+        <div className="grid gap-6 md:grid-cols-2">
+          <CustomerInformationCard invoice={invoice} />
+          <InvoiceInformationCard invoice={invoice} />
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <InvoiceItemsCard invoice={invoice} />
+          <InvoiceTotalsCard invoice={invoice} />
+        </div>
       </div>
 
-      <div className="mt-6">
-        <InvoiceItemsCard invoice={invoice} />
-      </div>
-
-      <div className="mt-6">
-        <InvoiceTotalsCard invoice={invoice} />
-      </div>
-    </div>
+      <InvoicePrintDocument invoice={invoice} />
+    </>
   );
 }
 
@@ -96,7 +98,7 @@ function InvoiceDetailSkeleton() {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid gap-6 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 5 }, (_, index) => (
             <div key={index}>
               <div className="h-4 w-28 rounded bg-slate-100" />
@@ -107,7 +109,7 @@ function InvoiceDetailSkeleton() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <div className="h-64 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="h-6 w-56 rounded bg-slate-100" />
           <div className="mt-8 space-y-4">

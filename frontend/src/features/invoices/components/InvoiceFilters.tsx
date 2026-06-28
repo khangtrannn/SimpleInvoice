@@ -1,177 +1,248 @@
-import {
-  AlertCircle,
-  Calendar,
-  CheckCircle2,
-  Clock3,
-  FileText,
-  LayoutList,
-  RotateCcw,
-  Search,
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowUpDown, Calendar, ChevronDown, RotateCcw, Search } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
-import type {
-  InvoiceListQuery,
-  InvoiceSortBy,
-  InvoiceStatus,
-  InvoiceStatusFilter,
-  Ordering,
-} from '@/api/types';
+import type { InvoiceListQuery, InvoiceSortBy, InvoiceStatus, InvoiceStatusFilter, Ordering } from '@/api/types';
+import { formatDate } from '@/utils/format';
 
-const statusOptions: Array<{
-  label: string;
-  value: InvoiceStatusFilter;
-  icon: typeof LayoutList;
-}> = [
-  { label: 'All', value: 'All', icon: LayoutList },
-  { label: 'Draft', value: 'Draft', icon: FileText },
-  { label: 'Pending', value: 'Pending', icon: Clock3 },
-  { label: 'Paid', value: 'Paid', icon: CheckCircle2 },
-  { label: 'Overdue', value: 'Overdue', icon: AlertCircle },
+type SortOption = { label: string; sortBy: InvoiceSortBy; ordering: Ordering };
+
+const sortOptions: SortOption[] = [
+  { label: 'Newest first', sortBy: 'createdAt', ordering: 'DESC' },
+  { label: 'Oldest first', sortBy: 'createdAt', ordering: 'ASC' },
+  { label: 'Issue date: Newest', sortBy: 'invoiceDate', ordering: 'DESC' },
+  { label: 'Issue date: Oldest', sortBy: 'invoiceDate', ordering: 'ASC' },
+  { label: 'Due date: Soonest', sortBy: 'dueDate', ordering: 'ASC' },
+  { label: 'Due date: Latest', sortBy: 'dueDate', ordering: 'DESC' },
+  { label: 'Amount: High to Low', sortBy: 'totalAmount', ordering: 'DESC' },
+  { label: 'Amount: Low to High', sortBy: 'totalAmount', ordering: 'ASC' },
 ];
-
-const statusActiveColors: Record<InvoiceStatusFilter, string> = {
-  All: 'bg-[#0D1F3C] text-white shadow-sm',
-  Draft: 'bg-slate-500 text-white shadow-sm',
-  Pending: 'bg-amber-600 text-white shadow-sm',
-  Paid: 'bg-emerald-600 text-white shadow-sm',
-  Overdue: 'bg-red-600 text-white shadow-sm',
-};
 
 type InvoiceFiltersProps = {
   query: InvoiceListQuery;
   onChange: (query: Partial<InvoiceListQuery>) => void;
   onReset: () => void;
+  customers?: string[];
 };
 
-export function InvoiceFilters({ query, onChange, onReset }: InvoiceFiltersProps) {
+export function InvoiceFilters({ query, onChange, onReset, customers = [] }: InvoiceFiltersProps) {
   const [keyword, setKeyword] = useState(query.keyword ?? '');
+  const [clientName, setClientName] = useState('');
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const datePickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setKeyword(query.keyword ?? '');
-  }, [query.keyword]);
+    function handleOutsideClick(e: MouseEvent) {
+      if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node)) {
+        setDatePickerOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
+    if (clientName) return;
+    const id = window.setTimeout(() => {
       if ((query.keyword ?? '') !== keyword.trim()) {
         onChange({ keyword: keyword.trim() || undefined, page: 1 });
       }
     }, 400);
+    return () => window.clearTimeout(id);
+  }, [keyword, clientName, onChange, query.keyword]);
 
-    return () => window.clearTimeout(timeoutId);
-  }, [keyword, onChange, query.keyword]);
-
-  function handleStatusChange(status: InvoiceStatusFilter) {
-    onChange({
-      status: status === 'All' ? undefined : (status as InvoiceStatus),
-      page: 1,
-    });
+  function handleKeywordChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setKeyword(e.target.value);
+    if (clientName) setClientName('');
   }
 
-  function handleSortByChange(sortBy: InvoiceSortBy) {
-    onChange({ sortBy, page: 1 });
+  function handleStatusChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const val = e.target.value as InvoiceStatusFilter;
+    onChange({ status: val === 'All' ? undefined : (val as InvoiceStatus), page: 1 });
   }
 
-  function handleOrderingChange(ordering: Ordering) {
-    onChange({ ordering, page: 1 });
+  function handleClientChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const client = e.target.value;
+    setClientName(client);
+    setKeyword('');
+    onChange({ keyword: client || undefined, page: 1 });
   }
 
-  const activeStatus: InvoiceStatusFilter = query.status ?? 'All';
+  function handleSortChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const option = sortOptions.find((o) => o.label === e.target.value);
+    if (option) onChange({ sortBy: option.sortBy, ordering: option.ordering, page: 1 });
+  }
+
+  function handleReset() {
+    setKeyword('');
+    setClientName('');
+    setDatePickerOpen(false);
+    onReset();
+  }
+
+  const activeSortLabel =
+    sortOptions.find((o) => o.sortBy === query.sortBy && o.ordering === query.ordering)?.label ??
+    sortOptions[0].label;
+
+  const dateLabel =
+    query.fromDate || query.toDate
+      ? `${query.fromDate ? formatDate(query.fromDate) : '…'} – ${query.toDate ? formatDate(query.toDate) : '…'}`
+      : 'All dates';
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      {/* Row 1: Search + Date range */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 px-4 py-2.5">
-        <div className="relative min-w-0 flex-1">
+    <div className="flex flex-wrap items-end gap-3" aria-label="Invoice filters">
+      {/* Search */}
+      <div className="w-full sm:min-w-[200px] sm:flex-[2]">
+        <p className="mb-1.5 text-xs font-medium text-slate-500">Search</p>
+        <div className="relative">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
             aria-hidden="true"
           />
           <input
-            value={keyword}
-            onChange={(event) => setKeyword(event.target.value)}
-            placeholder="Search by invoice number or customer name"
-            className="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-4 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-100"
-          />
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <Calendar className="h-3.5 w-3.5 flex-shrink-0 text-slate-400" aria-hidden="true" />
-          <input
-            type="date"
-            value={query.fromDate ?? ''}
-            onChange={(event) => onChange({ fromDate: event.target.value || undefined, page: 1 })}
-            className="h-8 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-xs text-slate-700 outline-none transition focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-100"
-            aria-label="From date"
-          />
-          <span className="text-xs text-slate-300">—</span>
-          <input
-            type="date"
-            value={query.toDate ?? ''}
-            onChange={(event) => onChange({ toDate: event.target.value || undefined, page: 1 })}
-            className="h-8 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-xs text-slate-700 outline-none transition focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-100"
-            aria-label="To date"
+            value={clientName ? '' : keyword}
+            onChange={handleKeywordChange}
+            placeholder="Search invoices..."
+            className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
           />
         </div>
       </div>
 
-      {/* Row 2: Status tabs + Sort + Reset */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
-        <div className="flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5">
-          {statusOptions.map((option) => {
-            const Icon = option.icon;
-            const isActive = activeStatus === option.value;
+      {/* Status */}
+      <div className="w-full sm:w-auto">
+        <p className="mb-1.5 text-xs font-medium text-slate-500">Status</p>
+        <div className="relative">
+          <select
+            value={query.status ?? 'All'}
+            onChange={handleStatusChange}
+            className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-4 pr-9 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 sm:w-36"
+          >
+            <option value="All">All status</option>
+            <option value="Draft">Draft</option>
+            <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+            <option value="Overdue">Overdue</option>
+          </select>
+          <ChevronDown
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
 
-            return (
+      {/* Date range */}
+      <div ref={datePickerRef} className="relative w-full sm:w-auto">
+        <p className="mb-1.5 text-xs font-medium text-slate-500">Date range</p>
+        <button
+          type="button"
+          onClick={() => setDatePickerOpen((v) => !v)}
+          className="inline-flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 sm:w-auto sm:justify-start"
+        >
+          <Calendar className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+          <span className="whitespace-nowrap">{dateLabel}</span>
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${datePickerOpen ? 'rotate-180' : ''}`}
+            aria-hidden="true"
+          />
+        </button>
+
+        {datePickerOpen && (
+          <div className="absolute left-0 top-[calc(100%+6px)] z-20 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
+            <div className="space-y-3">
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-slate-500">From</span>
+                <input
+                  type="date"
+                  value={query.fromDate ?? ''}
+                  onChange={(e) => onChange({ fromDate: e.target.value || undefined, page: 1 })}
+                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-slate-500">To</span>
+                <input
+                  type="date"
+                  value={query.toDate ?? ''}
+                  onChange={(e) => onChange({ toDate: e.target.value || undefined, page: 1 })}
+                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+                />
+              </label>
+            </div>
+            {(query.fromDate || query.toDate) && (
               <button
-                key={option.value}
                 type="button"
-                onClick={() => handleStatusChange(option.value)}
-                className={`inline-flex h-6 items-center gap-1 rounded-md px-2.5 text-[11px] font-semibold transition-all ${
-                  isActive
-                    ? statusActiveColors[option.value]
-                    : 'text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm'
-                }`}
+                onClick={() => {
+                  onChange({ fromDate: undefined, toDate: undefined, page: 1 });
+                  setDatePickerOpen(false);
+                }}
+                className="mt-3 w-full rounded-lg border border-slate-200 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
               >
-                <Icon className="h-3 w-3" aria-hidden="true" />
-                <span className="hidden sm:inline">{option.label}</span>
+                Clear dates
               </button>
-            );
-          })}
-        </div>
+            )}
+          </div>
+        )}
+      </div>
 
-        <div className="flex items-center gap-1.5">
+      {/* Client */}
+      <div className="w-full sm:w-auto">
+        <p className="mb-1.5 text-xs font-medium text-slate-500">Client</p>
+        <div className="relative">
           <select
-            aria-label="Sort by"
-            value={query.sortBy}
-            onChange={(event) => handleSortByChange(event.target.value as InvoiceSortBy)}
-            className="h-7 rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 shadow-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+            value={clientName}
+            onChange={handleClientChange}
+            className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-4 pr-9 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 sm:w-44"
           >
-            <option value="invoiceDate">Invoice Date</option>
-            <option value="dueDate">Due Date</option>
-            <option value="totalAmount">Total Amount</option>
+            <option value="">All clients</option>
+            {customers.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
-
-          <select
-            aria-label="Ordering"
-            value={query.ordering}
-            onChange={(event) => handleOrderingChange(event.target.value as Ordering)}
-            className="h-7 rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 shadow-sm outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
-          >
-            <option value="DESC">DESC</option>
-            <option value="ASC">ASC</option>
-          </select>
-
-          <button
-            type="button"
-            onClick={onReset}
-            className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-500 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
-          >
-            <RotateCcw className="h-3 w-3" aria-hidden="true" />
-            <span className="hidden sm:inline">Clear filters</span>
-          </button>
+          <ChevronDown
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            aria-hidden="true"
+          />
         </div>
       </div>
+
+      {/* Sort by */}
+      <div className="w-full sm:w-auto">
+        <p className="mb-1.5 text-xs font-medium text-slate-500">Sort by</p>
+        <div className="relative">
+          <ArrowUpDown
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            aria-hidden="true"
+          />
+          <select
+            value={activeSortLabel}
+            onChange={handleSortChange}
+            className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-9 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 sm:w-48"
+          >
+            {sortOptions.map((o) => (
+              <option key={o.label} value={o.label}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+
+      {/* Reset */}
+      <button
+        type="button"
+        onClick={handleReset}
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 sm:w-11 sm:shrink-0"
+        aria-label="Reset filters"
+        title="Reset filters"
+      >
+        <RotateCcw className="h-4 w-4" aria-hidden="true" />
+        <span className="text-sm font-medium sm:hidden">Reset filters</span>
+      </button>
     </div>
   );
 }

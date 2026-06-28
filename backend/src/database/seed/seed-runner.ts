@@ -74,8 +74,15 @@ async function createInvoices(
       rate: seedInvoice.item.rate,
       taxPercentage: seedInvoice.taxPercentage,
       discount: seedInvoice.totalDiscount,
-      totalPaid: seedInvoice.totalPaid,
+      totalPaid: 0,
     });
+
+    // totalPaid from the factory may differ from totals.totalAmount by a
+    // rounding fraction (ROUND_HALF_UP on intermediate values). Clamp to the
+    // authoritative rounded totalAmount so the balance never goes negative.
+    const totalPaid = toMoney(
+      Math.min(Number(seedInvoice.totalPaid), Number(totals.totalAmount)),
+    );
 
     return invoiceRepository.create({
       id: seedInvoice.id,
@@ -98,8 +105,8 @@ async function createInvoices(
       totalTax: totals.totalTax,
       totalDiscount: toMoney(seedInvoice.totalDiscount),
       totalAmount: totals.totalAmount,
-      totalPaid: toMoney(seedInvoice.totalPaid),
-      balanceAmount: totals.balanceAmount,
+      totalPaid,
+      balanceAmount: toMoney(Number(totals.totalAmount) - Number(totalPaid)),
 
       createdById: reviewerUserId,
     });

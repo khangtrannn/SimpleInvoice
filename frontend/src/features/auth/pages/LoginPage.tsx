@@ -52,7 +52,11 @@ export function LoginPage() {
           <div className="flex min-h-0 flex-1 items-center justify-center">
             <div className="w-full max-w-[520px]">
               <div className="mb-14 hidden lg:block xl:mb-20 2xl:mb-24">
-                <span className="text-3xl font-bold text-slate-950">SimpleInvoice</span>
+                <img
+                  src="/brand/simple-invoice-logo.png"
+                  alt="SimpleInvoice"
+                  className="h-14 w-auto"
+                />
               </div>
 
               <div className="mb-8 text-center lg:text-left xl:mb-10">

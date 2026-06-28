@@ -1,7 +1,7 @@
 import type { InvoiceStatus } from '@/api/types';
 
 const statusConfig: Record<InvoiceStatus, { badge: string; dot: string }> = {
-  Draft: { badge: 'bg-slate-100 text-slate-600', dot: 'bg-slate-400' },
+  Draft: { badge: 'bg-white text-slate-700 ring-1 ring-slate-300', dot: 'bg-slate-500' },
   Pending: { badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200', dot: 'bg-amber-400' },
   Paid: { badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200', dot: 'bg-emerald-500' },
   Overdue: { badge: 'bg-red-50 text-red-700 ring-1 ring-red-200', dot: 'bg-red-500' },

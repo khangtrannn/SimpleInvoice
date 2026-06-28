@@ -76,12 +76,53 @@ export class InvoiceListItemResponseDto {
   status!: InvoiceEffectiveStatus;
 }
 
+export class InvoiceSummaryResponseDto {
+  @ApiProperty({ type: String, example: '81751.09' })
+  totalRevenue!: string;
+
+  @ApiProperty({ type: String, example: '0.00' })
+  totalPaid!: string;
+
+  @ApiProperty({ type: String, example: '0.00' })
+  totalPending!: string;
+
+  @ApiProperty({ type: String, example: '0.00' })
+  totalOverdue!: string;
+
+  @ApiProperty({ type: String, example: '0.00' })
+  totalDraft!: string;
+
+  @ApiProperty({ type: Number, example: 5 })
+  paidCount!: number;
+
+  @ApiProperty({ type: Number, example: 3 })
+  pendingCount!: number;
+
+  @ApiProperty({ type: Number, example: 2 })
+  overdueCount!: number;
+
+  @ApiProperty({ type: Number, example: 8 })
+  draftCount!: number;
+
+  @ApiProperty({ type: String, example: 'AUD', nullable: true })
+  currency!: string | null;
+
+  @ApiProperty({ type: String, example: 'AU$', nullable: true })
+  currencySymbol!: string | null;
+
+  @ApiProperty({ type: Number, example: 1 })
+  currencyCount!: number;
+}
+
 export class InvoiceListResponseDto {
   @ApiProperty({ type: [InvoiceListItemResponseDto] })
   data!: InvoiceListItemResponseDto[];
 
   @ApiProperty({ type: PagingResponseDto })
   paging!: PagingResponseDto;
+
+  @ApiProperty({ type: InvoiceSummaryResponseDto })
+  summary!: InvoiceSummaryResponseDto;
 }
 
 export class InvoiceDetailResponseDto {

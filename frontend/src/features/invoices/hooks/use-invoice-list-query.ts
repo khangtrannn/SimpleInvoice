@@ -5,11 +5,11 @@ import type { InvoiceListQuery, InvoiceSortBy, InvoiceStatus, Ordering } from '@
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 10;
-const DEFAULT_SORT_BY: InvoiceSortBy = 'invoiceDate';
+const DEFAULT_SORT_BY: InvoiceSortBy = 'createdAt';
 const DEFAULT_ORDERING: Ordering = 'DESC';
 
 const invoiceStatuses: InvoiceStatus[] = ['Draft', 'Pending', 'Paid', 'Overdue'];
-const sortFields: InvoiceSortBy[] = ['invoiceDate', 'dueDate', 'totalAmount'];
+const sortFields: InvoiceSortBy[] = ['createdAt', 'invoiceDate', 'dueDate', 'totalAmount'];
 const orderings: Ordering[] = ['ASC', 'DESC'];
 
 function parsePositiveNumber(value: string | null, fallback: number) {

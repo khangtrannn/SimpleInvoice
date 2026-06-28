@@ -20,14 +20,30 @@ import {
 } from './enums/invoice-status.enum';
 
 const SORT_COLUMN_MAP: Record<InvoiceSortBy, string> = {
-  [InvoiceSortBy.INVOICE_DATE]: 'invoice.invoice_date',
-  [InvoiceSortBy.DUE_DATE]: 'invoice.due_date',
-  [InvoiceSortBy.TOTAL_AMOUNT]: 'invoice.total_amount',
+  [InvoiceSortBy.CREATED_AT]: 'invoice.createdAt',
+  [InvoiceSortBy.INVOICE_DATE]: 'invoice.invoiceDate',
+  [InvoiceSortBy.DUE_DATE]: 'invoice.dueDate',
+  [InvoiceSortBy.TOTAL_AMOUNT]: 'invoice.totalAmount',
 };
 
 export type FindAllInvoicesResult = {
   invoices: InvoiceEntity[];
   total: number;
+};
+
+export type InvoiceSummaryRaw = {
+  totalRevenue: string;
+  totalPaid: string;
+  totalPending: string;
+  totalOverdue: string;
+  totalDraft: string;
+  paidCount: string;
+  pendingCount: string;
+  overdueCount: string;
+  draftCount: string;
+  currency: string | null;
+  currencySymbol: string | null;
+  currencyCount: string;
 };
 
 export type DraftInvoiceData = {
@@ -72,6 +88,51 @@ export class InvoicesRepository {
     return { invoices, total };
   }
 
+  async findSummary(query: GetInvoicesQueryDto): Promise<InvoiceSummaryRaw> {
+    const qb = this.invoicesRepository
+      .createQueryBuilder('invoice')
+      .select('COALESCE(SUM(invoice.total_amount), 0)', 'totalRevenue')
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN invoice.status = '${InvoiceStatus.PAID}' THEN invoice.total_amount ELSE 0 END), 0)`,
+        'totalPaid',
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN invoice.status = '${InvoiceStatus.PENDING}' AND invoice.due_date >= CURRENT_DATE THEN invoice.total_amount ELSE 0 END), 0)`,
+        'totalPending',
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN invoice.status != '${InvoiceStatus.PAID}' AND invoice.due_date < CURRENT_DATE THEN invoice.total_amount ELSE 0 END), 0)`,
+        'totalOverdue',
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN invoice.status = '${InvoiceStatus.DRAFT}' THEN invoice.total_amount ELSE 0 END), 0)`,
+        'totalDraft',
+      )
+      .addSelect(
+        `COUNT(CASE WHEN invoice.status = '${InvoiceStatus.PAID}' THEN 1 END)`,
+        'paidCount',
+      )
+      .addSelect(
+        `COUNT(CASE WHEN invoice.status = '${InvoiceStatus.PENDING}' AND invoice.due_date >= CURRENT_DATE THEN 1 END)`,
+        'pendingCount',
+      )
+      .addSelect(
+        `COUNT(CASE WHEN invoice.status != '${InvoiceStatus.PAID}' AND invoice.due_date < CURRENT_DATE THEN 1 END)`,
+        'overdueCount',
+      )
+      .addSelect(
+        `COUNT(CASE WHEN invoice.status = '${InvoiceStatus.DRAFT}' THEN 1 END)`,
+        'draftCount',
+      )
+      .addSelect('MIN(invoice.currency)', 'currency')
+      .addSelect('MIN(invoice.currency_symbol)', 'currencySymbol')
+      .addSelect('COUNT(DISTINCT invoice.currency)', 'currencyCount');
+
+    this.applyFilters(qb, query);
+
+    return qb.getRawOne() as Promise<InvoiceSummaryRaw>;
+  }
+
   findByIdWithItems(id: string): Promise<InvoiceEntity | null> {
     return this.invoicesRepository.findOne({
       where: { id },
@@ -90,11 +151,22 @@ export class InvoicesRepository {
   private buildFindAllQuery(
     query: GetInvoicesQueryDto,
   ): SelectQueryBuilder<InvoiceEntity> {
-    const today = getTodayDateOnly();
     const queryBuilder = this.invoicesRepository
       .createQueryBuilder('invoice')
       .skip((query.page - 1) * query.pageSize)
       .take(query.pageSize);
+
+    this.applyFilters(queryBuilder, query);
+    this.applySorting(queryBuilder, query);
+
+    return queryBuilder;
+  }
+
+  private applyFilters(
+    queryBuilder: SelectQueryBuilder<InvoiceEntity>,
+    query: GetInvoicesQueryDto,
+  ): void {
+    const today = getTodayDateOnly();
 
     this.applyKeywordFilter(queryBuilder, query.keyword);
     this.applyDateRangeFilter(queryBuilder, query);
@@ -102,10 +174,6 @@ export class InvoicesRepository {
     if (query.status) {
       this.applyStatusFilter(queryBuilder, query.status, today);
     }
-
-    this.applySorting(queryBuilder, query);
-
-    return queryBuilder;
   }
 
   private applyKeywordFilter(

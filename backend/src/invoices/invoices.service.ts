@@ -12,6 +12,7 @@ import { GetInvoicesQueryDto } from './dto/get-invoices-query.dto';
 import {
   InvoiceDetailResponseDto,
   InvoiceListResponseDto,
+  InvoiceSummaryResponseDto,
 } from './dto/invoice-response.dto';
 import {
   calculateInvoiceTotals,
@@ -19,7 +20,11 @@ import {
   toMoney,
 } from './domain/invoice-calculation';
 import type { InvoiceTotals } from './domain/invoice-calculation.types';
-import { DraftInvoiceData, InvoicesRepository } from './invoices.repository';
+import {
+  DraftInvoiceData,
+  InvoiceSummaryRaw,
+  InvoicesRepository,
+} from './invoices.repository';
 import {
   toInvoiceDetailResponse,
   toInvoiceListItemResponse,
@@ -33,17 +38,36 @@ export class InvoicesService {
   constructor(private readonly invoicesRepository: InvoicesRepository) {}
 
   async findAll(query: GetInvoicesQueryDto): Promise<InvoiceListResponseDto> {
-    const page = query.page;
-    const pageSize = query.pageSize;
-    const { invoices, total } = await this.invoicesRepository.findAll(query);
+    const [{ invoices, total }, summaryRaw] = await Promise.all([
+      this.invoicesRepository.findAll(query),
+      this.invoicesRepository.findSummary(query),
+    ]);
 
     return {
       data: invoices.map(toInvoiceListItemResponse),
       paging: {
-        page,
-        pageSize,
+        page: query.page,
+        pageSize: query.pageSize,
         total,
       },
+      summary: this.toSummaryDto(summaryRaw),
+    };
+  }
+
+  private toSummaryDto(raw: InvoiceSummaryRaw): InvoiceSummaryResponseDto {
+    return {
+      totalRevenue: raw.totalRevenue,
+      totalPaid: raw.totalPaid,
+      totalPending: raw.totalPending,
+      totalOverdue: raw.totalOverdue,
+      totalDraft: raw.totalDraft,
+      paidCount: Number(raw.paidCount),
+      pendingCount: Number(raw.pendingCount),
+      overdueCount: Number(raw.overdueCount),
+      draftCount: Number(raw.draftCount),
+      currency: raw.currency,
+      currencySymbol: raw.currencySymbol,
+      currencyCount: Number(raw.currencyCount),
     };
   }
 

@@ -157,7 +157,7 @@ function isInvoiceStatus(value: string | null): value is InvoiceStatus {
 }
 
 function isSortBy(value: string | null): value is InvoiceSortBy {
-  return value === 'invoiceDate' || value === 'dueDate' || value === 'totalAmount';
+  return value === 'createdAt' || value === 'invoiceDate' || value === 'dueDate' || value === 'totalAmount';
 }
 
 function isOrdering(value: string | null): value is Ordering {
@@ -170,12 +170,18 @@ function sortInvoices(
   ordering: Ordering,
 ): InvoiceListItem[] {
   return [...invoices].sort((firstInvoice, secondInvoice) => {
-    let firstValue: string | number = firstInvoice[sortBy];
-    let secondValue: string | number = secondInvoice[sortBy];
+    let firstValue: string | number;
+    let secondValue: string | number;
 
-    if (sortBy === 'totalAmount') {
+    if (sortBy === 'createdAt') {
+      firstValue = mockInvoices.indexOf(firstInvoice);
+      secondValue = mockInvoices.indexOf(secondInvoice);
+    } else if (sortBy === 'totalAmount') {
       firstValue = Number(firstInvoice.totalAmount);
       secondValue = Number(secondInvoice.totalAmount);
+    } else {
+      firstValue = firstInvoice[sortBy];
+      secondValue = secondInvoice[sortBy];
     }
 
     if (firstValue < secondValue) {
@@ -225,7 +231,7 @@ export const invoiceHandlers = [
     const pageSize = Number(url.searchParams.get('pageSize') ?? 10);
 
     const status = isInvoiceStatus(statusParam) ? statusParam : undefined;
-    const sortBy = isSortBy(sortByParam) ? sortByParam : 'invoiceDate';
+    const sortBy = isSortBy(sortByParam) ? sortByParam : 'createdAt';
     const ordering = isOrdering(orderingParam) ? orderingParam : 'DESC';
 
     let filteredInvoices = mockInvoices;
@@ -256,12 +262,38 @@ export const invoiceHandlers = [
     const startIndex = (page - 1) * pageSize;
     const pagedInvoices = sortedInvoices.slice(startIndex, startIndex + pageSize);
 
+    const today = new Date().toISOString().slice(0, 10);
+    const paidInvoices = filteredInvoices.filter((inv) => inv.status === 'Paid');
+    const pendingInvoices = filteredInvoices.filter((inv) => inv.status === 'Pending' && inv.dueDate >= today);
+    const overdueInvoices = filteredInvoices.filter((inv) => inv.status !== 'Paid' && inv.dueDate < today);
+    const draftInvoices = filteredInvoices.filter((inv) => inv.status === 'Draft');
+    const paidTotal = paidInvoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+    const pendingTotal = pendingInvoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+    const overdueTotal = overdueInvoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+    const draftTotal = draftInvoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+    const totalRevenue = filteredInvoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+    const currencies = [...new Set(filteredInvoices.map((inv) => inv.currency))];
+
     const response: InvoiceListResponse = {
       data: pagedInvoices,
       paging: {
         page,
         pageSize,
         total: filteredInvoices.length,
+      },
+      summary: {
+        totalRevenue: totalRevenue.toFixed(2),
+        totalPaid: paidTotal.toFixed(2),
+        totalPending: pendingTotal.toFixed(2),
+        totalOverdue: overdueTotal.toFixed(2),
+        totalDraft: draftTotal.toFixed(2),
+        paidCount: paidInvoices.length,
+        pendingCount: pendingInvoices.length,
+        overdueCount: overdueInvoices.length,
+        draftCount: draftInvoices.length,
+        currency: currencies[0] ?? null,
+        currencySymbol: filteredInvoices[0]?.currencySymbol ?? null,
+        currencyCount: currencies.length,
       },
     };
 

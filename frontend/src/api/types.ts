@@ -28,7 +28,9 @@ export type InvoiceStatus = 'Draft' | 'Pending' | 'Paid' | 'Overdue';
 
 export type InvoiceStatusFilter = InvoiceStatus | 'All';
 
-export type InvoiceSortBy = 'invoiceDate' | 'dueDate' | 'totalAmount';
+export type CurrencyCode = 'AUD' | 'USD' | 'GBP';
+
+export type InvoiceSortBy = 'createdAt' | 'invoiceDate' | 'dueDate' | 'totalAmount';
 
 export type Ordering = 'ASC' | 'DESC';
 
@@ -61,9 +63,25 @@ export type InvoiceListItem = {
   status: InvoiceStatus;
 };
 
+export type InvoiceSummary = {
+  totalRevenue: string;
+  totalPaid: string;
+  totalPending: string;
+  totalOverdue: string;
+  totalDraft: string;
+  paidCount: number;
+  pendingCount: number;
+  overdueCount: number;
+  draftCount: number;
+  currency: string | null;
+  currencySymbol: string | null;
+  currencyCount: number;
+};
+
 export type InvoiceListResponse = {
   data: InvoiceListItem[];
   paging: Paging;
+  summary: InvoiceSummary;
 };
 
 export type InvoiceCustomer = {
@@ -100,4 +118,24 @@ export type InvoiceDetail = {
   totalPaid: string;
   balanceAmount: string;
   createdAt: string;
+};
+
+export type CreateInvoiceRequest = {
+  customerName: string;
+  customerEmail: string;
+  customerMobile?: string;
+  customerAddress?: string;
+  invoiceNumber: string;
+  invoiceReference?: string;
+  invoiceDate: string;
+  dueDate: string;
+  currency: CurrencyCode;
+  description?: string;
+  item: {
+    name: string;
+    quantity: number;
+    rate: number;
+  };
+  taxPercentage?: number;
+  discount?: number;
 };

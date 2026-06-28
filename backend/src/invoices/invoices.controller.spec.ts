@@ -54,10 +54,20 @@ describe(InvoicesController.name, () => {
 
       const response = {
         data: [],
-        paging: {
-          page: 1,
-          pageSize: 10,
-          total: 0,
+        paging: { page: 1, pageSize: 10, total: 0 },
+        summary: {
+          totalRevenue: '0.00',
+          totalPaid: '0.00',
+          totalPending: '0.00',
+          totalOverdue: '0.00',
+          totalDraft: '0.00',
+          paidCount: 0,
+          pendingCount: 0,
+          overdueCount: 0,
+          draftCount: 0,
+          currency: null,
+          currencySymbol: null,
+          currencyCount: 0,
         },
       } as InvoiceListResponseDto;
 
