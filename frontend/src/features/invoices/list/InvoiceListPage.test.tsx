@@ -6,7 +6,7 @@ import type { RouteObject } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
 import { InvoiceListPage } from '@/features/invoices/list/InvoiceListPage';
-import { API_BASE_URL, TEST_ACCESS_TOKEN } from '@/test/mocks/auth-handlers';
+import { API_BASE_URL, TEST_ACCESS_TOKEN } from '@/test/mocks/constants';
 import { server } from '@/test/mocks/server';
 import { renderWithRouter } from '@/test/test-utils';
 import { setAccessToken } from '@/features/auth/auth-storage';

@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { Receipt } from 'lucide-react';
 import { Link } from 'react-router';
 
 export function InvoiceListHeader() {
@@ -15,7 +15,7 @@ export function InvoiceListHeader() {
         to="/invoices/new"
         className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition hover:bg-slate-800 active:scale-[0.98]"
       >
-        <Plus className="h-4 w-4" aria-hidden="true" />
+        <Receipt className="h-4 w-4" aria-hidden="true" />
         Create Invoice
       </Link>
     </div>

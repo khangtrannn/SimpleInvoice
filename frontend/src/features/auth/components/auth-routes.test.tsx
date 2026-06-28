@@ -7,7 +7,8 @@ import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { PublicOnlyRoute } from '@/features/auth/components/PublicOnlyRoute';
 import { setAccessToken, setStoredAuthUser } from '@/features/auth/auth-storage';
 import { LoginPage } from '@/features/auth/login/LoginPage';
-import { reviewerUser, TEST_ACCESS_TOKEN } from '@/test/mocks/auth-handlers';
+import { TEST_ACCESS_TOKEN } from '@/test/mocks/constants';
+import { reviewerUser } from '@/test/mocks/auth-fixtures';
 import { renderWithRouter } from '@/test/test-utils';
 
 function renderAuthRoutes(initialEntries: string[]) {

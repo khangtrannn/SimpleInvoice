@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { CreateInvoiceRequest, InvoiceDetail } from '@/api/types';
 import { CreateInvoicePage } from '@/features/invoices/create/CreateInvoicePage';
-import { API_BASE_URL, TEST_ACCESS_TOKEN } from '@/test/mocks/auth-handlers';
+import { API_BASE_URL, TEST_ACCESS_TOKEN } from '@/test/mocks/constants';
 import { server } from '@/test/mocks/server';
 import { renderWithRouter } from '@/test/test-utils';
 import { setAccessToken } from '@/features/auth/auth-storage';

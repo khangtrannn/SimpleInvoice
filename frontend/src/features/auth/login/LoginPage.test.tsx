@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { PublicOnlyRoute } from '@/features/auth/components/PublicOnlyRoute';
 import { LoginPage } from '@/features/auth/login/LoginPage';
-import { reviewerCredentials, TEST_ACCESS_TOKEN } from '@/test/mocks/auth-handlers';
+import { TEST_ACCESS_TOKEN } from '@/test/mocks/constants';
+import { reviewerCredentials } from '@/test/mocks/auth-fixtures';
 import { renderWithRouter } from '@/test/test-utils';
 
 function renderLoginFlow(initialEntries = ['/login']) {

@@ -1,21 +1,9 @@
 import { http, HttpResponse } from 'msw';
 
-import type { AuthUser, LoginRequest, LoginResponse } from '@/api/types';
-
-export const API_BASE_URL = 'http://localhost:4000';
-
-export const TEST_ACCESS_TOKEN = 'test-access-token';
-
-export const reviewerUser: AuthUser = {
-  id: 'ad1e0902-1928-4345-b513-60c86c94fc91',
-  email: 'reviewer@simpleinvoice.local',
-  fullname: 'SimpleInvoice Reviewer',
-};
-
-export const reviewerCredentials: LoginRequest = {
-  email: 'reviewer@simpleinvoice.local',
-  password: 'Password123',
-};
+import type { LoginRequest } from '@/api/types';
+import { createMockLoginResponse } from '@/test/factories/auth.factory';
+import { API_BASE_URL, TEST_ACCESS_TOKEN } from '@/test/mocks/constants';
+import { reviewerCredentials, reviewerUser } from '@/test/mocks/auth-fixtures';
 
 export const authHandlers = [
   http.post(`${API_BASE_URL}/auth/login`, async ({ request }) => {
@@ -25,14 +13,7 @@ export const authHandlers = [
       body.email === reviewerCredentials.email &&
       body.password === reviewerCredentials.password
     ) {
-      const response: LoginResponse = {
-        accessToken: TEST_ACCESS_TOKEN,
-        tokenType: 'Bearer',
-        expiresIn: 3600,
-        user: reviewerUser,
-      };
-
-      return HttpResponse.json(response, { status: 200 });
+      return HttpResponse.json(createMockLoginResponse(), { status: 200 });
     }
 
     return HttpResponse.json(
