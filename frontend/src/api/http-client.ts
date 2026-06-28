@@ -1,9 +1,11 @@
 import axios from 'axios';
 
-import { clearAuthSession, getAccessToken } from '@/features/auth/auth-storage';
+import { handleUnauthorized } from '@/app/auth/handle-unauthorized';
+import { getAccessToken } from '@/features/auth/auth-storage';
+import { env } from '@/shared/config/env';
 
 export const httpClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: env.API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -27,11 +29,7 @@ httpClient.interceptors.response.use(
       const isLoginRequest = requestUrl.includes('/auth/login');
 
       if (!isLoginRequest) {
-        clearAuthSession();
-
-        if (window.location.pathname !== '/login') {
-          window.location.assign('/login');
-        }
+        handleUnauthorized();
       }
     }
 
