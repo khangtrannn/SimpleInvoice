@@ -1,4 +1,9 @@
 import { httpClient } from '@/api/http-client';
+import {
+  parseCreateInvoiceResponse,
+  parseInvoiceDetailResponse,
+  parseInvoiceListResponse,
+} from '@/api/invoices.schema';
 import type {
   CreateInvoiceRequest,
   InvoiceDetail,
@@ -6,8 +11,10 @@ import type {
   InvoiceListResponse,
 } from '@/api/types';
 
-export async function getInvoices(query: InvoiceListQuery) {
-  const response = await httpClient.get<InvoiceListResponse>('/invoices', {
+export async function getInvoices(
+  query: InvoiceListQuery,
+): Promise<InvoiceListResponse> {
+  const response = await httpClient.get('/invoices', {
     params: {
       page: query.page,
       pageSize: query.pageSize,
@@ -20,17 +27,19 @@ export async function getInvoices(query: InvoiceListQuery) {
     },
   });
 
-  return response.data;
+  return parseInvoiceListResponse(response.data);
 }
 
-export async function getInvoiceById(id: string) {
-  const response = await httpClient.get<InvoiceDetail>(`/invoices/${id}`);
+export async function getInvoiceById(id: string): Promise<InvoiceDetail> {
+  const response = await httpClient.get(`/invoices/${id}`);
 
-  return response.data;
+  return parseInvoiceDetailResponse(response.data);
 }
 
-export async function createInvoice(payload: CreateInvoiceRequest) {
-  const response = await httpClient.post<InvoiceDetail>('/invoices', payload);
+export async function createInvoice(
+  payload: CreateInvoiceRequest,
+): Promise<InvoiceDetail> {
+  const response = await httpClient.post('/invoices', payload);
 
-  return response.data;
+  return parseCreateInvoiceResponse(response.data);
 }

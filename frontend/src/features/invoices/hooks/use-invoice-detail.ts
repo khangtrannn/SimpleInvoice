@@ -9,7 +9,13 @@ export const invoiceDetailQueryKeys = {
 export function useInvoiceDetail(invoiceId: string | undefined) {
   return useQuery({
     queryKey: invoiceDetailQueryKeys.detail(invoiceId ?? ''),
-    queryFn: () => getInvoiceById(invoiceId!),
+    queryFn: () => {
+      if (!invoiceId) {
+        throw new Error('Missing invoice id');
+      }
+
+      return getInvoiceById(invoiceId);
+    },
     enabled: Boolean(invoiceId),
   });
 }

@@ -67,7 +67,7 @@ describe('InvoiceListPage', () => {
     expect(acmeElements.length).toBeGreaterThan(0);
     const brightElements = screen.getAllByText(/bright ideas pty ltd/i);
     expect(brightElements.length).toBeGreaterThan(0);
-    expect(await screen.findByText(/8 invoice/i)).toBeInTheDocument();
+    expect(await screen.findByText(/8 invoices found/i)).toBeInTheDocument();
   });
 
   it('searches invoices by invoice number or customer name', async () => {
@@ -144,7 +144,7 @@ describe('InvoiceListPage', () => {
     expect(brightNames.length).toBeGreaterThan(0);
     const creativeNames = screen.getAllByText(/creative studio/i);
     expect(creativeNames.length).toBeGreaterThan(0);
-    expect(screen.getByText(/showing 1 to 8 of 8 results/i)).toBeInTheDocument();
+    expect(screen.getByText(/showing 1 to 8 of 8 invoices/i)).toBeInTheDocument();
   });
 
   it('sorts invoices by total amount in ascending order', async () => {
@@ -184,7 +184,7 @@ describe('InvoiceListPage', () => {
     await user.selectOptions(screen.getByDisplayValue('10'), '20');
 
     // Assert
-    expect(await screen.findByText(/showing 1 to 8 of 8 results/i)).toBeInTheDocument();
+    expect(await screen.findByText(/showing 1 to 8 of 8 invoices/i)).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: /rows per page/i })).toHaveValue('20');
   });
 
