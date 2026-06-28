@@ -19,6 +19,9 @@ lerna-debug.log*
 /coverage
 /.nyc_output
 
+# Generated OpenAPI spec — source of truth is the running /api/docs
+swagger.json
+
 # IDEs and editors
 /.idea
 .project
