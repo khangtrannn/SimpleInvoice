@@ -21,12 +21,10 @@ type InvoiceFiltersProps = {
   query: InvoiceListQuery;
   onChange: (query: Partial<InvoiceListQuery>) => void;
   onReset: () => void;
-  customers?: string[];
 };
 
-export function InvoiceFilters({ query, onChange, onReset, customers = [] }: InvoiceFiltersProps) {
+export function InvoiceFilters({ query, onChange, onReset }: InvoiceFiltersProps) {
   const [keyword, setKeyword] = useState(query.keyword ?? '');
-  const [clientName, setClientName] = useState('');
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const datePickerRef = useRef<HTMLDivElement>(null);
 
@@ -41,30 +39,21 @@ export function InvoiceFilters({ query, onChange, onReset, customers = [] }: Inv
   }, []);
 
   useEffect(() => {
-    if (clientName) return;
     const id = window.setTimeout(() => {
       if ((query.keyword ?? '') !== keyword.trim()) {
         onChange({ keyword: keyword.trim() || undefined, page: 1 });
       }
     }, 400);
     return () => window.clearTimeout(id);
-  }, [keyword, clientName, onChange, query.keyword]);
+  }, [keyword, onChange, query.keyword]);
 
   function handleKeywordChange(e: React.ChangeEvent<HTMLInputElement>) {
     setKeyword(e.target.value);
-    if (clientName) setClientName('');
   }
 
   function handleStatusChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = e.target.value as InvoiceStatusFilter;
     onChange({ status: val === 'All' ? undefined : (val as InvoiceStatus), page: 1 });
-  }
-
-  function handleClientChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const client = e.target.value;
-    setClientName(client);
-    setKeyword('');
-    onChange({ keyword: client || undefined, page: 1 });
   }
 
   function handleSortChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -74,7 +63,6 @@ export function InvoiceFilters({ query, onChange, onReset, customers = [] }: Inv
 
   function handleReset() {
     setKeyword('');
-    setClientName('');
     setDatePickerOpen(false);
     onReset();
   }
@@ -99,7 +87,7 @@ export function InvoiceFilters({ query, onChange, onReset, customers = [] }: Inv
             aria-hidden="true"
           />
           <input
-            value={clientName ? '' : keyword}
+            value={keyword}
             onChange={handleKeywordChange}
             placeholder="Search invoices..."
             className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
@@ -181,29 +169,6 @@ export function InvoiceFilters({ query, onChange, onReset, customers = [] }: Inv
             )}
           </div>
         )}
-      </div>
-
-      {/* Client */}
-      <div className="w-full sm:w-auto">
-        <p className="mb-1.5 text-xs font-medium text-slate-500">Client</p>
-        <div className="relative">
-          <select
-            value={clientName}
-            onChange={handleClientChange}
-            className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-4 pr-9 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 sm:w-44"
-          >
-            <option value="">All clients</option>
-            {customers.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-            aria-hidden="true"
-          />
-        </div>
       </div>
 
       {/* Sort by */}
