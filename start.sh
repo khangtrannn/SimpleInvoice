@@ -7,12 +7,12 @@ FRONTEND_DIR="$ROOT_DIR/frontend"
 
 # ── 1. Env file check ────────────────────────────────────────────────────────
 if [[ ! -f "$ROOT_DIR/.env" ]]; then
-  echo ".env not found — copying from .env.example"
+  echo ".env not found - copying from .env.example"
   cp "$ROOT_DIR/.env.example" "$ROOT_DIR/.env"
 fi
 
 if [[ ! -f "$BACKEND_DIR/.env" ]]; then
-  echo "backend/.env not found — copying from backend/.env.example"
+  echo "backend/.env not found - copying from backend/.env.example"
   cp "$BACKEND_DIR/.env.example" "$BACKEND_DIR/.env"
 fi
 
@@ -20,10 +20,12 @@ fi
 set -o allexport
 # shellcheck disable=SC1091
 source "$ROOT_DIR/.env"
+source "$BACKEND_DIR/.env"
 set +o allexport
 
 APP_PORT="${APP_PORT:-4000}"
 FRONTEND_PORT="${FRONTEND_PORT:-3000}"
+BACKEND_CONTAINER_PORT="${PORT:-4000}"
 
 # ── 2. Start containers ───────────────────────────────────────────────────────
 echo "Starting Docker services..."
@@ -33,7 +35,7 @@ docker compose -f "$ROOT_DIR/docker-compose.yml" up -d --build
 echo "Waiting for backend to be ready..."
 MAX_WAIT=60
 ELAPSED=0
-until docker exec simple_invoice_backend wget -qO- http://localhost:4000/health > /dev/null 2>&1; do
+until docker exec simple_invoice_backend wget -qO- "http://localhost:${BACKEND_CONTAINER_PORT}/health" > /dev/null 2>&1; do
   if [[ $ELAPSED -ge $MAX_WAIT ]]; then
     echo "ERROR: backend did not become ready within ${MAX_WAIT}s."
     echo "Check logs with: docker compose logs backend"
