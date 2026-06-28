@@ -86,7 +86,7 @@ describe('getApiErrorMessage', () => {
     const result = getApiErrorMessage(error, 'Invalid email or password.');
 
     // Assert
-    expect(result).toMatch(/server is having trouble/i);
+    expect(result).toBe('Internal server error');
   });
 });
 

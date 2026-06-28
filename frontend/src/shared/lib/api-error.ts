@@ -21,10 +21,6 @@ export function getApiErrorMessage(error: unknown, fallbackMessage = 'Something 
     return NETWORK_ERROR_MESSAGE;
   }
 
-  if (error.response.status >= 500) {
-    return SERVER_ERROR_MESSAGE;
-  }
-
   const message = error.response.data?.message;
 
   if (Array.isArray(message)) {
@@ -33,6 +29,10 @@ export function getApiErrorMessage(error: unknown, fallbackMessage = 'Something 
 
   if (typeof message === 'string' && message.trim().length > 0) {
     return message;
+  }
+
+  if (error.response.status >= 500) {
+    return SERVER_ERROR_MESSAGE;
   }
 
   return fallbackMessage;

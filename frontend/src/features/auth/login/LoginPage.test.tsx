@@ -122,7 +122,7 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
     // Assert
-    expect(await screen.findByText(/server is having trouble/i)).toBeInTheDocument();
+    expect(await screen.findByText(/internal server error/i)).toBeInTheDocument();
     expect(screen.queryByText(/invalid email or password/i)).not.toBeInTheDocument();
   });
 });
