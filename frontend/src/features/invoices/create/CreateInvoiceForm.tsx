@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronLeft, Send } from 'lucide-react';
+import { ChevronLeft, Receipt } from 'lucide-react';
 import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router';
@@ -104,7 +104,7 @@ export function CreateInvoiceForm() {
               disabled={isSubmitting}
               className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-black disabled:bg-slate-400"
             >
-              <Send className="h-4 w-4" aria-hidden="true" />
+              <Receipt className="h-4 w-4" aria-hidden="true" />
               {isSubmitting ? 'Creating...' : 'Create Invoice'}
             </button>
 

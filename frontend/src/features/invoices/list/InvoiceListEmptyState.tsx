@@ -1,4 +1,4 @@
-import { FileSearch, Plus } from 'lucide-react';
+import { FileSearch, Receipt } from 'lucide-react';
 import { Link } from 'react-router';
 
 export function InvoiceListEmptyState() {
@@ -15,7 +15,7 @@ export function InvoiceListEmptyState() {
         to="/invoices/new"
         className="mt-6 inline-flex h-9 items-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white shadow-md shadow-slate-950/20 transition hover:bg-slate-800"
       >
-        <Plus className="h-4 w-4" aria-hidden="true" />
+        <Receipt className="h-4 w-4" aria-hidden="true" />
         Create Invoice
       </Link>
     </div>
