@@ -42,127 +42,17 @@ React 19 + TypeScript + Vite frontend for the SimpleInvoice assessment applicati
 
 ## Architecture Overview
 
-### Folder Structure
-
-```
-frontend/src/
-├── api/                     # HTTP client, schema validation, API types
-│   ├── auth.api.ts          # Auth endpoints (login, getCurrentUser)
-│   ├── invoices.api.ts      # Invoice endpoints (list, detail, create)
-│   ├── auth.schema.ts       # Zod schemas for auth responses
-│   ├── invoices.schema.ts   # Zod schemas for invoice responses
-│   ├── parse-api-response.ts # Response validation helper
-│   ├── http-client.ts       # Axios instance with auth interceptor
-│   ├── http-error.ts        # Error classification utility
-│   └── types/               # TypeScript types for API contracts
-│
-├── app/                     # Application bootstrap and routing
-│   ├── router.tsx           # React Router config with route guards
-│   ├── providers.tsx        # Root providers (QueryClient, AuthProvider, Toaster)
-│   ├── query-client.ts      # TanStack Query configuration
-│   ├── auth/                # Auth lifecycle utilities
-│   │   ├── handle-unauthorized.ts # Session expiry handler
-│   │   └── handle-unauthorized.test.ts
-│   └── ScrollToTop.tsx      # Route scroll behavior
-│
-├── features/
-│   ├── auth/                # Authentication feature
-│   │   ├── auth-context.tsx # Auth state & session restore (React Context)
-│   │   ├── auth-storage.ts  # localStorage wrapper for auth token & user
-│   │   ├── login.schema.ts  # Form validation schema for login
-│   │   ├── auth-route.constants.ts
-│   │   ├── components/      # Login route guards (ProtectedRoute, PublicOnlyRoute)
-│   │   └── login/           # Login page & form
-│   │
-│   └── invoices/            # Invoice feature
-│       ├── model/           # Domain types and constants (InvoiceStatus, etc)
-│       ├── schema/          # Form validation schemas (CreateInvoiceFormInput)
-│       ├── hooks/           # React Query hooks (useInvoices, useInvoiceDetail, useCreateInvoice)
-│       ├── list/            # Invoice list page and components
-│       │   ├── InvoiceListPage.tsx
-│       │   ├── InvoiceListContent.tsx
-│       │   ├── InvoiceListHeader.tsx
-│       │   ├── InvoiceSummaryTiles.tsx
-│       │   ├── use-invoice-list-query.ts # URL state management
-│       │   └── invoice-summary.mapper.ts
-│       ├── detail/          # Invoice detail page and components
-│       │   ├── InvoiceDetailPage.tsx
-│       │   ├── InvoicePrintDocument.tsx # Print-ready A4 layout (no PDF lib)
-│       │   ├── invoice-detail.mapper.ts
-│       │   ├── components/  # Detail card components (totals, items, customer, etc)
-│       │   └── ...
-│       └── create/          # Create invoice form and submission
-│           ├── CreateInvoiceForm.tsx
-│           ├── create-invoice.schema.ts
-│           ├── create-invoice-calculations.ts # Real-time preview logic
-│           ├── create-invoice.defaults.ts
-│           ├── create-invoice.mapper.ts
-│           ├── CustomerInformationFields.tsx
-│           ├── InvoiceInformationFields.tsx
-│           ├── InvoiceItemFields.tsx
-│           └── InvoicePreview.tsx
-│
-├── shared/                  # Shared across features
-│   ├── ui/                  # Reusable UI building blocks
-│   │   ├── form/            # Form controls (TextInput, SelectInput, etc)
-│   │   │   └── form-controls.test.tsx
-│   │   └── layout/          # App shell (AppLayout, AppHeader, AppUserMenu)
-│   ├── lib/                 # Cross-feature utilities
-│   │   ├── format/          # Currency, date formatting
-│   │   ├── currency.ts      # Currency options/labels (single source of truth)
-│   │   ├── api-error.ts     # API error message formatting
-│   │   └── ...
-│   └── config/              # App configuration (env vars)
-│
-├── test/                    # Test setup and mocks
-│   ├── setup.ts             # Vitest config: MSW server, localStorage mock
-│   ├── test-utils.tsx       # Custom render() with providers
-│   ├── mocks/               # MSW handlers and fixtures
-│   │   ├── server.ts        # MSW server
-│   │   ├── auth-handlers.ts # Mock /auth/login, /auth/me
-│   │   ├── invoice-handlers.ts # Mock /invoices, /invoices/:id, POST /invoices
-│   │   ├── auth-fixtures.ts # Sample auth responses
-│   │   ├── invoice-fixtures.ts # Sample invoice responses
-│   │   ├── invoice-query.ts # Helpers for building query params
-│   │   └── constants.ts     # Test constants (URLs, IDs)
-│   └── factories/           # Test data factories
-│       ├── auth.factory.ts
-│       └── invoice.factory.ts
-│
-├── App.tsx                  # Root component
-├── main.tsx                 # Bootstrap entry point
-└── vite-env.d.ts            # Vite type definitions
-```
-
 ### Dependency Direction
 
 Features are **loosely coupled** and depend only on the API and shared layers:
 
-```
-┌─────────────────────────────┐
-│       Route Handlers        │
-│  (LoginPage, InvoiceList)   │
-└──────────────┬──────────────┘
-               │
-    ┌──────────┴──────────┐
-    │                     │
-┌───▼────────┐    ┌──────▼──────┐
-│ Features   │    │    App       │
-│ (auth,     │    │  (router,    │
-│  invoices) │    │  providers)  │
-└───┬────────┘    └──────┬───────┘
-    │                    │
-    └────────┬───────────┘
-             │
-    ┌────────▼────────┐
-    │  API Layer      │
-    │  (Schemas,      │
-    │  Http Client)   │
-    └─────────────────┘
-             │
-    ┌────────▼────────┐
-    │  Backend API    │
-    └─────────────────┘
+```mermaid
+flowchart TD
+    A["Route Handlers<br/>LoginPage, InvoiceList"] --> B["Features<br/>auth, invoices"]
+    A --> C["App<br/>router, providers"]
+    B --> D["API Layer<br/>schemas, HTTP client"]
+    C --> D
+    D --> E["Backend API"]
 ```
 
 **Feature-first organization:**
@@ -292,7 +182,7 @@ flowchart TD
     E --> F["parseInvoiceDetailResponse<br/>Zod validation"]
     F --> G["InvoiceDetailHeader<br/>+ cards"]
     G --> H["InvoicePrintDocument<br/>hidden A4 layout"]
-    
+
     I["User clicks Print button"] --> J["window.print()"]
     J --> K["@media print CSS<br/>swaps visibility"]
     K --> L["InvoicePrintDocument<br/>becomes visible"]
@@ -562,13 +452,6 @@ See root `README.md` for full-stack setup (Docker, backend, database).
 - **Print engine dependency** - Print output depends on browser and printer driver. Some printers may not honor `print-color-adjust: exact`; status badge colors may not print as expected on all devices.
 - **No refresh token** - Expired tokens require re-login. Token lifetime is configurable by `JWT_EXPIRES_IN` env var on backend.
 - **Summary tiles span all currencies** - Multi-currency invoices may exist; summary tiles intentionally don't display a single currency symbol. See "Design Decisions" section.
-
-### General (See Backend README for Full List)
-
-- No email delivery on invoice status changes.
-- No payment processing integration.
-- No audit log for invoice changes.
-- Customer data embedded on invoice (no shared customer identity).
 
 ---
 
