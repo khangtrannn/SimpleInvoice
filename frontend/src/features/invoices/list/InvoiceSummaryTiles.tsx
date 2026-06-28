@@ -2,7 +2,12 @@ import { AlertCircle, Clock3, FileText, ReceiptText, WalletCards } from 'lucide-
 
 import type { TileSummary } from './invoice-summary.mapper';
 
-export function InvoiceSummaryTiles({ summary }: { summary: TileSummary }) {
+interface InvoiceSummaryTilesProps {
+  summary: TileSummary;
+  isLoading?: boolean;
+}
+
+export function InvoiceSummaryTiles({ summary, isLoading }: InvoiceSummaryTilesProps) {
   const tiles = [
     {
       label: 'Total Revenue',
@@ -35,6 +40,28 @@ export function InvoiceSummaryTiles({ summary }: { summary: TileSummary }) {
       icon: FileText,
     },
   ];
+
+  if (isLoading) {
+    return (
+      <section aria-label="Invoice summary" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, idx) => (
+          <article
+            key={idx}
+            className="flex min-h-28 items-center gap-5 rounded-lg border border-slate-200 bg-white px-6 py-5 shadow-sm"
+          >
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50">
+              <div className="h-6 w-6 animate-pulse rounded bg-slate-200" />
+            </div>
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
+              <div className="h-7 w-32 animate-pulse rounded bg-slate-200" />
+              <div className="h-3 w-28 animate-pulse rounded bg-slate-100" />
+            </div>
+          </article>
+        ))}
+      </section>
+    );
+  }
 
   return (
     <section aria-label="Invoice summary" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">

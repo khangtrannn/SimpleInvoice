@@ -2,6 +2,27 @@
 
 A full-stack invoice management application built with NestJS (backend) and React + TypeScript (frontend), backed by PostgreSQL.
 
+---
+
+## Live Demo
+
+| Service     | URL                                          |
+|-------------|-----------------------------------------------|
+| Frontend    | https://simpleinvoice.khangtran.dev            |
+| Backend API | https://api.simpleinvoice.khangtran.dev        |
+| Swagger UI  | https://api.simpleinvoice.khangtran.dev/api/docs |
+
+---
+
+## Default Login Credentials
+
+| Field    | Value                          |
+|----------|--------------------------------|
+| Email    | `reviewer@simpleinvoice.local` |
+| Password | `Password123!`                 |
+
+---
+
 ## Reviewer Quick Tour
 
 1. **Run locally:** `./start.sh` (Docker Desktop required), then open http://localhost:3000.
@@ -18,31 +39,12 @@ A full-stack invoice management application built with NestJS (backend) and Reac
 
 These are intentional extras beyond the assessment requirements:
 
-- **Live demo** at custom domains (Cloudflare Pages + Railway) - see Live Demo table below.
+- **Live demo** at custom domains (Cloudflare Pages + Railway).
 - **CI → gated deploy pipeline** - production deploy only fires after CI succeeds on `main` via a `workflow_run` trigger.
 - **A4 print-to-PDF** without a PDF library - pure CSS `@media print` swap. See [`frontend/src/features/invoices/detail/InvoicePrintDocument.tsx`](./frontend/src/features/invoices/detail/InvoicePrintDocument.tsx).
 - **Runtime Zod validation** at the frontend API boundary - every response is parsed; schema drift fails loudly. See [`frontend/src/api/invoices.schema.ts`](./frontend/src/api/invoices.schema.ts).
 - **Summary dashboard endpoint** - `GET /invoices/summary` returns aggregated totals/counts respecting the same filters as `GET /invoices`. Powers the invoice list tiles.
 - **`Decimal.js` precision arithmetic** - money math never touches IEEE-754 floats. See [`backend/src/invoices/domain/invoice-calculation.ts`](./backend/src/invoices/domain/invoice-calculation.ts).
-
-## Live Demo
-
-| Service     | URL                                          |
-|-------------|-----------------------------------------------|
-| Frontend    | https://simpleinvoice.khangtran.dev            |
-| Backend API | https://api.simpleinvoice.khangtran.dev        |
-| Swagger UI  | https://api.simpleinvoice.khangtran.dev/api/docs |
-
----
-
-## Default Login Credentials
-
-Seeded by `npm run seed` / `start.sh`:
-
-| Field    | Value                          |
-|----------|--------------------------------|
-| Email    | `reviewer@simpleinvoice.local` |
-| Password | `Password123!`                 |
 
 ---
 
@@ -52,9 +54,9 @@ Seeded by `npm run seed` / `start.sh`:
 SimpleInvoice/
 ├── backend/           # NestJS REST API
 ├── frontend/          # React + TypeScript + Vite SPA
-├── docker-compose.yml
 ├── start.sh           # One-command startup script
-└── stop.sh            # One-command teardown script
+├── stop.sh            # One-command teardown script
+└── docker-compose.yml
 ```
 
 This is a monorepo. Detailed documentation for each layer lives alongside the code:

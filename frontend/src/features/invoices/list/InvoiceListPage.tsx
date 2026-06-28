@@ -27,7 +27,7 @@ export function InvoiceListPage() {
     <div className="space-y-5">
       <InvoiceListHeader />
 
-      <InvoiceSummaryTiles summary={summary} />
+      <InvoiceSummaryTiles summary={summary} isLoading={summaryQuery.isLoading} />
 
       <InvoiceListContent
         invoices={invoices}
