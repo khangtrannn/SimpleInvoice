@@ -185,7 +185,7 @@ Features are **loosely coupled** and depend only on the API and shared layers:
 
 ```mermaid
 flowchart TD
-    A["main.tsx<br/>ReactDOM.createRoot"] --> B["App.tsx"]
+    A["main.tsx<br/>ReactDOM.createRoot"] --> B["App.tsx<br/>wrapped in AppErrorBoundary"]
     B --> C["AppProviders<br/>QueryClientProvider<br/>AuthProvider<br/>Toaster"]
     C --> D["RouterProvider"]
     D --> E["ScrollToTop"]
