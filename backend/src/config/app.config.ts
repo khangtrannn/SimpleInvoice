@@ -1,13 +1,19 @@
 import { registerAs } from '@nestjs/config';
 import Joi from 'joi';
 
-const DEFAULT_CORS_ORIGIN = 'http://localhost:3000';
+const DEFAULT_CORS_ORIGINS = [
+  'http://localhost:3000',
+  'https://simpleinvoice.khangtran.dev',
+];
+const DEFAULT_CORS_ORIGIN = DEFAULT_CORS_ORIGINS.join(',');
 
 function parseCorsOrigin(raw: string | undefined): string[] {
-  return (raw ?? DEFAULT_CORS_ORIGIN)
+  const configuredOrigins = (raw ?? DEFAULT_CORS_ORIGIN)
     .split(',')
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
+
+  return [...new Set([...DEFAULT_CORS_ORIGINS, ...configuredOrigins])];
 }
 
 export const appEnvValidationSchema = Joi.object({

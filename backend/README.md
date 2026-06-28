@@ -223,7 +223,7 @@ Copy `backend/.env.example` to `backend/.env` and fill in the required values.
 | `POSTGRES_PASSWORD` | Yes      | -             | Database password                                |
 | `JWT_SECRET`        | Yes      | -             | Signing secret, minimum 32 characters            |
 | `JWT_EXPIRES_IN`    | No       | `3600`        | Token lifetime in seconds                        |
-| `CORS_ORIGIN`       | No       | `http://localhost:3000` | Comma-separated allowlist of permitted origins |
+| `CORS_ORIGIN`       | No       | `http://localhost:3000,https://simpleinvoice.khangtran.dev` | Comma-separated allowlist of permitted origins |
 
 The app validates all required variables at startup using Joi and exits immediately with a descriptive error if any are missing or malformed.
 

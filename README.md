@@ -143,7 +143,7 @@ Docker Compose reads the root `.env` for container wiring and `backend/.env` for
 | `POSTGRES_DB`       | PostgreSQL database name                     | -             |
 | `JWT_SECRET`        | Secret for signing JWT tokens (min 32 chars) | -             |
 | `JWT_EXPIRES_IN`    | Token expiry in seconds                      | `3600`        |
-| `CORS_ORIGIN`       | Comma-separated allowlist of permitted origins | `http://localhost:3000` |
+| `CORS_ORIGIN`       | Comma-separated allowlist of permitted origins | `http://localhost:3000,https://simpleinvoice.khangtran.dev` |
 
 ---
 

@@ -44,6 +44,30 @@ jobs:
           RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
           RAILWAY_SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
 
+      - name: Verify production CORS
+        run: |
+          for attempt in {1..6}; do
+            headers="$(mktemp)"
+            status="$(
+              curl -sS -o /dev/null -D "$headers" -w "%{http_code}" \
+                -X OPTIONS "https://api.simpleinvoice.khangtran.dev/auth/login" \
+                -H "Origin: https://simpleinvoice.khangtran.dev" \
+                -H "Access-Control-Request-Method: POST" \
+                -H "Access-Control-Request-Headers: content-type"
+            )"
+
+            if [ "$status" = "204" ] && grep -qi '^access-control-allow-origin: https://simpleinvoice.khangtran.dev' "$headers"; then
+              exit 0
+            fi
+
+            echo "Production CORS check failed on attempt $attempt; retrying..."
+            cat "$headers"
+            sleep 10
+          done
+
+          echo "Production API did not allow https://simpleinvoice.khangtran.dev after deploy."
+          exit 1
+
   deploy-frontend:
     name: Deploy Frontend to Cloudflare Pages
     runs-on: ubuntu-latest
