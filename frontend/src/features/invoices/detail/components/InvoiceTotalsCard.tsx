@@ -1,7 +1,6 @@
 import type { InvoiceDetail } from '@/api/types';
 import { getInvoiceDetailViewModel } from '@/features/invoices/detail/invoice-detail.mapper';
-
-import { DetailCard } from './DetailCard';
+import { SectionCard } from '@/shared/ui/SectionCard';
 
 type InvoiceTotalsCardProps = {
   invoice: InvoiceDetail;
@@ -9,9 +8,10 @@ type InvoiceTotalsCardProps = {
 
 export function InvoiceTotalsCard({ invoice }: InvoiceTotalsCardProps) {
   const vm = getInvoiceDetailViewModel(invoice);
+  const hasBalance = Number(invoice.balanceAmount) > 0;
 
   return (
-    <DetailCard>
+    <SectionCard title="Amount Summary">
       <div className="space-y-4 text-sm">
         <TotalLine
           label="Subtotal"
@@ -39,8 +39,8 @@ export function InvoiceTotalsCard({ invoice }: InvoiceTotalsCardProps) {
           value={vm.totalPaid}
         />
 
-        {Number(invoice.balanceAmount) > 0 ? (
-          <div className="rounded-xl border border-red-100 bg-red-50/70 px-4 py-3">
+        {hasBalance ? (
+          <div className="rounded-xl border border-red-100 bg-red-50/60 px-4 py-3">
             <TotalLine
               label="Outstanding Balance"
               value={vm.balanceAmount}
@@ -48,6 +48,9 @@ export function InvoiceTotalsCard({ invoice }: InvoiceTotalsCardProps) {
               labelClassName="text-red-600"
               valueClassName="text-red-600"
             />
+            <p className="mt-2 text-xs font-medium text-red-500/80">
+              Paid {vm.totalPaid} of {vm.totalAmount}
+            </p>
           </div>
         ) : (
           <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
@@ -61,7 +64,7 @@ export function InvoiceTotalsCard({ invoice }: InvoiceTotalsCardProps) {
           </div>
         )}
       </div>
-    </DetailCard>
+    </SectionCard>
   );
 }
 

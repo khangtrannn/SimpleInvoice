@@ -3,8 +3,7 @@ import {
   getFormattedInvoiceItemRate,
   getInvoiceItemLineTotal,
 } from '@/features/invoices/detail/invoice-detail.mapper';
-
-import { DetailCard } from './DetailCard';
+import { SectionCard } from '@/shared/ui/SectionCard';
 
 type InvoiceItemsCardProps = {
   invoice: InvoiceDetail;
@@ -16,16 +15,16 @@ export function InvoiceItemsCard({ invoice }: InvoiceItemsCardProps) {
   }
 
   return (
-    <DetailCard title="Invoice Items">
-      <div className="hidden overflow-x-auto md:block">
+    <SectionCard title="Invoice Items">
+      <div className="hidden overflow-x-auto rounded-xl border border-slate-200 md:block">
         <table className="w-full border-collapse text-left">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50/50 text-sm text-slate-500">
-              <th className="px-6 py-4 font-semibold">#</th>
-              <th className="px-6 py-4 font-semibold">Item Name</th>
-              <th className="px-6 py-4 font-semibold">Quantity</th>
-              <th className="px-6 py-4 font-semibold">Rate</th>
-              <th className="px-6 py-4 font-semibold">Line Total</th>
+            <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold tracking-wide text-slate-500 uppercase">
+              <th className="px-6 py-4">#</th>
+              <th className="px-6 py-4">Item Name</th>
+              <th className="px-6 py-4">Quantity</th>
+              <th className="px-6 py-4">Rate</th>
+              <th className="px-6 py-4 text-right">Line Total</th>
             </tr>
           </thead>
 
@@ -41,7 +40,7 @@ export function InvoiceItemsCard({ invoice }: InvoiceItemsCardProps) {
                 <td className="px-6 py-4">
                   {getFormattedInvoiceItemRate(invoice, item)}
                 </td>
-                <td className="px-6 py-4 font-semibold text-slate-800">
+                <td className="px-6 py-4 text-right font-semibold text-slate-800">
                   {getInvoiceItemLineTotal(invoice, item)}
                 </td>
               </tr>
@@ -72,7 +71,7 @@ export function InvoiceItemsCard({ invoice }: InvoiceItemsCardProps) {
 
               <div>
                 <p className="text-slate-500">Rate</p>
-                <p className="mt-1 font-medium text-blue-600">
+                <p className="mt-1 font-medium text-slate-800">
                   {getFormattedInvoiceItemRate(invoice, item)}
                 </p>
               </div>
@@ -80,6 +79,6 @@ export function InvoiceItemsCard({ invoice }: InvoiceItemsCardProps) {
           </div>
         ))}
       </div>
-    </DetailCard>
+    </SectionCard>
   );
 }

@@ -31,7 +31,7 @@ export function InvoicePreview({ control }: InvoicePreviewProps) {
   const lineAmount = quantity * rate;
 
   return (
-    <div className="h-fit rounded-xl bg-white p-6 shadow-[0_16px_60px_rgba(15,23,42,0.10)]">
+    <div className="h-fit rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-6">
         <div className="flex w-full items-center justify-between">
           <img
@@ -137,7 +137,7 @@ export function InvoicePreview({ control }: InvoicePreviewProps) {
           )}
           strong
           labelClassName="text-base"
-          valueClassName="text-blue-600"
+          valueClassName="text-slate-950"
         />
       </div>
     </div>

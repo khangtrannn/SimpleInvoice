@@ -4,8 +4,7 @@ import { useWatch } from 'react-hook-form';
 
 import { TextInput } from '@/shared/ui/form';
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
-
-import { CreateInvoiceSectionCard } from './CreateInvoiceSectionCard';
+import { SectionCard } from '@/shared/ui/SectionCard';
 
 type InvoiceItemFieldsProps = {
   register: UseFormRegister<CreateInvoiceFormInput>;
@@ -21,7 +20,7 @@ export function InvoiceItemFields({
   const currency = useWatch({ control, name: 'currency' });
 
   return (
-    <CreateInvoiceSectionCard
+    <SectionCard
       icon={<Box className="h-5 w-5" />}
       title="Invoice Item"
     >
@@ -74,6 +73,6 @@ export function InvoiceItemFields({
           {...register('discount')}
         />
       </div>
-    </CreateInvoiceSectionCard>
+    </SectionCard>
   );
 }

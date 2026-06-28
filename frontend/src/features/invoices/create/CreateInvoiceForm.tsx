@@ -11,6 +11,7 @@ import {
   type CreateInvoiceFormValues,
 } from '@/features/invoices/schema/create-invoice.schema';
 import { getApiErrorMessage } from '@/shared/lib/api-error';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 import { getCreateInvoiceDefaultValues } from './create-invoice.defaults';
 import { mapCreateInvoiceFormToPayload } from './create-invoice.mapper';
@@ -62,45 +63,21 @@ export function CreateInvoiceForm() {
   return (
     <div>
       <form id="create-invoice-form" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Link to="/invoices" className="font-medium hover:text-blue-600">
-                Invoices
+        <div className="mb-6">
+          <PageHeader
+            breadcrumb={[{ label: 'Invoices', to: '/invoices' }, { label: 'Create Invoice' }]}
+            title="Create Invoice"
+            subtitle="Create a new invoice and deliver it instantly."
+            actions={
+              <Link
+                to="/invoices"
+                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              >
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                Back to Invoices
               </Link>
-              <span>/</span>
-              <span className="font-semibold text-slate-700">
-                Create Invoice
-              </span>
-            </div>
-
-            <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-950">
-              Create Invoice
-            </h1>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Create a new invoice and deliver it instantly.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-black disabled:bg-slate-400"
-            >
-              <Receipt className="h-4 w-4" aria-hidden="true" />
-              {isSubmitting ? 'Creating...' : 'Create Invoice'}
-            </button>
-
-            <Link
-              to="/invoices"
-              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-            >
-              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-              Back to Invoices
-            </Link>
-          </div>
+            }
+          />
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.05fr_0.9fr]">
@@ -114,6 +91,17 @@ export function CreateInvoiceForm() {
               errors={errors}
               control={control}
             />
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-black disabled:bg-slate-400"
+              >
+                <Receipt className="h-4 w-4" aria-hidden="true" />
+                {isSubmitting ? 'Creating...' : 'Create Invoice'}
+              </button>
+            </div>
           </div>
 
           <div>

@@ -105,7 +105,7 @@ export class InvoicesRepository {
         'totalOverdue',
       )
       .addSelect(
-        `COALESCE(SUM(CASE WHEN invoice.status = '${InvoiceStatus.DRAFT}' THEN invoice.total_amount ELSE 0 END), 0)`,
+        `COALESCE(SUM(CASE WHEN invoice.status = '${InvoiceStatus.DRAFT}' AND invoice.due_date >= CURRENT_DATE THEN invoice.total_amount ELSE 0 END), 0)`,
         'totalDraft',
       )
       .addSelect(
@@ -121,7 +121,7 @@ export class InvoicesRepository {
         'overdueCount',
       )
       .addSelect(
-        `COUNT(CASE WHEN invoice.status = '${InvoiceStatus.DRAFT}' THEN 1 END)`,
+        `COUNT(CASE WHEN invoice.status = '${InvoiceStatus.DRAFT}' AND invoice.due_date >= CURRENT_DATE THEN 1 END)`,
         'draftCount',
       )
       .addSelect('MIN(invoice.currency)', 'currency')

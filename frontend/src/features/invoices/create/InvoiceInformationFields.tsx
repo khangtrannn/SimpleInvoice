@@ -4,8 +4,7 @@ import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 import { SelectInput, TextareaInput, TextInput } from '@/shared/ui/form';
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
 import { CURRENCY_OPTIONS } from '@/shared/lib/currency';
-
-import { CreateInvoiceSectionCard } from './CreateInvoiceSectionCard';
+import { SectionCard } from '@/shared/ui/SectionCard';
 
 type InvoiceInformationFieldsProps = {
   register: UseFormRegister<CreateInvoiceFormInput>;
@@ -17,7 +16,7 @@ export function InvoiceInformationFields({
   errors,
 }: InvoiceInformationFieldsProps) {
   return (
-    <CreateInvoiceSectionCard
+    <SectionCard
       icon={<FileText className="h-5 w-5" />}
       title="Invoice Information"
     >
@@ -77,6 +76,6 @@ export function InvoiceInformationFields({
           {...register('description')}
         />
       </div>
-    </CreateInvoiceSectionCard>
+    </SectionCard>
   );
 }

@@ -2,42 +2,38 @@ import type { InvoiceSummary } from '@/api/types';
 import { formatLineAmount } from '@/shared/lib/format';
 
 export type TileSummary = {
-  total: string;
+  totalInvoices: number;
+  totalInvoicesHelper: string;
+  outstanding: string;
+  outstandingHelper: string;
   paid: string;
-  pending: string;
-  overdue: string;
-  draft: string;
-  draftCount: number;
-  totalHelper: string;
   paidHelper: string;
-  pendingHelper: string;
+  overdue: string;
   overdueHelper: string;
-  draftHelper: string;
 };
 
 export function buildTileSummary(summary: InvoiceSummary | null): TileSummary {
+  const paidCount = summary?.paidCount ?? 0;
+  const pendingCount = summary?.pendingCount ?? 0;
+  const overdueCount = summary?.overdueCount ?? 0;
   const draftCount = summary?.draftCount ?? 0;
 
-  const totalRevenue = Number(summary?.totalRevenue ?? 0);
   const totalPaid = Number(summary?.totalPaid ?? 0);
   const totalPending = Number(summary?.totalPending ?? 0);
   const totalOverdue = Number(summary?.totalOverdue ?? 0);
-  const totalDraft = Number(summary?.totalDraft ?? 0);
 
-  const pct = (val: number) =>
-    totalRevenue > 0 ? `${Math.round((val / totalRevenue) * 100)}% of total` : '—';
+  const totalInvoices = paidCount + pendingCount + overdueCount + draftCount;
+  const outstandingAmount = totalPending + totalOverdue;
+  const unpaidCount = pendingCount + overdueCount;
 
   return {
-    total: formatLineAmount(totalRevenue, ''),
+    totalInvoices,
+    totalInvoicesHelper: `${draftCount} draft${draftCount !== 1 ? 's' : ''}`,
+    outstanding: formatLineAmount(outstandingAmount, ''),
+    outstandingHelper: `${unpaidCount} invoice${unpaidCount !== 1 ? 's' : ''} unpaid`,
     paid: formatLineAmount(totalPaid, ''),
-    pending: formatLineAmount(totalPending, ''),
+    paidHelper: `${paidCount} invoice${paidCount !== 1 ? 's' : ''} paid`,
     overdue: formatLineAmount(totalOverdue, ''),
-    draft: formatLineAmount(totalDraft, ''),
-    draftCount,
-    totalHelper: 'Total revenue',
-    paidHelper: pct(totalPaid),
-    pendingHelper: pct(totalPending),
-    overdueHelper: pct(totalOverdue),
-    draftHelper: `${draftCount} invoice${draftCount !== 1 ? 's' : ''}`,
+    overdueHelper: `${overdueCount} invoice${overdueCount !== 1 ? 's' : ''} overdue`,
   };
 }

@@ -2,8 +2,7 @@ import { Calendar, Copy } from 'lucide-react';
 
 import type { InvoiceDetail } from '@/api/types';
 import { getInvoiceDetailViewModel } from '@/features/invoices/detail/invoice-detail.mapper';
-
-import { DetailCard } from './DetailCard';
+import { SectionCard } from '@/shared/ui/SectionCard';
 
 type InvoiceSummaryCardProps = {
   invoice: InvoiceDetail;
@@ -13,7 +12,7 @@ export function InvoiceSummaryCard({ invoice }: InvoiceSummaryCardProps) {
   const vm = getInvoiceDetailViewModel(invoice);
 
   return (
-    <DetailCard>
+    <SectionCard>
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         <SummaryBlock label="Invoice Number">
           <div className="flex items-center gap-2">
@@ -69,7 +68,7 @@ export function InvoiceSummaryCard({ invoice }: InvoiceSummaryCardProps) {
           </p>
         </SummaryBlock>
       </div>
-    </DetailCard>
+    </SectionCard>
   );
 }
 

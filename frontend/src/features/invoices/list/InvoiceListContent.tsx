@@ -32,13 +32,19 @@ export function InvoiceListContent({
   onQueryReset,
 }: InvoiceListContentProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 p-5">
         <InvoiceFilters
           query={query}
           onChange={onQueryChange}
           onReset={onQueryReset}
         />
+
+        {paging && !isLoading && !isError ? (
+          <p className="mt-3 text-xs font-medium text-slate-500">
+            {paging.total} invoice{paging.total !== 1 ? 's' : ''} found
+          </p>
+        ) : null}
       </div>
 
       {isLoading ? <InvoiceListSkeleton /> : null}
@@ -51,14 +57,6 @@ export function InvoiceListContent({
 
       {!isLoading && !isError ? (
         <>
-          {paging ? (
-            <div className="border-b border-slate-100 px-5 py-2.5">
-              <p className="text-sm text-slate-500">
-                {paging.total} invoice{paging.total !== 1 ? 's' : ''} found
-              </p>
-            </div>
-          ) : null}
-
           {invoices.length === 0 ? (
             <InvoiceListEmptyState />
           ) : (

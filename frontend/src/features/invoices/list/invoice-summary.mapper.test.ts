@@ -24,17 +24,14 @@ describe('buildTileSummary', () => {
     const result = buildTileSummary(summary);
 
     expect(result).toEqual({
-      total: '1,000.00',
+      totalInvoices: 6,
+      totalInvoicesHelper: '0 drafts',
+      outstanding: '400.00',
+      outstandingHelper: '3 invoices unpaid',
       paid: '600.00',
-      pending: '250.00',
+      paidHelper: '3 invoices paid',
       overdue: '150.00',
-      draft: '0.00',
-      draftCount: 0,
-      totalHelper: 'Total revenue',
-      paidHelper: '60% of total',
-      pendingHelper: '25% of total',
-      overdueHelper: '15% of total',
-      draftHelper: '0 invoices',
+      overdueHelper: '1 invoice overdue',
     });
   });
 
@@ -44,21 +41,18 @@ describe('buildTileSummary', () => {
     const result = buildTileSummary(summary);
 
     expect(result).toEqual({
-      total: '0.00',
+      totalInvoices: 0,
+      totalInvoicesHelper: '0 drafts',
+      outstanding: '0.00',
+      outstandingHelper: '0 invoices unpaid',
       paid: '0.00',
-      pending: '0.00',
+      paidHelper: '0 invoices paid',
       overdue: '0.00',
-      draft: '0.00',
-      draftCount: 0,
-      totalHelper: 'Total revenue',
-      paidHelper: '—',
-      pendingHelper: '—',
-      overdueHelper: '—',
-      draftHelper: '0 invoices',
+      overdueHelper: '0 invoices overdue',
     });
   });
 
-  it('uses singular invoice label for one draft invoice', () => {
+  it('uses singular invoice label for a single draft invoice', () => {
     const summary: InvoiceSummary = {
       totalRevenue: '0',
       totalPaid: '0',
@@ -76,6 +70,7 @@ describe('buildTileSummary', () => {
 
     const result = buildTileSummary(summary);
 
-    expect(result.draftHelper).toBe('1 invoice');
+    expect(result.totalInvoicesHelper).toBe('1 draft');
+    expect(result.totalInvoices).toBe(1);
   });
 });

@@ -3,8 +3,7 @@ import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 
 import { TextInput } from '@/shared/ui/form';
 import type { CreateInvoiceFormInput } from '@/features/invoices/schema/create-invoice.schema';
-
-import { CreateInvoiceSectionCard } from './CreateInvoiceSectionCard';
+import { SectionCard } from '@/shared/ui/SectionCard';
 
 type CustomerInformationFieldsProps = {
   register: UseFormRegister<CreateInvoiceFormInput>;
@@ -16,7 +15,7 @@ export function CustomerInformationFields({
   errors,
 }: CustomerInformationFieldsProps) {
   return (
-    <CreateInvoiceSectionCard
+    <SectionCard
       icon={<User className="h-5 w-5" />}
       title="Customer Information"
     >
@@ -52,6 +51,6 @@ export function CustomerInformationFields({
           {...register('customerAddress')}
         />
       </div>
-    </CreateInvoiceSectionCard>
+    </SectionCard>
   );
 }
