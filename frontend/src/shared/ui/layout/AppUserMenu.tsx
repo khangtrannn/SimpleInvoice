@@ -17,8 +17,8 @@ export function AppUserMenu({ user, onLogout }: AppUserMenuProps) {
           {initials}
         </div>
         <div className="hidden text-left lg:block">
-          <p className="text-xs font-semibold text-slate-800">{user?.fullname}</p>
-          <p className="text-xs text-slate-500">{user?.email}</p>
+          <p className="text-sm font-semibold text-slate-800">{user?.fullname}</p>
+          <p className="text-sm text-slate-500">{user?.email}</p>
         </div>
       </div>
 
