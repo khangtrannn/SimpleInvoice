@@ -57,19 +57,21 @@ export function InvoiceDetailPage() {
 
   return (
     <>
-      <InvoiceDetailHeader status={invoice.status} />
+      <div className="invoice-detail-screen">
+        <InvoiceDetailHeader status={invoice.status} />
 
-      <div className="mt-6 space-y-6">
-        <InvoiceSummaryCard invoice={invoice} />
+        <div className="mt-6 space-y-6">
+          <InvoiceSummaryCard invoice={invoice} />
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <CustomerInformationCard invoice={invoice} />
-          <InvoiceInformationCard invoice={invoice} />
-        </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <CustomerInformationCard invoice={invoice} />
+            <InvoiceInformationCard invoice={invoice} />
+          </div>
 
-        <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-          <InvoiceItemsCard invoice={invoice} />
-          <InvoiceTotalsCard invoice={invoice} />
+          <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+            <InvoiceItemsCard invoice={invoice} />
+            <InvoiceTotalsCard invoice={invoice} />
+          </div>
         </div>
       </div>
 
