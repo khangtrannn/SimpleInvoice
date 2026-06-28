@@ -5,9 +5,9 @@ import { ScrollToTop } from '@/app/ScrollToTop';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import { PublicOnlyRoute } from '@/features/auth/components/PublicOnlyRoute';
-import { CreateInvoicePage } from '@/features/invoices/pages/CreateInvoicePage';
-import { InvoiceDetailPage } from '@/features/invoices/pages/InvoiceDetailPage';
-import { InvoiceListPage } from '@/features/invoices/pages/InvoiceListPage';
+import { CreateInvoicePage } from '@/features/invoices/create/CreateInvoicePage';
+import { InvoiceDetailPage } from '@/features/invoices/detail/InvoiceDetailPage';
+import { InvoiceListPage } from '@/features/invoices/list/InvoiceListPage';
 
 export const router = createBrowserRouter([
   {

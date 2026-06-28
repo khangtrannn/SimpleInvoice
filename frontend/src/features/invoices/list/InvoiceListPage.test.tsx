@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 import type { RouteObject } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
-import { InvoiceListPage } from '@/features/invoices/pages/InvoiceListPage';
+import { InvoiceListPage } from '@/features/invoices/list/InvoiceListPage';
 import { API_BASE_URL, TEST_ACCESS_TOKEN } from '@/test/mocks/auth-handlers';
 import { server } from '@/test/mocks/server';
 import { renderWithRouter } from '@/test/test-utils';
