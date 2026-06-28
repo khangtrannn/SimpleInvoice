@@ -6,15 +6,15 @@ export function InvoiceDetailSkeleton() {
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
           <div>
             <div className="h-4 w-40 rounded-full bg-slate-100" />
-            <div className="mt-4 flex items-center gap-3">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="h-8 w-48 rounded-full bg-slate-200" />
               <div className="h-6 w-20 rounded-full bg-slate-100" />
             </div>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="h-11 w-40 rounded-xl bg-slate-200" />
-            <div className="h-11 w-44 rounded-xl bg-slate-100" />
+            <div className="h-11 w-full rounded-xl bg-slate-200 sm:w-40" />
+            <div className="h-11 w-full rounded-xl bg-slate-100 sm:w-44" />
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@ export function InvoiceDetailSkeleton() {
             </div>
           </div>
 
-          <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 md:hidden">
+          <div className="divide-y divide-slate-100 md:hidden">
             {Array.from({ length: 3 }, (_, index) => (
               <div key={index} className="space-y-3 p-5">
                 <div className="flex items-start justify-between gap-4">
