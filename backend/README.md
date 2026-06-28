@@ -11,7 +11,7 @@ src/
 ├── auth/          # JWT login, token issuance, JwtAuthGuard, CurrentUser decorator
 ├── users/         # UsersRepository, UsersService, UserEntity
 ├── invoices/      # InvoicesController, InvoicesService, InvoicesRepository, domain logic, DTOs, mappers
-│   └── domain/    # calculateInvoiceTotals, deriveInvoiceStatus — pure business logic
+│   └── domain/    # calculateInvoiceTotals, deriveInvoiceStatus - pure business logic
 ├── database/      # TypeORM DataSource, migrations, seed scripts, postgres-errors util
 ├── health/        # HealthController (GET /health via @nestjs/terminus)
 ├── common/        # GlobalExceptionFilter, custom validators (IsDateOnly, IsDateOnOrAfter, IsDateRange)
@@ -36,13 +36,13 @@ Derived `Overdue` status uses the UTC date as the business date boundary so stat
 ```mermaid
 flowchart TD
     A[HTTP Request] --> B[GlobalExceptionFilter wraps response]
-    B --> C[JwtAuthGuard — verifies Bearer token]
+    B --> C[JwtAuthGuard - verifies Bearer token]
     C -. missing or invalid token .-> U[401 Unauthorized]
     C --> D[Global ValidationPipe]
     D -. invalid shape or unknown fields .-> V[400 Validation Error]
     D --> E[Controller]
     E --> F[Service]
-    F --> G[Domain — calculateInvoiceTotals / deriveInvoiceStatus]
+    F --> G[Domain - calculateInvoiceTotals / deriveInvoiceStatus]
     G -. business rule violation .-> W[400 Bad Request]
     G --> H[Repository Wrapper]
     H --> I[TypeORM QueryBuilder / Repository]
@@ -98,20 +98,20 @@ sequenceDiagram
 flowchart TD
     A["GET /invoices?keyword=&status=&fromDate=&toDate=&sortBy=&ordering=&page=&pageSize="] --> B[JwtAuthGuard]
     B -. no token .-> Z[401 Unauthorized]
-    B --> C[ValidationPipe — GetInvoicesQueryDto]
+    B --> C[ValidationPipe - GetInvoicesQueryDto]
     C -. invalid params eg fromDate after toDate .-> Y[400 Bad Request]
     C --> D[InvoicesController.findAll]
     D --> E[InvoicesService.findAll]
     E --> F[InvoicesRepository.findAll]
     F --> G[createQueryBuilder skip/take for pagination]
-    G --> H[applyKeywordFilter — ILIKE on invoiceNumber or customerFullname]
-    H --> I[applyDateRangeFilter — invoiceDate >= fromDate AND invoiceDate <= toDate]
-    I --> J[applyStatusFilter — handles Overdue as due_date < today AND status != Paid]
-    J --> K[applySorting — invoiceDate / dueDate / totalAmount ASC or DESC]
+    G --> H[applyKeywordFilter - ILIKE on invoiceNumber or customerFullname]
+    H --> I[applyDateRangeFilter - invoiceDate >= fromDate AND invoiceDate <= toDate]
+    I --> J[applyStatusFilter - handles Overdue as due_date < today AND status != Paid]
+    J --> K[applySorting - invoiceDate / dueDate / totalAmount ASC or DESC]
     K --> L[(PostgreSQL getManyAndCount)]
     L --> M[InvoiceEntity array + total count]
-    M --> N[toInvoiceListItemResponse — maps each entity]
-    N --> O[deriveInvoiceStatus — computes Overdue at read time]
+    M --> N[toInvoiceListItemResponse - maps each entity]
+    N --> O[deriveInvoiceStatus - computes Overdue at read time]
     O --> P["{ data: InvoiceListItemResponseDto[], paging: { page, pageSize, total } }"]
 ```
 
@@ -129,7 +129,7 @@ Validation is split across three layers so each rule lives where it is most reli
 
 ### DTO validation
 
-Request DTOs use `class-validator` and `class-transformer`. The global `ValidationPipe` is configured with `whitelist`, `forbidNonWhitelisted`, and `transform`. Controllers receive stripped, typed DTO instances — never raw request bodies.
+Request DTOs use `class-validator` and `class-transformer`. The global `ValidationPipe` is configured with `whitelist`, `forbidNonWhitelisted`, and `transform`. Controllers receive stripped, typed DTO instances - never raw request bodies.
 
 - `CreateInvoiceDto` validates customer fields, dates, currency, tax, discount, and a nested `CreateInvoiceItemDto`.
 - `GetInvoicesQueryDto` validates pagination, sorting, status, keyword, and date range filters.
@@ -181,6 +181,7 @@ Password: Password123!
 | Filter by date range          | Done   | `InvoicesRepository.applyDateRangeFilter`    | `GET /invoices?fromDate=2026-01-01&toDate=2026-06-30` |
 | Sort invoices                 | Done   | `InvoicesRepository.applySorting`            | `GET /invoices?sortBy=totalAmount&ordering=ASC`       |
 | Server-side pagination        | Done   | `InvoicesRepository.buildFindAllQuery`       | Response includes `paging.total`, `paging.page`       |
+| Summary dashboard endpoint    | Extra  | `InvoicesService.findSummary`                | `GET /invoices/summary` (honors same filters as `/invoices`) |
 | Invoice detail                | Done   | `src/invoices/invoices.service.ts`           | `GET /invoices/:id`                                   |
 | Create invoice                | Done   | `src/invoices/invoices.service.ts`           | `POST /invoices`                                      |
 | Server-side total calculation | Done   | `src/invoices/domain/invoice-calculation.ts` | `npm run test` → `invoice-calculation.spec.ts`        |
@@ -215,13 +216,14 @@ Copy `backend/.env.example` to `backend/.env` and fill in the required values.
 |---------------------|----------|---------------|--------------------------------------------------|
 | `NODE_ENV`          | No       | `development` | Runtime environment                              |
 | `PORT`              | No       | `4000`        | HTTP port                                        |
-| `POSTGRES_HOST`     | Yes      | —             | PostgreSQL hostname                              |
-| `POSTGRES_PORT`     | Yes      | —             | PostgreSQL port (typically `5432`)               |
-| `POSTGRES_DB`       | Yes      | —             | Database name                                    |
-| `POSTGRES_USER`     | Yes      | —             | Database user                                    |
-| `POSTGRES_PASSWORD` | Yes      | —             | Database password                                |
-| `JWT_SECRET`        | Yes      | —             | Signing secret, minimum 32 characters            |
+| `POSTGRES_HOST`     | Yes      | -             | PostgreSQL hostname                              |
+| `POSTGRES_PORT`     | Yes      | -             | PostgreSQL port (typically `5432`)               |
+| `POSTGRES_DB`       | Yes      | -             | Database name                                    |
+| `POSTGRES_USER`     | Yes      | -             | Database user                                    |
+| `POSTGRES_PASSWORD` | Yes      | -             | Database password                                |
+| `JWT_SECRET`        | Yes      | -             | Signing secret, minimum 32 characters            |
 | `JWT_EXPIRES_IN`    | No       | `3600`        | Token lifetime in seconds                        |
+| `CORS_ORIGIN`       | No       | `http://localhost:3000` | Comma-separated allowlist of permitted origins |
 
 The app validates all required variables at startup using Joi and exits immediately with a descriptive error if any are missing or malformed.
 
@@ -231,7 +233,7 @@ E2E tests can either use `npm run test:e2e:docker` for a temporary Docker Postgr
 
 ## Database and Migrations
 
-The schema is migration-driven. `synchronize` and `migrationsRun` are disabled in TypeORM — schema changes only happen through explicit migrations.
+The schema is migration-driven. `synchronize` and `migrationsRun` are disabled in TypeORM - schema changes only happen through explicit migrations.
 
 ```bash
 npm run migration:run                                                       # apply pending migrations
@@ -272,7 +274,7 @@ Unit tests use Jest and `@nestjs/testing`. Each spec wires only the class under 
 | Invoices controller   | `invoices/invoices.controller.spec.ts`        | Delegation to service with mocked guard                                   |
 | Invoice calculation   | `invoices/domain/invoice-calculation.spec.ts` | Subtotal, tax, discount, paid, balance rounding (Decimal.js); over-discount and over-paid validation |
 | Users service         | `users/user.service.spec.ts`                  | Email normalisation, lookup by ID, null handling                          |
-| Date validators       | `common/validators/date-only.validator.spec.ts` | `IsDateOnly`, `IsDateOnOrAfter`, `IsDateRange` — format and ordering rules |
+| Date validators       | `common/validators/date-only.validator.spec.ts` | `IsDateOnly`, `IsDateOnOrAfter`, `IsDateRange` - format and ordering rules |
 | Postgres error util   | `database/postgres-errors.util.spec.ts`       | `isUniqueViolation` identifies unique constraint errors by constraint name |
 
 ### E2E tests (`test/*.e2e-spec.ts`)
@@ -334,7 +336,7 @@ Example 400 body (validation):
 - The login endpoint is rate-limited to 5 requests per 60 seconds (`@nestjs/throttler`).
 - `ValidationPipe` with `whitelist: true` and `forbidNonWhitelisted: true` rejects unknown fields on every request.
 - All secrets are loaded from environment variables; none are hard-coded.
-- CORS is enabled via `app.enableCors()`.
+- CORS uses an env-driven allowlist (`CORS_ORIGIN`, comma-separated). Requests from non-allowlisted origins are rejected.
 
 ---
 
@@ -348,8 +350,8 @@ Three tables managed by TypeORM migrations. `synchronize` is disabled.
 |-----------------|----------------|-------------------------|
 | `id`            | uuid           | PK                      |
 | `email`         | varchar(255)   | Unique (`uq_users_email`) |
-| `password_hash` | varchar(255)   | —                       |
-| `fullname`      | varchar(255)   | —                       |
+| `password_hash` | varchar(255)   | -                       |
+| `fullname`      | varchar(255)   | -                       |
 | `created_at`    | timestamptz    | auto                    |
 
 ### `invoices`
@@ -359,14 +361,14 @@ Three tables managed by TypeORM migrations. `synchronize` is disabled.
 | `id`                 | uuid             | PK                                               |
 | `invoice_number`     | varchar(100)     | Unique (`uq_invoices_invoice_number`)            |
 | `invoice_reference`  | varchar(100)     | nullable                                         |
-| `invoice_date`       | date             | —                                                |
+| `invoice_date`       | date             | -                                                |
 | `due_date`           | date             | `due_date >= invoice_date` check constraint      |
-| `currency`           | varchar(3)       | —                                                |
-| `currency_symbol`    | varchar(8)       | —                                                |
+| `currency`           | varchar(3)       | -                                                |
+| `currency_symbol`    | varchar(8)       | -                                                |
 | `description`        | text             | nullable                                         |
 | `status`             | enum             | Draft / Pending / Paid (default Draft)           |
-| `customer_fullname`  | varchar(255)     | —                                                |
-| `customer_email`     | varchar(255)     | —                                                |
+| `customer_fullname`  | varchar(255)     | -                                                |
+| `customer_email`     | varchar(255)     | -                                                |
 | `customer_mobile_number` | varchar(50) | nullable                                         |
 | `customer_address`   | text             | nullable                                         |
 | `invoice_sub_total`  | numeric(14,2)    | `>= 0` check                                     |
@@ -385,7 +387,7 @@ Three tables managed by TypeORM migrations. `synchronize` is disabled.
 |--------------|---------------|--------------------------------------|
 | `id`         | uuid          | PK                                   |
 | `invoice_id` | uuid          | FK → `invoices.id` (CASCADE delete)  |
-| `name`       | varchar(255)  | —                                    |
+| `name`       | varchar(255)  | -                                    |
 | `quantity`   | integer       | `> 0` check                          |
 | `rate`       | numeric(14,2) | `> 0` check                          |
 

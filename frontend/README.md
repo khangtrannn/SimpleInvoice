@@ -1,4 +1,4 @@
-# SimpleInvoice — Frontend
+# SimpleInvoice - Frontend
 
 React 19 + TypeScript + Vite frontend for the SimpleInvoice assessment application. Fully responsive, feature-first architecture with runtime API validation, comprehensive test coverage, and polished UX.
 
@@ -8,13 +8,13 @@ React 19 + TypeScript + Vite frontend for the SimpleInvoice assessment applicati
 
 **What to look for:**
 
-- **Protected Routes & Authentication** — Login redirects to invoice list on success; all invoice routes require valid JWT; logout clears session. See `auth-context.tsx`, `ProtectedRoute.tsx`.
-- **Invoice List** — Paginated, searchable, filterable by status (Draft/Pending/Paid/Overdue), sortable by date/amount. List state lives in URL query params. See `InvoiceListPage.tsx`, `use-invoice-list-query.ts`.
-- **Invoice Detail** — Full invoice information, line items, totals, payment status. Includes a **print-to-PDF** feature that produces an A4 document without external dependencies. See `InvoiceDetailPage.tsx`, `InvoicePrintDocument.tsx`.
-- **Create Invoice** — Multi-field form with real-time validation and a live preview panel. Backend validates totals; frontend shows preview. One line item per assessment spec. See `CreateInvoiceForm.tsx`, `createInvoiceSchema.ts`.
-- **Runtime Response Validation** — Zod schemas validate all API responses at unsafe boundaries (login, invoice list/detail, create). Parsing errors are caught and logged. See `invoices.schema.ts`, `auth.schema.ts`, `parse-api-response.ts`.
-- **Comprehensive Tests** — 25 test files covering form validation, hooks, utilities, component behavior, API mocking. MSW mocks backend; factories for test data. See `frontend/src/**/*.test.ts`, `test/mocks/`.
-- **Feature-First Architecture** — Code organized by feature (`auth`, `invoices`) with feature-local domain logic, not by layer. Shared utilities live in `shared/`. See folder structure below.
+- **Protected Routes & Authentication** - Login redirects to invoice list on success; all invoice routes require valid JWT; logout clears session. See `auth-context.tsx`, `ProtectedRoute.tsx`.
+- **Invoice List** - Paginated, searchable, filterable by status (Draft/Pending/Paid/Overdue), sortable by date/amount. List state lives in URL query params. See `InvoiceListPage.tsx`, `use-invoice-list-query.ts`.
+- **Invoice Detail** - Full invoice information, line items, totals, payment status. Includes a **print-to-PDF** feature that produces an A4 document without external dependencies. See `InvoiceDetailPage.tsx`, `InvoicePrintDocument.tsx`.
+- **Create Invoice** - Multi-field form with real-time validation and a live preview panel. Backend validates totals; frontend shows preview. One line item per assessment spec. See `CreateInvoiceForm.tsx`, `createInvoiceSchema.ts`.
+- **Runtime Response Validation** - Zod schemas validate all API responses at unsafe boundaries (login, invoice list/detail, create). Parsing errors are caught and logged. See `invoices.schema.ts`, `auth.schema.ts`, `parse-api-response.ts`.
+- **Comprehensive Tests** - tests cover form validation, hooks, utilities, component behavior, and runtime schema validation. MSW mocks backend; factories generate test data. Run `npm run test` for the full suite. See `frontend/src/**/*.test.ts`, `test/mocks/`.
+- **Feature-First Architecture** - Code organized by feature (`auth`, `invoices`) with feature-local domain logic, not by layer. Shared utilities live in `shared/`. See folder structure below.
 
 ---
 
@@ -315,10 +315,10 @@ Validation happens at **unsafe boundaries** where external data enters:
 
 **Why Zod?**
 
-- **Type narrowing** — After validation, TypeScript knows the shape is safe.
-- **Composition** — Schemas are reusable and composable.
-- **Error reporting** — Clear, structured validation errors.
-- **Assertion at boundaries** — Only validate where data is untrusted (API, user input, storage).
+- **Type narrowing** - After validation, TypeScript knows the shape is safe.
+- **Composition** - Schemas are reusable and composable.
+- **Error reporting** - Clear, structured validation errors.
+- **Assertion at boundaries** - Only validate where data is untrusted (API, user input, storage).
 
 **Example:** Backend sends `{ totalAmount: "123.45" }` (string, not number). Zod schema specifies `numericStringSchema`, which accepts strings and coerces to numbers in JS. If backend sends `{ totalAmount: "not-a-number" }`, validation fails loudly.
 
@@ -349,26 +349,26 @@ Validation happens at **unsafe boundaries** where external data enters:
 
 Pure functions tested in isolation:
 
-- **Form schemas** — Zod schema validation with valid/invalid inputs.
-- **Mappers** — `invoice-detail.mapper.ts` transforms API response to view model.
-- **Utilities** — `format.ts`, `api-error.ts`, etc.
-- **Hooks** — Query hooks return expected shapes, error handling.
+- **Form schemas** - Zod schema validation with valid/invalid inputs.
+- **Mappers** - `invoice-detail.mapper.ts` transforms API response to view model.
+- **Utilities** - `format.ts`, `api-error.ts`, etc.
+- **Hooks** - Query hooks return expected shapes, error handling.
 
 ### Component Tests
 
 React components tested with `@testing-library/react`:
 
-- **Form controls** — Render, interact (type, select, submit), verify errors.
-- **Invoice status badge** — Render with different statuses, verify color/label.
-- **List components** — Render with mock data, verify UI updates on prop changes.
+- **Form controls** - Render, interact (type, select, submit), verify errors.
+- **Invoice status badge** - Render with different statuses, verify color/label.
+- **List components** - Render with mock data, verify UI updates on prop changes.
 
 ### Integration Tests
 
 Full workflows with MSW mocking:
 
-- **Login → redirect to list** — Session state flows through.
-- **Create invoice → appears in list** — Mutation + list refetch.
-- **Filter, sort, paginate** — URL state and query synced.
+- **Login → redirect to list** - Session state flows through.
+- **Create invoice → appears in list** - Mutation + list refetch.
+- **Filter, sort, paginate** - URL state and query synced.
 
 ### Test Data
 
@@ -404,10 +404,10 @@ const user = authFactory.build({ email: 'test@example.com' });
 **Decision:** Validate every API response with Zod at the call site.
 
 **Why:**
-- **Defensive** — Catch unexpected API changes immediately.
-- **Type-safe** — After validation, TypeScript knows the shape.
-- **Observable** — Validation errors logged with endpoint name; easy to debug.
-- **Cheap** — Zod validation is fast; negligible performance impact.
+- **Defensive** - Catch unexpected API changes immediately.
+- **Type-safe** - After validation, TypeScript knows the shape.
+- **Observable** - Validation errors logged with endpoint name; easy to debug.
+- **Cheap** - Zod validation is fast; negligible performance impact.
 
 **Trade-off:** Verbose schema definitions. Offset by reusability and safety.
 
@@ -418,13 +418,13 @@ const user = authFactory.build({ email: 'test@example.com' });
 **Decision:** Form shows a live *preview* of subtotal/tax/total, but does NOT send calculations to backend.
 
 **Why:**
-- **Correctness** — Backend recalculates independently; no rounding or precision bugs.
-- **Auditability** — Backend is the single source of truth for money.
-- **Simplicity** — Frontend doesn't need to replicate complex money math.
+- **Correctness** - Backend recalculates independently; no rounding or precision bugs.
+- **Auditability** - Backend is the single source of truth for money.
+- **Simplicity** - Frontend doesn't need to replicate complex money math.
 
 **Implementation:**
-- `create-invoice-calculations.ts` — Client-side preview (uses same formula as backend for UX consistency).
-- Backend `calculateInvoiceTotals()` — Validates and applies actual totals.
+- `create-invoice-calculations.ts` - Client-side preview (uses same formula as backend for UX consistency).
+- Backend `calculateInvoiceTotals()` - Validates and applies actual totals.
 
 ---
 
@@ -433,14 +433,14 @@ const user = authFactory.build({ email: 'test@example.com' });
 **Decision:** Print invoice using browser `window.print()` and CSS media queries; no external PDF library.
 
 **Why:**
-- **Zero dependency** — No extra library to bundle.
-- **Native** — Works in all modern browsers without setup.
-- **Familiar** — Users expect `Ctrl+P` / `Cmd+P` to work.
-- **A4-ready** — CSS handles page size, margins, breaks.
+- **Zero dependency** - No extra library to bundle.
+- **Native** - Works in all modern browsers without setup.
+- **Familiar** - Users expect `Ctrl+P` / `Cmd+P` to work.
+- **A4-ready** - CSS handles page size, margins, breaks.
 
 **Implementation:**
-- `InvoicePrintDocument.tsx` — A4-sized hidden layout.
-- `index.css` — `@media print` rule hides app shell, shows print document.
+- `InvoicePrintDocument.tsx` - A4-sized hidden layout.
+- `index.css` - `@media print` rule hides app shell, shows print document.
 - `page-break-inside: avoid` prevents table/totals from splitting across pages.
 
 ---
@@ -450,13 +450,13 @@ const user = authFactory.build({ email: 'test@example.com' });
 **Decision:** Pagination, sorting, filtering, and search state lives in the URL, not in React state.
 
 **Why:**
-- **Sharable** — Copy URL → share filtered list with colleague.
-- **Bookmarkable** — Refresh page → state preserved.
-- **Debuggable** — Query state visible in address bar.
-- **Lightweight** — No global state management needed.
+- **Sharable** - Copy URL → share filtered list with colleague.
+- **Bookmarkable** - Refresh page → state preserved.
+- **Debuggable** - Query state visible in address bar.
+- **Lightweight** - No global state management needed.
 
 **Implementation:**
-- `use-invoice-list-query.ts` — Reads/writes URL search params.
+- `use-invoice-list-query.ts` - Reads/writes URL search params.
 - `updateQuery()` → updates param and re-fetches.
 - `resetQuery()` → clears filters.
 
@@ -467,10 +467,10 @@ const user = authFactory.build({ email: 'test@example.com' });
 **Decision:** Three separate routes and page components, not a shared modal or tab interface.
 
 **Why:**
-- **Clear entry/exit** — Each route has clear URL and purpose.
-- **No state leakage** — Create form doesn't affect list state until redirect.
-- **Mobile-friendly** — Full-screen experience on small screens.
-- **Accessible** — Clear navigation flow with browser back button.
+- **Clear entry/exit** - Each route has clear URL and purpose.
+- **No state leakage** - Create form doesn't affect list state until redirect.
+- **Mobile-friendly** - Full-screen experience on small screens.
+- **Accessible** - Clear navigation flow with browser back button.
 
 ---
 
@@ -479,9 +479,9 @@ const user = authFactory.build({ email: 'test@example.com' });
 **Decision:** Summary tiles show plain numbers (e.g., `94,737.54`) without currency symbol.
 
 **Why:**
-- **Accuracy** — Totals may span multiple currencies; no single symbol is correct.
-- **Consistency** — Symbol doesn't flicker as user changes status filter.
-- **Clarity** — Avoids confusion if invoice mix is multi-currency.
+- **Accuracy** - Totals may span multiple currencies; no single symbol is correct.
+- **Consistency** - Symbol doesn't flicker as user changes status filter.
+- **Clarity** - Avoids confusion if invoice mix is multi-currency.
 
 ---
 
@@ -490,9 +490,9 @@ const user = authFactory.build({ email: 'test@example.com' });
 **Decision:** Reusable form inputs (TextInput, SelectInput, etc) live in `shared/`, not duplicated per feature.
 
 **Why:**
-- **DRY** — Single source of truth for form control styling and behavior.
-- **Consistency** — All forms look and feel the same.
-- **Easier to refactor** — Update styling in one place.
+- **DRY** - Single source of truth for form control styling and behavior.
+- **Consistency** - All forms look and feel the same.
+- **Easier to refactor** - Update styling in one place.
 
 ---
 
@@ -557,11 +557,11 @@ See root `README.md` for full-stack setup (Docker, backend, database).
 
 ### Frontend-Specific
 
-- **JWT in localStorage** — Token stored in localStorage for assessment simplicity. A production app would use httpOnly cookies and refresh token rotation.
-- **One line item per invoice** — Form supports exactly one item per the requirement. Data model allows multiple items for future expansion, but `POST /invoices` enforces one item.
-- **Print engine dependency** — Print output depends on browser and printer driver. Some printers may not honor `print-color-adjust: exact`; status badge colors may not print as expected on all devices.
-- **No refresh token** — Expired tokens require re-login. Token lifetime is configurable by `JWT_EXPIRES_IN` env var on backend.
-- **Summary tiles span all currencies** — Multi-currency invoices may exist; summary tiles intentionally don't display a single currency symbol. See "Design Decisions" section.
+- **JWT in localStorage** - Token stored in localStorage for assessment simplicity. A production app would use httpOnly cookies and refresh token rotation.
+- **One line item per invoice** - Form supports exactly one item per the requirement. Data model allows multiple items for future expansion, but `POST /invoices` enforces one item.
+- **Print engine dependency** - Print output depends on browser and printer driver. Some printers may not honor `print-color-adjust: exact`; status badge colors may not print as expected on all devices.
+- **No refresh token** - Expired tokens require re-login. Token lifetime is configurable by `JWT_EXPIRES_IN` env var on backend.
+- **Summary tiles span all currencies** - Multi-currency invoices may exist; summary tiles intentionally don't display a single currency symbol. See "Design Decisions" section.
 
 ### General (See Backend README for Full List)
 
@@ -578,13 +578,14 @@ The frontend assumes the backend API at the URL specified in `VITE_API_URL` env 
 
 **Required backend endpoints:**
 
-| Method | Endpoint         | Auth | Response                                   |
-|--------|------------------|------|---------------------------------------------|
-| POST   | `/auth/login`    | No   | `{ accessToken, tokenType, expiresIn, user }` |
-| GET    | `/auth/me`       | Yes  | `{ id, email, fullname }`                  |
-| GET    | `/invoices`      | Yes  | `{ data: [...], paging, summary }`        |
-| GET    | `/invoices/:id`  | Yes  | `{ id, invoiceNumber, customer, items, ...}` |
-| POST   | `/invoices`      | Yes  | `{ id, invoiceNumber, customer, items, ...}` |
+| Method | Endpoint              | Auth | Response                                   |
+|--------|-----------------------|------|---------------------------------------------|
+| POST   | `/auth/login`         | No   | `{ accessToken, tokenType, expiresIn, user }` |
+| GET    | `/auth/me`            | Yes  | `{ id, email, fullname }`                  |
+| GET    | `/invoices`           | Yes  | `{ data: [...], paging }`                  |
+| GET    | `/invoices/summary`   | Yes  | `{ totalRevenue, totalPaid, ...counts, currency }` - honors same filters as `/invoices` |
+| GET    | `/invoices/:id`       | Yes  | `{ id, invoiceNumber, customer, items, ...}` |
+| POST   | `/invoices`           | Yes  | `{ id, invoiceNumber, customer, items, ...}` |
 
 See backend README (`backend/README.md`) for endpoint details, query params, and error codes.
 
@@ -619,18 +620,18 @@ npm run start
 
 ## Code Quality
 
-- **TypeScript strict mode** — All code is typed; no `any`.
-- **ESLint** — Enforces React hooks rules, unused variables, imports.
-- **Vitest** — 25 test files; coverage for critical paths.
-- **Responsive design** — Tested on mobile, tablet, desktop.
+- **TypeScript strict mode** - All code is typed; no `any`.
+- **ESLint** - Enforces React hooks rules, unused variables, imports.
+- **Vitest** - 25 test files; coverage for critical paths.
+- **Responsive design** - Tested on mobile, tablet, desktop.
 
 ---
 
 ## Architecture Principles
 
-1. **Type safety first** — TypeScript strict mode; Zod validation at boundaries.
-2. **Single responsibility** — Each function/component does one thing.
-3. **Testability** — Logic is isolated; components are small and focused.
-4. **Accessibility** — Semantic HTML, ARIA labels, keyboard navigation.
-5. **Performance** — TanStack Query caches; React Router lazy-loads routes (future).
-6. **Maintainability** — Clear folder structure; feature-first organization.
+1. **Type safety first** - TypeScript strict mode; Zod validation at boundaries.
+2. **Single responsibility** - Each function/component does one thing.
+3. **Testability** - Logic is isolated; components are small and focused.
+4. **Accessibility** - Semantic HTML, ARIA labels, keyboard navigation.
+5. **Performance** - TanStack Query caches; React Router lazy-loads routes (future).
+6. **Maintainability** - Clear folder structure; feature-first organization.
