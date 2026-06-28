@@ -4,172 +4,6 @@ NestJS REST API backed by PostgreSQL, TypeORM migrations, JWT authentication, cl
 
 ---
 
-## Reviewer Quick Start
-
-### Option A — Docker (recommended)
-
-> Requires Docker Desktop running.
-
-```bash
-./start.sh
-```
-
-This single command copies missing root/backend env files from their examples, builds all Docker services, waits for the backend to be healthy, runs compiled production migrations, and seeds sample data.
-
-### Option B — Local (Node.js 20+ and PostgreSQL 14+ required)
-
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Edit .env — set POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
-npm run migration:run
-npm run seed
-npm run start:dev
-```
-
-### Endpoints
-
-| Resource    | URL                              |
-|-------------|----------------------------------|
-| Backend API | http://localhost:4000            |
-| Swagger UI  | http://localhost:4000/api/docs   |
-| Health      | http://localhost:4000/health     |
-
----
-
-## Default Reviewer Credentials
-
-Seeded automatically by `npm run seed`:
-
-```
-Email:    reviewer@simpleinvoice.local
-Password: Password123!
-```
-
----
-
-## Requirement Coverage
-
-| Requirement                    | Status | Location                                     | How to verify                                         |
-|-------------------------------|--------|----------------------------------------------|-------------------------------------------------------|
-| JWT login                     | Done   | `src/auth/auth.service.ts`                   | `POST /auth/login`                                    |
-| Current user profile          | Done   | `src/auth/auth.controller.ts`                | `GET /auth/me` with Bearer token                      |
-| Protected invoice APIs        | Done   | `JwtAuthGuard` on `InvoicesController`       | Call `/invoices` without token → 401                  |
-| Invoice listing               | Done   | `src/invoices/invoices.controller.ts`        | `GET /invoices`                                       |
-| Search invoices               | Done   | `InvoicesRepository.applyKeywordFilter`      | `GET /invoices?keyword=Paul` (number or name)         |
-| Filter by status              | Done   | `InvoicesRepository.applyStatusFilter`       | `GET /invoices?status=Overdue`                        |
-| Filter by date range          | Done   | `InvoicesRepository.applyDateRangeFilter`    | `GET /invoices?fromDate=2026-01-01&toDate=2026-06-30` |
-| Sort invoices                 | Done   | `InvoicesRepository.applySorting`            | `GET /invoices?sortBy=totalAmount&ordering=ASC`       |
-| Server-side pagination        | Done   | `InvoicesRepository.buildFindAllQuery`       | Response includes `paging.total`, `paging.page`       |
-| Invoice detail                | Done   | `src/invoices/invoices.service.ts`           | `GET /invoices/:id`                                   |
-| Create invoice                | Done   | `src/invoices/invoices.service.ts`           | `POST /invoices`                                      |
-| Server-side total calculation | Done   | `src/invoices/domain/invoice-calculation.ts` | `npm run test` → `invoice-calculation.spec.ts`        |
-| Unique invoice number         | Done   | DB constraint + service error mapping        | Duplicate `invoiceNumber` → 409 Conflict              |
-| Due date validation           | Done   | DTO `@IsDateOnOrAfter` + DB constraint       | `dueDate` before `invoiceDate` → 400                  |
-| Overdue derived status        | Done   | `src/invoices/domain/derive-invoice-status.ts` | Unpaid invoice past due date returns `Overdue`      |
-| Swagger docs                  | Done   | Swagger decorators on all controllers        | http://localhost:4000/api/docs                        |
-| Unit tests                    | Done   | `src/**/*.spec.ts`                           | `npm run test`                                        |
-| E2E tests                     | Done   | `test/*.e2e-spec.ts`                         | `npm run test:e2e`                                    |
-
----
-
-## API Documentation
-
-Swagger UI is available at **http://localhost:4000/api/docs**.
-
-Reviewer flow:
-
-1. Call `POST /auth/login` with the credentials above.
-2. Copy the `accessToken` from the response.
-3. Click **Authorize** in the top-right of Swagger UI.
-4. Paste the token value (Swagger prefixes `Bearer` automatically).
-5. All protected invoice endpoints are now callable.
-
----
-
-## Environment Configuration
-
-Copy `backend/.env.example` to `backend/.env` and fill in the required values.
-
-| Variable            | Required | Default       | Description                                      |
-|---------------------|----------|---------------|--------------------------------------------------|
-| `NODE_ENV`          | No       | `development` | Runtime environment                              |
-| `PORT`              | No       | `4000`        | HTTP port                                        |
-| `POSTGRES_HOST`     | Yes      | —             | PostgreSQL hostname                              |
-| `POSTGRES_PORT`     | Yes      | —             | PostgreSQL port (typically `5432`)               |
-| `POSTGRES_DB`       | Yes      | —             | Database name                                    |
-| `POSTGRES_USER`     | Yes      | —             | Database user                                    |
-| `POSTGRES_PASSWORD` | Yes      | —             | Database password                                |
-| `JWT_SECRET`        | Yes      | —             | Signing secret, minimum 32 characters            |
-| `JWT_EXPIRES_IN`    | No       | `3600`        | Token lifetime in seconds                        |
-
-The app validates all required variables at startup using Joi and exits immediately with a descriptive error if any are missing or malformed.
-
-E2E tests can either use `npm run test:e2e:docker` for a temporary Docker PostgreSQL instance or a separate `backend/.env.test` file pointing to a dedicated test database. Use `.env.test.example` as the starting point for local test DB configuration.
-
----
-
-## Database and Migrations
-
-The schema is migration-driven. `synchronize` and `migrationsRun` are disabled in TypeORM — schema changes only happen through explicit migrations.
-
-```bash
-npm run migration:run                                                       # apply pending migrations
-npm run migration:run:prod                                                  # apply compiled dist migrations
-npm run migration:show                                                      # list applied vs pending
-npm run migration:generate -- src/database/migrations/NameOfMigration      # generate from entity diff
-npm run migration:revert                                                    # revert last migration
-npm run seed                                                                # seed reviewer user + 30 sample invoices
-npm run seed:prod                                                           # seed from compiled dist
-```
-
-Run migrations before seeding. The seed script uses upsert for the reviewer user so it is safe to run multiple times.
-
----
-
-## Testing
-
-```bash
-npm run test          # unit tests
-npm run test:e2e      # end-to-end tests (requires .env.test and a running PostgreSQL)
-npm run test:e2e:docker # start test PostgreSQL in Docker, then run end-to-end tests
-npm run test:cov      # unit tests with coverage report
-```
-
-### Unit tests (`src/**/*.spec.ts`)
-
-Unit tests use Jest and `@nestjs/testing`. Each spec wires only the class under test and replaces every dependency with a typed `jest.Mocked` partial. Guards are swapped via `overrideGuard`.
-
-| Area                  | File                                          | What it verifies                                                          |
-|-----------------------|-----------------------------------------------|---------------------------------------------------------------------------|
-| Auth service          | `auth/auth.service.spec.ts`                   | Login flow, credential validation, token issuance                         |
-| Auth controller       | `auth/auth.controller.spec.ts`                | Delegation to service; `getMe` with mocked guard                          |
-| JWT guard             | `auth/guards/jwt-auth.guard.spec.ts`          | Valid token, missing/malformed/expired token, revoked user                |
-| Access token service  | `auth/services/access-token.service.spec.ts`  | JWT signing and expiry config                                             |
-| Password utility      | `auth/utils/password.util.spec.ts`            | `bcrypt.compare` delegation                                               |
-| Auth response mapper  | `auth/mappers/auth-user-response.mapper.spec.ts` | `passwordHash` is never exposed                                        |
-| Invoices service      | `invoices/invoices.service.spec.ts`           | `findAll`, `findOne`, `create`; conflict on duplicate number; domain validation failure |
-| Invoices controller   | `invoices/invoices.controller.spec.ts`        | Delegation to service with mocked guard                                   |
-| Invoice calculation   | `invoices/domain/invoice-calculation.spec.ts` | Subtotal, tax, discount, paid, balance rounding (Decimal.js); over-discount and over-paid validation |
-| Users service         | `users/user.service.spec.ts`                  | Email normalisation, lookup by ID, null handling                          |
-| Date validators       | `common/validators/date-only.validator.spec.ts` | `IsDateOnly`, `IsDateOnOrAfter`, `IsDateRange` — format and ordering rules |
-| Postgres error util   | `database/postgres-errors.util.spec.ts`       | `isUniqueViolation` identifies unique constraint errors by constraint name |
-
-### E2E tests (`test/*.e2e-spec.ts`)
-
-E2E tests boot a real NestJS application against a dedicated PostgreSQL database. TypeORM migrations run during setup. Each suite truncates all tables in `beforeAll` for isolation.
-
-| Suite            | File                     | Scenarios                                                                           |
-|------------------|--------------------------|-------------------------------------------------------------------------------------|
-| Health           | `app.e2e-spec.ts`        | `GET /health` returns 200                                                           |
-| Auth             | `auth.e2e-spec.ts`       | Login → 200 + JWT; invalid password → 401; email validation → 400; `GET /auth/me` with valid/missing/malformed token |
-| Invoices (create) | `invoices.e2e-spec.ts`  | Full payload → 201 + computed totals; minimal fields → 201; duplicate number → 409; missing required field → 400; no token → 401 |
-| Invoices (list)   | `invoices.e2e-spec.ts`  | Default pagination; keyword filter; date range filter; invalid date range → 400; page 2; no token → 401 |
-| Invoices (detail) | `invoices.e2e-spec.ts`  | Known ID → 200; non-existent UUID → 404; invalid UUID → 400; no token → 401        |
-
----
-
 ## Architecture Overview
 
 ```
@@ -308,6 +142,150 @@ Money rules live in `calculateInvoiceTotals` (`src/invoices/domain/invoice-calcu
 ### Persistence constraints
 
 Database constraints protect invariants at the storage boundary even if a future code path bypasses the API layer. Key constraints on `invoices`: unique `invoice_number`, `due_date >= invoice_date`, and non-negative checks on all money columns. Key constraints on `invoice_items`: `quantity > 0`, `rate > 0`.
+
+---
+
+## Reviewer Quick Start
+
+See the [root README](../README.md) for full setup instructions (Docker or local). This section highlights backend-specific endpoints and credentials.
+
+### Default Credentials
+
+Seeded automatically by `npm run seed`:
+
+```
+Email:    reviewer@simpleinvoice.local
+Password: Password123!
+```
+
+### Backend Endpoints
+
+| Resource    | URL                              |
+|-------------|----------------------------------|
+| Backend API | http://localhost:4000            |
+| Swagger UI  | http://localhost:4000/api/docs   |
+| Health      | http://localhost:4000/health     |
+
+---
+
+## Requirement Coverage
+
+| Requirement                    | Status | Location                                     | How to verify                                         |
+|-------------------------------|--------|----------------------------------------------|-------------------------------------------------------|
+| JWT login                     | Done   | `src/auth/auth.service.ts`                   | `POST /auth/login`                                    |
+| Current user profile          | Done   | `src/auth/auth.controller.ts`                | `GET /auth/me` with Bearer token                      |
+| Protected invoice APIs        | Done   | `JwtAuthGuard` on `InvoicesController`       | Call `/invoices` without token → 401                  |
+| Invoice listing               | Done   | `src/invoices/invoices.controller.ts`        | `GET /invoices`                                       |
+| Search invoices               | Done   | `InvoicesRepository.applyKeywordFilter`      | `GET /invoices?keyword=Paul` (number or name)         |
+| Filter by status              | Done   | `InvoicesRepository.applyStatusFilter`       | `GET /invoices?status=Overdue`                        |
+| Filter by date range          | Done   | `InvoicesRepository.applyDateRangeFilter`    | `GET /invoices?fromDate=2026-01-01&toDate=2026-06-30` |
+| Sort invoices                 | Done   | `InvoicesRepository.applySorting`            | `GET /invoices?sortBy=totalAmount&ordering=ASC`       |
+| Server-side pagination        | Done   | `InvoicesRepository.buildFindAllQuery`       | Response includes `paging.total`, `paging.page`       |
+| Invoice detail                | Done   | `src/invoices/invoices.service.ts`           | `GET /invoices/:id`                                   |
+| Create invoice                | Done   | `src/invoices/invoices.service.ts`           | `POST /invoices`                                      |
+| Server-side total calculation | Done   | `src/invoices/domain/invoice-calculation.ts` | `npm run test` → `invoice-calculation.spec.ts`        |
+| Unique invoice number         | Done   | DB constraint + service error mapping        | Duplicate `invoiceNumber` → 409 Conflict              |
+| Due date validation           | Done   | DTO `@IsDateOnOrAfter` + DB constraint       | `dueDate` before `invoiceDate` → 400                  |
+| Overdue derived status        | Done   | `src/invoices/domain/derive-invoice-status.ts` | Unpaid invoice past due date returns `Overdue`      |
+| Swagger docs                  | Done   | Swagger decorators on all controllers        | http://localhost:4000/api/docs                        |
+| Unit tests                    | Done   | `src/**/*.spec.ts`                           | `npm run test`                                        |
+| E2E tests                     | Done   | `test/*.e2e-spec.ts`                         | `npm run test:e2e`                                    |
+
+---
+
+## API Documentation
+
+Swagger UI is available at **http://localhost:4000/api/docs**.
+
+Reviewer flow:
+
+1. Call `POST /auth/login` with the credentials above.
+2. Copy the `accessToken` from the response.
+3. Click **Authorize** in the top-right of Swagger UI.
+4. Paste the token value (Swagger prefixes `Bearer` automatically).
+5. All protected invoice endpoints are now callable.
+
+---
+
+## Environment Configuration
+
+Copy `backend/.env.example` to `backend/.env` and fill in the required values.
+
+| Variable            | Required | Default       | Description                                      |
+|---------------------|----------|---------------|--------------------------------------------------|
+| `NODE_ENV`          | No       | `development` | Runtime environment                              |
+| `PORT`              | No       | `4000`        | HTTP port                                        |
+| `POSTGRES_HOST`     | Yes      | —             | PostgreSQL hostname                              |
+| `POSTGRES_PORT`     | Yes      | —             | PostgreSQL port (typically `5432`)               |
+| `POSTGRES_DB`       | Yes      | —             | Database name                                    |
+| `POSTGRES_USER`     | Yes      | —             | Database user                                    |
+| `POSTGRES_PASSWORD` | Yes      | —             | Database password                                |
+| `JWT_SECRET`        | Yes      | —             | Signing secret, minimum 32 characters            |
+| `JWT_EXPIRES_IN`    | No       | `3600`        | Token lifetime in seconds                        |
+
+The app validates all required variables at startup using Joi and exits immediately with a descriptive error if any are missing or malformed.
+
+E2E tests can either use `npm run test:e2e:docker` for a temporary Docker PostgreSQL instance or a separate `backend/.env.test` file pointing to a dedicated test database. Use `.env.test.example` as the starting point for local test DB configuration.
+
+---
+
+## Database and Migrations
+
+The schema is migration-driven. `synchronize` and `migrationsRun` are disabled in TypeORM — schema changes only happen through explicit migrations.
+
+```bash
+npm run migration:run                                                       # apply pending migrations
+npm run migration:run:prod                                                  # apply compiled dist migrations
+npm run migration:show                                                      # list applied vs pending
+npm run migration:generate -- src/database/migrations/NameOfMigration      # generate from entity diff
+npm run migration:revert                                                    # revert last migration
+npm run seed                                                                # seed reviewer user + 30 sample invoices
+npm run seed:prod                                                           # seed from compiled dist
+```
+
+Run migrations before seeding. The seed script uses upsert for the reviewer user so it is safe to run multiple times.
+
+---
+
+## Testing
+
+```bash
+npm run test          # unit tests
+npm run test:e2e      # end-to-end tests (requires .env.test and a running PostgreSQL)
+npm run test:e2e:docker # start test PostgreSQL in Docker, then run end-to-end tests
+npm run test:cov      # unit tests with coverage report
+```
+
+### Unit tests (`src/**/*.spec.ts`)
+
+Unit tests use Jest and `@nestjs/testing`. Each spec wires only the class under test and replaces every dependency with a typed `jest.Mocked` partial. Guards are swapped via `overrideGuard`.
+
+| Area                  | File                                          | What it verifies                                                          |
+|-----------------------|-----------------------------------------------|---------------------------------------------------------------------------|
+| Auth service          | `auth/auth.service.spec.ts`                   | Login flow, credential validation, token issuance                         |
+| Auth controller       | `auth/auth.controller.spec.ts`                | Delegation to service; `getMe` with mocked guard                          |
+| JWT guard             | `auth/guards/jwt-auth.guard.spec.ts`          | Valid token, missing/malformed/expired token, revoked user                |
+| Access token service  | `auth/services/access-token.service.spec.ts`  | JWT signing and expiry config                                             |
+| Password utility      | `auth/utils/password.util.spec.ts`            | `bcrypt.compare` delegation                                               |
+| Auth response mapper  | `auth/mappers/auth-user-response.mapper.spec.ts` | `passwordHash` is never exposed                                        |
+| Invoices service      | `invoices/invoices.service.spec.ts`           | `findAll`, `findOne`, `create`; conflict on duplicate number; domain validation failure |
+| Invoices controller   | `invoices/invoices.controller.spec.ts`        | Delegation to service with mocked guard                                   |
+| Invoice calculation   | `invoices/domain/invoice-calculation.spec.ts` | Subtotal, tax, discount, paid, balance rounding (Decimal.js); over-discount and over-paid validation |
+| Users service         | `users/user.service.spec.ts`                  | Email normalisation, lookup by ID, null handling                          |
+| Date validators       | `common/validators/date-only.validator.spec.ts` | `IsDateOnly`, `IsDateOnOrAfter`, `IsDateRange` — format and ordering rules |
+| Postgres error util   | `database/postgres-errors.util.spec.ts`       | `isUniqueViolation` identifies unique constraint errors by constraint name |
+
+### E2E tests (`test/*.e2e-spec.ts`)
+
+E2E tests boot a real NestJS application against a dedicated PostgreSQL database. TypeORM migrations run during setup. Each suite truncates all tables in `beforeAll` for isolation.
+
+| Suite            | File                     | Scenarios                                                                           |
+|------------------|--------------------------|-------------------------------------------------------------------------------------|
+| Health           | `app.e2e-spec.ts`        | `GET /health` returns 200                                                           |
+| Auth             | `auth.e2e-spec.ts`       | Login → 200 + JWT; invalid password → 401; email validation → 400; `GET /auth/me` with valid/missing/malformed token |
+| Invoices (create) | `invoices.e2e-spec.ts`  | Full payload → 201 + computed totals; minimal fields → 201; duplicate number → 409; missing required field → 400; no token → 401 |
+| Invoices (list)   | `invoices.e2e-spec.ts`  | Default pagination; keyword filter; date range filter; invalid date range → 400; page 2; no token → 401 |
+| Invoices (detail) | `invoices.e2e-spec.ts`  | Known ID → 200; non-existent UUID → 404; invalid UUID → 400; no token → 401        |
 
 ---
 
