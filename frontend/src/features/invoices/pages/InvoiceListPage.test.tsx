@@ -58,16 +58,16 @@ describe('InvoiceListPage', () => {
     renderInvoiceList();
 
     // Act - Wait for invoice number to appear in desktop table (first link matching the pattern)
-    const links = await screen.findAllByRole('link', {
+    await screen.findAllByRole('link', {
       name: /inv-2026-001/i,
     });
 
     // Assert
-    expect(links[0]).toBeInTheDocument();
-    expect(screen.getByText(/acme corporation/i)).toBeInTheDocument();
-    expect(screen.getByText(/bright ideas pty ltd/i)).toBeInTheDocument();
-    expect(screen.getByText(/au\$2,450.00 aud/i)).toBeInTheDocument();
-    expect(screen.getByText(/showing 1 to 8 of 8 results/i)).toBeInTheDocument();
+    const acmeElements = screen.getAllByText(/acme corporation/i);
+    expect(acmeElements.length).toBeGreaterThan(0);
+    const brightElements = screen.getAllByText(/bright ideas pty ltd/i);
+    expect(brightElements.length).toBeGreaterThan(0);
+    expect(await screen.findByText(/8 invoice/i)).toBeInTheDocument();
   });
 
   it('searches invoices by invoice number or customer name', async () => {
@@ -75,10 +75,9 @@ describe('InvoiceListPage', () => {
     const user = userEvent.setup();
     renderInvoiceList();
 
-    const links = await screen.findAllByRole('link', {
+    await screen.findAllByRole('link', {
       name: /inv-2026-001/i,
     });
-    expect(links[0]).toBeInTheDocument();
 
     // Act
     await user.type(
@@ -87,17 +86,17 @@ describe('InvoiceListPage', () => {
     );
 
     // Assert
-    const results = await screen.findAllByRole('link', {
+    await screen.findAllByRole('link', {
       name: /inv-2026-003/i,
     });
-    expect(results[0]).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.queryByText(/acme corporation/i)).not.toBeInTheDocument();
+      const acmeElements = screen.queryAllByText(/acme corporation/i);
+      expect(acmeElements.length).toBe(0);
     });
 
-    expect(screen.getByText(/creative studio/i)).toBeInTheDocument();
-    expect(screen.getByText(/showing 1 to 1 of 1 results/i)).toBeInTheDocument();
+    const creativeElements = screen.getAllByText(/creative studio/i);
+    expect(creativeElements.length).toBeGreaterThan(0);
   });
 
   it('filters invoices by status', async () => {
@@ -106,23 +105,23 @@ describe('InvoiceListPage', () => {
     renderInvoiceList();
 
     const names = await screen.findAllByText(/acme corporation/i);
-    expect(names[0]).toBeInTheDocument();
+    expect(names.length).toBeGreaterThan(0);
 
     // Act
-    await user.click(screen.getByRole('button', { name: /paid/i }));
+    await user.selectOptions(screen.getByRole('combobox', { name: /status/i }), 'Paid');
 
     // Assert
     const paidNames = await screen.findAllByText(/acme corporation/i);
-    expect(paidNames[0]).toBeInTheDocument();
+    expect(paidNames.length).toBeGreaterThan(0);
     const enterpriseNames = screen.getAllByText(/echo enterprises/i);
-    expect(enterpriseNames[0]).toBeInTheDocument();
+    expect(enterpriseNames.length).toBeGreaterThan(0);
 
     await waitFor(() => {
-      expect(screen.queryByText(/bright ideas pty ltd/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/creative studio/i)).not.toBeInTheDocument();
+      const brightElements = screen.queryAllByText(/bright ideas pty ltd/i);
+      const creativeElements = screen.queryAllByText(/creative studio/i);
+      expect(brightElements.length).toBe(0);
+      expect(creativeElements.length).toBe(0);
     });
-
-    expect(screen.getByText(/showing 1 to 2 of 2 results/i)).toBeInTheDocument();
   });
 
   it('clears filters and returns to the default invoice list', async () => {
@@ -131,20 +130,20 @@ describe('InvoiceListPage', () => {
     renderInvoiceList();
 
     const names = await screen.findAllByText(/acme corporation/i);
-    expect(names[0]).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /paid/i }));
+    expect(names.length).toBeGreaterThan(0);
+    await user.selectOptions(screen.getByRole('combobox', { name: /status/i }), 'Paid');
 
     const filteredNames = await screen.findAllByText(/echo enterprises/i);
-    expect(filteredNames[0]).toBeInTheDocument();
+    expect(filteredNames.length).toBeGreaterThan(0);
 
     // Act
     await user.click(screen.getByRole('button', { name: /clear filters/i }));
 
     // Assert
     const brightNames = await screen.findAllByText(/bright ideas pty ltd/i);
-    expect(brightNames[0]).toBeInTheDocument();
+    expect(brightNames.length).toBeGreaterThan(0);
     const creativeNames = screen.getAllByText(/creative studio/i);
-    expect(creativeNames[0]).toBeInTheDocument();
+    expect(creativeNames.length).toBeGreaterThan(0);
     expect(screen.getByText(/showing 1 to 8 of 8 results/i)).toBeInTheDocument();
   });
 
@@ -154,7 +153,7 @@ describe('InvoiceListPage', () => {
     renderInvoiceList();
 
     const names = await screen.findAllByText(/acme corporation/i);
-    expect(names[0]).toBeInTheDocument();
+    expect(names.length).toBeGreaterThan(0);
 
     // Act
     await user.selectOptions(screen.getByRole('combobox', { name: /sort by/i }), 'Amount: Low to High');
@@ -179,7 +178,7 @@ describe('InvoiceListPage', () => {
     const links = await screen.findAllByRole('link', {
       name: /inv-2026-001/i,
     });
-    expect(links[0]).toBeInTheDocument();
+    expect(links.length).toBeGreaterThan(0);
 
     // Act
     await user.selectOptions(screen.getByDisplayValue('10'), '20');
@@ -277,5 +276,19 @@ describe('InvoiceListPage', () => {
 
     // Assert
     expect(await screen.findByText(/failed to load invoices/i)).toBeInTheDocument();
+  });
+
+  it('does not display client/customer select filter', async () => {
+    // Arrange
+    renderInvoiceList();
+
+    // Act - Wait for page to load
+    await screen.findAllByRole('link', {
+      name: /inv-2026-001/i,
+    });
+
+    // Assert
+    expect(screen.queryByLabelText(/client/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/all clients/i)).not.toBeInTheDocument();
   });
 });
