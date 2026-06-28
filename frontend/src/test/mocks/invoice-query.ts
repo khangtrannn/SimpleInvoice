@@ -190,7 +190,7 @@ function parseSortBy(value: string | null): InvoiceSortBy {
     return value;
   }
 
-  return 'invoiceDate';
+  return 'createdAt';
 }
 
 function parseOrdering(value: string | null): Ordering {

@@ -86,7 +86,7 @@ describe('auth routes', () => {
     await screen.findByText(/invoices page/i); // wait for session restore to finish
 
     // Act
-    await user.click(screen.getByRole('button', { name: /logout/i }));
+    await user.click(screen.getByRole('button', { name: /log out/i }));
 
     // Assert
     expect(await screen.findByRole('heading', { name: /sign in/i })).toBeInTheDocument();
