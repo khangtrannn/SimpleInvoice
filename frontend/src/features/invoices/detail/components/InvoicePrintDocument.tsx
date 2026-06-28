@@ -34,11 +34,11 @@ export function InvoicePrintDocument({ invoice }: InvoicePrintDocumentProps) {
         <div className="invoice-print-parties grid grid-cols-2 gap-12 border-b border-slate-200 py-8 text-xl">
           <div>
             <p className="font-bold text-slate-500">Billed By:</p>
-            <p className="mt-6 font-bold text-slate-950">SimpleInvoice</p>
+            <p className="mt-6 font-bold text-slate-950">101 Digital PTE LTD</p>
             <p className="mt-3 leading-8 text-slate-600">
-              Secure invoicing workspace
+              Full Stack Engineering Assessment
               <br />
-              Australia
+              Singapore
             </p>
           </div>
 

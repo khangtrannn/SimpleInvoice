@@ -52,11 +52,11 @@ export function InvoicePreview({ control }: InvoicePreviewProps) {
       <div className="grid gap-6 border-b border-slate-200 py-6 text-sm md:grid-cols-2">
         <div>
           <p className="font-semibold text-slate-500">Billed By:</p>
-          <p className="mt-3 font-bold text-slate-950">SimpleInvoice</p>
+          <p className="mt-3 font-bold text-slate-950">101 Digital PTE LTD</p>
           <p className="mt-1 leading-6 text-slate-600">
-            Secure invoicing workspace
+            Full Stack Engineering Assessment
             <br />
-            Australia
+            Singapore
           </p>
         </div>
 
