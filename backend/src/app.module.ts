@@ -10,6 +10,7 @@ import { HealthModule } from './health/health.module';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { InvoicesModule } from './invoices/invoices.module';
+import { PaymentsModule } from './payments/payments.module';
 import authConfig from './config/auth.config';
 import { AuthModule } from './auth/auth.module';
 
@@ -32,6 +33,7 @@ import { AuthModule } from './auth/auth.module';
     DatabaseModule,
     UsersModule,
     InvoicesModule,
+    PaymentsModule,
     AuthModule,
   ],
   providers: [

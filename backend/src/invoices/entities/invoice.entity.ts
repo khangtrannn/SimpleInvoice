@@ -11,6 +11,8 @@ import {
 } from 'typeorm';
 
 import { UserEntity } from '../../users/entities/user.entity';
+import { PaymentEntity } from '../../payments/entities/payment.entity';
+import { InvoicePaymentLinkEntity } from '../../payments/entities/invoice-payment-link.entity';
 import { InvoiceStatus } from '../enums/invoice-status.enum';
 import { InvoiceItemEntity } from './invoice-item.entity';
 
@@ -185,6 +187,27 @@ export class InvoiceEntity {
   })
   balanceAmount!: string;
 
+  @Column({
+    name: 'issued_at',
+    type: 'timestamptz',
+    nullable: true,
+  })
+  issuedAt!: Date | null;
+
+  @Column({
+    name: 'sent_at',
+    type: 'timestamptz',
+    nullable: true,
+  })
+  sentAt!: Date | null;
+
+  @Column({
+    name: 'paid_at',
+    type: 'timestamptz',
+    nullable: true,
+  })
+  paidAt!: Date | null;
+
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamptz',
@@ -209,4 +232,10 @@ export class InvoiceEntity {
 
   @OneToMany(() => InvoiceItemEntity, (item) => item.invoice)
   items!: InvoiceItemEntity[];
+
+  @OneToMany(() => PaymentEntity, (payment) => payment.invoice)
+  payments!: PaymentEntity[];
+
+  @OneToMany(() => InvoicePaymentLinkEntity, (paymentLink) => paymentLink.invoice)
+  paymentLinks!: InvoicePaymentLinkEntity[];
 }
