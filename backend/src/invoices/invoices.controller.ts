@@ -82,25 +82,6 @@ export class InvoicesController {
     return this.invoicesService.findSummary(query);
   }
 
-  @Get(':id')
-  @ApiOperation({
-    summary: 'Get invoice detail by ID',
-  })
-  @ApiOkResponse({
-    type: InvoiceDetailResponseDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Invoice not found',
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Missing, invalid, or expired access token',
-  })
-  findOne(
-    @Param('id', new ParseUUIDPipe()) id: string,
-  ): Promise<InvoiceDetailResponseDto> {
-    return this.invoicesService.findOne(id);
-  }
-
   @Post()
   @ApiOperation({
     summary: 'Create a new draft invoice',
@@ -149,5 +130,24 @@ export class InvoicesController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<InvoiceDetailResponseDto> {
     return this.invoicesService.issueInvoice(id);
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get invoice detail by ID',
+  })
+  @ApiOkResponse({
+    type: InvoiceDetailResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Invoice not found',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired access token',
+  })
+  findOne(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<InvoiceDetailResponseDto> {
+    return this.invoicesService.findOne(id);
   }
 }
