@@ -1,12 +1,21 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import type { Repository } from 'typeorm';
 
 import { isUniqueViolation } from '../database/postgres-errors.util';
 import { AuthenticatedUser } from '../auth/types/authenticated-request.type';
+import { EMAIL_SERVICE } from '../notifications/constants/notification-tokens';
+import type { EmailService } from '../notifications/interfaces/email-service.interface';
+import { InvoicePaymentLinkEntity } from '../payments/entities/invoice-payment-link.entity';
+import { PaymentLinkTokenService } from '../payments/services/payment-link-token.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { GetInvoicesQueryDto } from './dto/get-invoices-query.dto';
 import {
@@ -30,12 +39,23 @@ import {
   toInvoiceListItemResponse,
 } from './mappers/invoice-response.mapper';
 import { getCurrencySymbol } from './utils/currency-symbol.util';
+import { InvoiceEntity } from './entities/invoice.entity';
+import { InvoiceStatus } from './enums/invoice-status.enum';
 
 const INVOICE_NUMBER_UNIQUE_CONSTRAINT = 'uq_invoices_invoice_number';
 
 @Injectable()
 export class InvoicesService {
-  constructor(private readonly invoicesRepository: InvoicesRepository) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly configService: ConfigService,
+    private readonly paymentLinkTokenService: PaymentLinkTokenService,
+    @Inject(EMAIL_SERVICE)
+    private readonly emailService: EmailService,
+    private readonly invoicesRepository: InvoicesRepository,
+    @InjectRepository(InvoiceEntity)
+    private readonly invoiceRepository: Repository<InvoiceEntity>,
+  ) {}
 
   async findAll(query: GetInvoicesQueryDto): Promise<InvoiceListResponseDto> {
     const { invoices, total } = await this.invoicesRepository.findAll(query);
@@ -152,5 +172,83 @@ export class InvoicesService {
         rate: toMoney(dto.item.rate),
       },
     };
+  }
+
+  async issueInvoice(invoiceId: string): Promise<InvoiceDetailResponseDto> {
+    const now = new Date();
+
+    const rawToken = this.paymentLinkTokenService.generateRawToken();
+    const tokenHash = this.paymentLinkTokenService.hashToken(rawToken);
+    const paymentUrl = this.paymentLinkTokenService.buildPaymentUrl(rawToken);
+    const expiresAt = this.getPaymentLinkExpiresAt(now);
+
+    const issuedInvoice = await this.dataSource.transaction(async (manager) => {
+      const invoiceRepository = manager.getRepository(InvoiceEntity);
+      const paymentLinkRepository = manager.getRepository(InvoicePaymentLinkEntity);
+
+      const invoice = await invoiceRepository.findOne({
+        where: { id: invoiceId },
+      });
+
+      if (!invoice) {
+        throw new NotFoundException('Invoice not found');
+      }
+
+      if (invoice.status !== InvoiceStatus.DRAFT) {
+        throw new ConflictException('Only draft invoices can be issued');
+      }
+
+      if (Number(invoice.balanceAmount) <= 0) {
+        throw new BadRequestException(
+          'Invoice balance amount must be greater than zero',
+        );
+      }
+
+      invoice.status = InvoiceStatus.PENDING;
+      invoice.issuedAt = now;
+
+      await invoiceRepository.save(invoice);
+
+      const paymentLink = paymentLinkRepository.create({
+        invoiceId: invoice.id,
+        tokenHash,
+        expiresAt,
+        revokedAt: null,
+      });
+
+      await paymentLinkRepository.save(paymentLink);
+
+      return invoice;
+    });
+
+    await this.emailService.sendInvoiceIssuedEmail({
+      to: issuedInvoice.customerEmail,
+      customerFullname: issuedInvoice.customerFullname,
+      invoiceNumber: issuedInvoice.invoiceNumber,
+      paymentUrl,
+      balanceAmount: String(issuedInvoice.balanceAmount),
+      currency: issuedInvoice.currency,
+    });
+
+    issuedInvoice.sentAt = new Date();
+    const savedInvoice = await this.invoiceRepository.save(issuedInvoice);
+
+    return toInvoiceDetailResponse(savedInvoice);
+  }
+
+  private getPaymentLinkExpiresAt(now: Date): Date {
+    const rawValue =
+      this.configService.get<string>('PAYMENT_LINK_EXPIRES_IN_DAYS') ?? '30';
+
+    const expiresInDays = Number(rawValue);
+
+    if (!Number.isInteger(expiresInDays) || expiresInDays <= 0) {
+      throw new Error('PAYMENT_LINK_EXPIRES_IN_DAYS must be a positive integer');
+    }
+
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+
+    return expiresAt;
   }
 }

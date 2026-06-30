@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from '../auth/auth.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { PaymentsModule } from '../payments/payments.module';
 import { IsDateOnlyConstraint } from '../common/validators/is-date-only.validator';
 import { IsDateOnOrAfterConstraint } from '../common/validators/is-date-on-or-after.validator';
 import { IsDateRangeConstraint } from '../common/validators/is-date-range.validator';
@@ -15,6 +17,8 @@ import { InvoicesService } from './invoices.service';
   imports: [
     AuthModule,
     TypeOrmModule.forFeature([InvoiceEntity, InvoiceItemEntity]),
+    PaymentsModule,
+    NotificationsModule,
   ],
   controllers: [InvoicesController],
   providers: [

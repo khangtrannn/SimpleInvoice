@@ -124,4 +124,30 @@ export class InvoicesController {
   ): Promise<InvoiceDetailResponseDto> {
     return this.invoicesService.create(createInvoiceDto, currentUser);
   }
+
+  @Post(':id/issue')
+  @ApiOperation({
+    summary: 'Issue a draft invoice',
+  })
+  @ApiOkResponse({
+    type: InvoiceDetailResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Invoice not found',
+  })
+  @ApiConflictResponse({
+    description: 'Only draft invoices can be issued',
+  })
+  @ApiBadRequestResponse({
+    type: ErrorResponseDto,
+    description: 'Invoice balance amount must be greater than zero',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired access token',
+  })
+  issueInvoice(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<InvoiceDetailResponseDto> {
+    return this.invoicesService.issueInvoice(id);
+  }
 }

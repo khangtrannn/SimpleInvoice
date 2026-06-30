@@ -3,10 +3,16 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
+import { DataSource } from 'typeorm';
 
 import { isUniqueViolation } from '../database/postgres-errors.util';
 import type { AuthenticatedUser } from '../auth/types/authenticated-request.type';
+import { EMAIL_SERVICE } from '../notifications/constants/notification-tokens';
+import type { EmailService } from '../notifications/interfaces/email-service.interface';
+import { PaymentLinkTokenService } from '../payments/services/payment-link-token.service';
 
 jest.mock('../database/postgres-errors.util');
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -101,12 +107,56 @@ describe(InvoicesService.name, () => {
       createDraftInvoice: jest.fn(),
     };
 
+    const mockDataSource = {
+      transaction: jest.fn(),
+    } as unknown as jest.Mocked<DataSource>;
+
+    const mockConfigService = {
+      get: jest.fn().mockReturnValue('30'),
+      getOrThrow: jest.fn().mockReturnValue('http://localhost:5173'),
+    } as unknown as jest.Mocked<ConfigService>;
+
+    const mockPaymentLinkTokenService = {
+      generateRawToken: jest.fn(),
+      hashToken: jest.fn(),
+      buildPaymentUrl: jest.fn(),
+    } as unknown as jest.Mocked<PaymentLinkTokenService>;
+
+    const mockEmailService = {
+      sendInvoiceIssuedEmail: jest.fn(),
+    } as unknown as jest.Mocked<EmailService>;
+
+    const mockInvoiceRepository = {
+      save: jest.fn(),
+      findOne: jest.fn(),
+    };
+
     const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [
         InvoicesService,
         {
           provide: InvoicesRepository,
           useValue: invoicesRepository,
+        },
+        {
+          provide: DataSource,
+          useValue: mockDataSource,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
+        {
+          provide: PaymentLinkTokenService,
+          useValue: mockPaymentLinkTokenService,
+        },
+        {
+          provide: EMAIL_SERVICE,
+          useValue: mockEmailService,
+        },
+        {
+          provide: getRepositoryToken(InvoiceEntity),
+          useValue: mockInvoiceRepository,
         },
       ],
     }).compile();
@@ -307,6 +357,167 @@ describe(InvoicesService.name, () => {
       // Assert
       await expect(act).rejects.toThrow(BadRequestException);
       expect(invoicesRepository.createDraftInvoice).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('issueInvoice', () => {
+    let mockDataSource: jest.Mocked<DataSource>;
+    let mockConfigService: jest.Mocked<ConfigService>;
+    let mockPaymentLinkTokenService: jest.Mocked<PaymentLinkTokenService>;
+    let mockEmailService: jest.Mocked<EmailService>;
+    let mockInvoiceRepository: any;
+
+    beforeEach(() => {
+      const moduleRef = (invoicesService as any).constructor.prototype;
+      mockDataSource = jest.fn() as any;
+      mockConfigService = jest.fn() as any;
+      mockPaymentLinkTokenService = jest.fn() as any;
+      mockEmailService = jest.fn() as any;
+      mockInvoiceRepository = jest.fn() as any;
+    });
+
+    it('should issue a draft invoice successfully', async () => {
+      // Arrange
+      const invoiceId = mockInvoice.id;
+      const rawToken = 'raw-token-base64url';
+      const tokenHash = 'sha256hash';
+      const paymentUrl = 'http://localhost:5173/pay/raw-token-base64url';
+
+      const invoiceToIssue = {
+        ...mockInvoice,
+        status: InvoiceStatus.DRAFT,
+        issuedAt: null,
+        sentAt: null,
+      };
+
+      const updatedInvoice = {
+        ...invoiceToIssue,
+        status: InvoiceStatus.PENDING,
+        issuedAt: expect.any(Date),
+        sentAt: expect.any(Date),
+      };
+
+      // Setup mocks through the service's injected dependencies
+      const dataSource = (invoicesService as any).dataSource;
+      const configService = (invoicesService as any).configService;
+      const paymentLinkTokenService = (invoicesService as any).paymentLinkTokenService;
+      const emailService = (invoicesService as any).emailService;
+      const invoiceRepository = (invoicesService as any).invoiceRepository;
+
+      const invoiceRepo = {
+        findOne: jest.fn().mockResolvedValue(invoiceToIssue),
+        save: jest.fn().mockImplementation((invoice) => Promise.resolve({ ...invoice })),
+      };
+
+      const paymentLinkRepo = {
+        create: jest.fn().mockReturnValue({}),
+        save: jest.fn().mockResolvedValue({}),
+      };
+
+      dataSource.transaction = jest.fn().mockImplementation(async (cb) => {
+        const mockManager = {
+          getRepository: jest.fn().mockImplementation((Entity) => {
+            if (Entity === InvoiceEntity) {
+              return invoiceRepo;
+            }
+            return paymentLinkRepo;
+          }),
+        };
+        return cb(mockManager);
+      });
+
+      paymentLinkTokenService.generateRawToken.mockReturnValue(rawToken);
+      paymentLinkTokenService.hashToken.mockReturnValue(tokenHash);
+      paymentLinkTokenService.buildPaymentUrl.mockReturnValue(paymentUrl);
+      configService.get.mockReturnValue('30');
+      emailService.sendInvoiceIssuedEmail.mockResolvedValue(undefined);
+      invoiceRepository.save.mockResolvedValue(updatedInvoice);
+
+      // Act
+      const result = await invoicesService.issueInvoice(invoiceId);
+
+      // Assert
+      expect(paymentLinkTokenService.generateRawToken).toHaveBeenCalled();
+      expect(paymentLinkTokenService.hashToken).toHaveBeenCalledWith(rawToken);
+      expect(paymentLinkTokenService.buildPaymentUrl).toHaveBeenCalledWith(rawToken);
+      expect(emailService.sendInvoiceIssuedEmail).toHaveBeenCalledWith({
+        to: mockInvoice.customerEmail,
+        customerFullname: mockInvoice.customerFullname,
+        invoiceNumber: mockInvoice.invoiceNumber,
+        paymentUrl,
+        balanceAmount: mockInvoice.balanceAmount,
+        currency: mockInvoice.currency,
+      });
+      expect(result.status).toBe(InvoiceStatus.PENDING);
+    });
+
+    it('should throw NotFoundException when invoice does not exist', async () => {
+      // Arrange
+      const invoiceId = 'non-existent-id';
+      const dataSource = (invoicesService as any).dataSource;
+
+      dataSource.transaction = jest.fn().mockImplementation(async (cb) => {
+        const mockManager = {
+          getRepository: jest.fn().mockReturnValue({
+            findOne: jest.fn().mockResolvedValue(null),
+          }),
+        };
+        return cb(mockManager);
+      });
+
+      // Act & Assert
+      await expect(invoicesService.issueInvoice(invoiceId)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw ConflictException when invoice is not in Draft status', async () => {
+      // Arrange
+      const invoiceId = mockInvoice.id;
+      const pendingInvoice = {
+        ...mockInvoice,
+        status: InvoiceStatus.PENDING,
+      };
+
+      const dataSource = (invoicesService as any).dataSource;
+      dataSource.transaction = jest.fn().mockImplementation(async (cb) => {
+        const mockManager = {
+          getRepository: jest.fn().mockReturnValue({
+            findOne: jest.fn().mockResolvedValue(pendingInvoice),
+          }),
+        };
+        return cb(mockManager);
+      });
+
+      // Act & Assert
+      await expect(invoicesService.issueInvoice(invoiceId)).rejects.toThrow(
+        ConflictException,
+      );
+    });
+
+    it('should throw BadRequestException when balance amount is zero or negative', async () => {
+      // Arrange
+      const invoiceId = mockInvoice.id;
+      const zeroBalanceInvoice = {
+        ...mockInvoice,
+        status: InvoiceStatus.DRAFT,
+        balanceAmount: '0.00',
+      };
+
+      const dataSource = (invoicesService as any).dataSource;
+      dataSource.transaction = jest.fn().mockImplementation(async (cb) => {
+        const mockManager = {
+          getRepository: jest.fn().mockReturnValue({
+            findOne: jest.fn().mockResolvedValue(zeroBalanceInvoice),
+          }),
+        };
+        return cb(mockManager);
+      });
+
+      // Act & Assert
+      await expect(invoicesService.issueInvoice(invoiceId)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

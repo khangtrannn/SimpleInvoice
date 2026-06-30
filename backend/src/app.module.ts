@@ -12,6 +12,7 @@ import { UsersModule } from './users/users.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { PaymentsModule } from './payments/payments.module';
 import authConfig from './config/auth.config';
+import paymentsConfig from './config/payments.config';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -20,7 +21,7 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
       cache: true,
       envFilePath: ENV_FILE_PATHS,
-      load: [appConfig, authConfig, databaseConfig],
+      load: [appConfig, authConfig, databaseConfig, paymentsConfig],
       validationSchema: envValidationSchema,
     }),
     ThrottlerModule.forRoot([
