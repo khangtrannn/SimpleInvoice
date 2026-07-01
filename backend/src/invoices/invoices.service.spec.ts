@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -25,6 +26,7 @@ import { InvoiceEntity } from './entities/invoice.entity';
 import { InvoiceStatus } from './enums/invoice-status.enum';
 import { InvoicesRepository } from './invoices.repository';
 import { InvoicesService } from './invoices.service';
+import { InvoicePdfService } from './pdf/invoice-pdf.service';
 
 describe(InvoicesService.name, () => {
   let invoicesService: InvoicesService;
@@ -131,6 +133,10 @@ describe(InvoicesService.name, () => {
       findOne: jest.fn(),
     };
 
+    const mockInvoicePdfService = {
+      generateInvoicePdf: jest.fn(),
+    } as unknown as jest.Mocked<InvoicePdfService>;
+
     const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [
         InvoicesService,
@@ -157,6 +163,10 @@ describe(InvoicesService.name, () => {
         {
           provide: getRepositoryToken(InvoiceEntity),
           useValue: mockInvoiceRepository,
+        },
+        {
+          provide: InvoicePdfService,
+          useValue: mockInvoicePdfService,
         },
       ],
     }).compile();
@@ -382,6 +392,7 @@ describe(InvoicesService.name, () => {
       const rawToken = 'raw-token-base64url';
       const tokenHash = 'sha256hash';
       const paymentUrl = 'http://localhost:5173/pay/raw-token-base64url';
+      const pdfBuffer = Buffer.from('%PDF-1.4');
 
       const invoiceToIssue = {
         ...mockInvoice,
@@ -403,6 +414,7 @@ describe(InvoicesService.name, () => {
       const paymentLinkTokenService = (invoicesService as any).paymentLinkTokenService;
       const emailService = (invoicesService as any).emailService;
       const invoiceRepository = (invoicesService as any).invoiceRepository;
+      const invoicePdfService = (invoicesService as any).invoicePdfService;
 
       const invoiceRepo = {
         findOne: jest.fn().mockResolvedValue(invoiceToIssue),
@@ -430,6 +442,7 @@ describe(InvoicesService.name, () => {
       paymentLinkTokenService.hashToken.mockReturnValue(tokenHash);
       paymentLinkTokenService.buildPaymentUrl.mockReturnValue(paymentUrl);
       configService.get.mockReturnValue('30');
+      invoicePdfService.generateInvoicePdf.mockResolvedValue(pdfBuffer);
       emailService.sendInvoiceIssuedEmail.mockResolvedValue(undefined);
       invoiceRepository.save.mockResolvedValue(updatedInvoice);
 
@@ -440,6 +453,7 @@ describe(InvoicesService.name, () => {
       expect(paymentLinkTokenService.generateRawToken).toHaveBeenCalled();
       expect(paymentLinkTokenService.hashToken).toHaveBeenCalledWith(rawToken);
       expect(paymentLinkTokenService.buildPaymentUrl).toHaveBeenCalledWith(rawToken);
+      expect(invoicePdfService.generateInvoicePdf).toHaveBeenCalledWith(invoiceToIssue);
       expect(emailService.sendInvoiceIssuedEmail).toHaveBeenCalledWith({
         to: mockInvoice.customerEmail,
         customerFullname: mockInvoice.customerFullname,
@@ -447,6 +461,13 @@ describe(InvoicesService.name, () => {
         paymentUrl,
         balanceAmount: mockInvoice.balanceAmount,
         currency: mockInvoice.currency,
+        attachments: [
+          {
+            filename: `${mockInvoice.invoiceNumber}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ],
       });
       expect(result.status).toBe(InvoiceStatus.PENDING);
     });
@@ -517,6 +538,65 @@ describe(InvoicesService.name, () => {
       // Act & Assert
       await expect(invoicesService.issueInvoice(invoiceId)).rejects.toThrow(
         BadRequestException,
+      );
+    });
+
+    it('should throw ServiceUnavailableException when email sending fails', async () => {
+      // Arrange
+      const invoiceId = mockInvoice.id;
+      const rawToken = 'raw-token-base64url';
+      const tokenHash = 'sha256hash';
+      const paymentUrl = 'http://localhost:5173/pay/raw-token-base64url';
+      const pdfBuffer = Buffer.from('%PDF-1.4');
+
+      const invoiceToIssue = {
+        ...mockInvoice,
+        status: InvoiceStatus.DRAFT,
+        issuedAt: null,
+        sentAt: null,
+        items: [mockInvoice.items[0]],
+      };
+
+      const dataSource = (invoicesService as any).dataSource;
+      const configService = (invoicesService as any).configService;
+      const paymentLinkTokenService = (invoicesService as any).paymentLinkTokenService;
+      const emailService = (invoicesService as any).emailService;
+      const invoicePdfService = (invoicesService as any).invoicePdfService;
+
+      const invoiceRepo = {
+        findOne: jest.fn().mockResolvedValue(invoiceToIssue),
+        save: jest.fn().mockImplementation((invoice) => Promise.resolve({ ...invoice })),
+      };
+
+      const paymentLinkRepo = {
+        create: jest.fn().mockReturnValue({}),
+        save: jest.fn().mockResolvedValue({}),
+      };
+
+      dataSource.transaction = jest.fn().mockImplementation(async (cb) => {
+        const mockManager = {
+          getRepository: jest.fn().mockImplementation((Entity) => {
+            if (Entity === InvoiceEntity) {
+              return invoiceRepo;
+            }
+            return paymentLinkRepo;
+          }),
+        };
+        return cb(mockManager);
+      });
+
+      paymentLinkTokenService.generateRawToken.mockReturnValue(rawToken);
+      paymentLinkTokenService.hashToken.mockReturnValue(tokenHash);
+      paymentLinkTokenService.buildPaymentUrl.mockReturnValue(paymentUrl);
+      configService.get.mockReturnValue('30');
+      invoicePdfService.generateInvoicePdf.mockResolvedValue(pdfBuffer);
+      emailService.sendInvoiceIssuedEmail.mockRejectedValue(
+        new Error('SMTP connection failed'),
+      );
+
+      // Act & Assert
+      await expect(invoicesService.issueInvoice(invoiceId)).rejects.toThrow(
+        ServiceUnavailableException,
       );
     });
   });

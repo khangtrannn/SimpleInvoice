@@ -1,3 +1,9 @@
+export type EmailAttachment = {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+};
+
 export type SendInvoiceIssuedEmailInput = {
   to: string;
   customerFullname: string;
@@ -5,6 +11,7 @@ export type SendInvoiceIssuedEmailInput = {
   paymentUrl: string;
   balanceAmount: string;
   currency: string;
+  attachments?: EmailAttachment[];
 };
 
 export interface EmailService {

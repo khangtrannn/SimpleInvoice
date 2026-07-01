@@ -12,6 +12,7 @@ import { InvoiceEntity } from './entities/invoice.entity';
 import { InvoicesController } from './invoices.controller';
 import { InvoicesRepository } from './invoices.repository';
 import { InvoicesService } from './invoices.service';
+import { InvoicePdfService } from './pdf/invoice-pdf.service';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { InvoicesService } from './invoices.service';
   providers: [
     InvoicesRepository,
     InvoicesService,
+    InvoicePdfService,
     IsDateOnlyConstraint,
     IsDateOnOrAfterConstraint,
     IsDateRangeConstraint,

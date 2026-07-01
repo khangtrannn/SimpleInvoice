@@ -12,6 +12,10 @@ export class ConsoleEmailService implements EmailService {
   async sendInvoiceIssuedEmail(
     input: SendInvoiceIssuedEmailInput,
   ): Promise<void> {
+    const attachmentInfo = input.attachments
+      ? `Attachments: ${input.attachments.map((a) => a.filename).join(', ')}`
+      : 'No attachments';
+
     this.logger.log(
       [
         'Invoice issued email',
@@ -20,6 +24,7 @@ export class ConsoleEmailService implements EmailService {
         `Invoice: ${input.invoiceNumber}`,
         `Balance: ${input.currency} ${input.balanceAmount}`,
         `Payment URL: ${input.paymentUrl}`,
+        attachmentInfo,
       ].join('\n'),
     );
   }

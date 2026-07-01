@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -41,6 +42,7 @@ import {
 import { getCurrencySymbol } from './utils/currency-symbol.util';
 import { InvoiceEntity } from './entities/invoice.entity';
 import { InvoiceStatus } from './enums/invoice-status.enum';
+import { InvoicePdfService } from './pdf/invoice-pdf.service';
 
 const INVOICE_NUMBER_UNIQUE_CONSTRAINT = 'uq_invoices_invoice_number';
 
@@ -55,6 +57,7 @@ export class InvoicesService {
     private readonly invoicesRepository: InvoicesRepository,
     @InjectRepository(InvoiceEntity)
     private readonly invoiceRepository: Repository<InvoiceEntity>,
+    private readonly invoicePdfService: InvoicePdfService,
   ) {}
 
   async findAll(query: GetInvoicesQueryDto): Promise<InvoiceListResponseDto> {
@@ -188,6 +191,7 @@ export class InvoicesService {
 
       const invoice = await invoiceRepository.findOne({
         where: { id: invoiceId },
+        relations: ['items'],
       });
 
       if (!invoice) {
@@ -206,6 +210,7 @@ export class InvoicesService {
 
       invoice.status = InvoiceStatus.PENDING;
       invoice.issuedAt = now;
+      invoice.sentAt = null;
 
       await invoiceRepository.save(invoice);
 
@@ -221,19 +226,34 @@ export class InvoicesService {
       return invoice;
     });
 
-    await this.emailService.sendInvoiceIssuedEmail({
-      to: issuedInvoice.customerEmail,
-      customerFullname: issuedInvoice.customerFullname,
-      invoiceNumber: issuedInvoice.invoiceNumber,
-      paymentUrl,
-      balanceAmount: String(issuedInvoice.balanceAmount),
-      currency: issuedInvoice.currency,
-    });
+    try {
+      const pdfBuffer = await this.invoicePdfService.generateInvoicePdf(issuedInvoice);
 
-    issuedInvoice.sentAt = new Date();
-    const savedInvoice = await this.invoiceRepository.save(issuedInvoice);
+      await this.emailService.sendInvoiceIssuedEmail({
+        to: issuedInvoice.customerEmail,
+        customerFullname: issuedInvoice.customerFullname,
+        invoiceNumber: issuedInvoice.invoiceNumber,
+        paymentUrl,
+        balanceAmount: String(issuedInvoice.balanceAmount),
+        currency: issuedInvoice.currency,
+        attachments: [
+          {
+            filename: `${issuedInvoice.invoiceNumber}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ],
+      });
 
-    return toInvoiceDetailResponse(savedInvoice);
+      issuedInvoice.sentAt = new Date();
+      const savedInvoice = await this.invoiceRepository.save(issuedInvoice);
+
+      return toInvoiceDetailResponse(savedInvoice);
+    } catch (error) {
+      throw new ServiceUnavailableException(
+        'Failed to send invoice email. Invoice has been issued but email was not sent.',
+      );
+    }
   }
 
   private getPaymentLinkExpiresAt(now: Date): Date {
